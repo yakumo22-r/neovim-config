@@ -1,6 +1,6 @@
 -- version: 0.0.5
 -- author: yakumo22
-return {
+local colors = {
 	dark0_hard = "#1d2021",
 	dark0 = "#282828",
 	dark0_soft = "#32302f",
@@ -15,10 +15,10 @@ return {
 	light2 = "#d5c4a1",
 	light3 = "#bdae93",
 	light4 = "#a89984",
-	bright_red = "#e85a50",
+	bright_red = "#f85a50",
 	bright_green = "#80b270",
 	bright_yellow = "#fabd2f",
-	bright_blue = "#83a598",
+	bright_blue = "#73b5e8",
 	bright_purple = "#d3869b",
 	bright_aqua = "#8ec07c",
 	bright_orange = "#fe8019",
@@ -58,3 +58,23 @@ return {
 	warm_light = "#f5c0b2",
 }
 
+colors.term = {
+	colors.bg0,
+	colors.neutral_red,
+	colors.neutral_green,
+	colors.neutral_yellow,
+	colors.neutral_blue,
+	colors.neutral_purple,
+	colors.neutral_aqua,
+	colors.fg4,
+	colors.gray,
+	colors.red,
+	colors.green,
+	colors.yellow,
+	colors.blue,
+	colors.purple,
+	colors.aqua,
+	colors.fg1,
+}
+
+return colors

@@ -112,25 +112,7 @@ local function get_groups()
 	local config = ykm22.config
 
 	if config.terminal_colors then
-		local term_colors = {
-			colors.bg0,
-			colors.neutral_red,
-			colors.neutral_green,
-			colors.neutral_yellow,
-			colors.neutral_blue,
-			colors.neutral_purple,
-			colors.neutral_aqua,
-			colors.fg4,
-			colors.gray,
-			colors.red,
-			colors.green,
-			colors.yellow,
-			colors.blue,
-			colors.purple,
-			colors.aqua,
-			colors.fg1,
-		}
-		for index, value in ipairs(term_colors) do
+		for index, value in ipairs(ykm22.palette.term) do
 			vim.g["terminal_color_" .. index - 1] = value
 		end
 	end
@@ -193,11 +175,12 @@ local function get_groups()
 		MatchParen = { bg = colors.bg3, bold = config.bold },
 		ColorColumn = { bg = colors.bg1 },
 		Conceal = { fg = colors.blue },
-		CursorLineNr = { fg = colors.yellow, bg = colors.bg1 },
+		CursorLineNr = {  },
 		NonText = { link = "ykm22Bg2" },
 		SpecialKey = { link = "ykm22Fg4" },
 		Visual = { bg = colors.bg3, reverse = config.invert_selection },
 		VisualNOS = { link = "Visual" },
+		VertSplit = { fg = colors.yellow, bg = colors.bg1},
 		Search = { fg = colors.yellow, bg = colors.bg0, reverse = config.inverse },
 		IncSearch = { fg = colors.orange, bg = colors.bg0, reverse = config.inverse },
 		CurSearch = { link = "IncSearch" },
@@ -225,7 +208,7 @@ local function get_groups()
 		iCursor = { link = "Cursor" },
 		lCursor = { link = "Cursor" },
 		Special = { link = "ykm22Orange" },
-		Comment = { fg = colors.green, italic = config.italic.comments },
+		Comment = { fg = colors.fg4, italic = config.italic.comments },
 		Todo = { fg = colors.bg0, bg = colors.yellow, bold = config.bold, italic = config.italic.comments },
 		Done = { fg = colors.orange, bold = config.bold, italic = config.italic.comments },
 		Error = { fg = colors.red, bold = config.bold, reverse = config.inverse },
@@ -265,7 +248,7 @@ local function get_groups()
 		SpellBad = { link = "ykm22RedUnderline" },
 		SpellLocal = { link = "ykm22AquaUnderline" },
 		SpellRare = { link = "ykm22PurpleUnderline" },
-		Whitespace = { fg = colors.bg2 },
+		Whitespace = { fg = colors.bg3 },
 		DiagnosticError = { link = "ykm22Red" },
 		DiagnosticSignError = { link = "ykm22RedSign" },
 		DiagnosticUnderlineError = { link = "ykm22RedUnderline" },

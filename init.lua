@@ -1,6 +1,7 @@
 require('settings')
 require('keymaps')
+require('filetypes')
 require('ykm22_theme')
 
-require("plugins.lazy-setup")
+require("lazy-setup")
 

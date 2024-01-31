@@ -14,10 +14,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- plugin lists
-require("lazy").setup(
-{
-	{import = "plugins.colorizer"},
-	{import = "plugins.nvim-tree"},
-	{import = "plugins.lualine"},
-	{import = "plugins.bufferline"},
+require("lazy").setup({
+	{import = "plugins"},
+	{import = "plugins.lsp"},
 })
