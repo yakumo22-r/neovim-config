@@ -1,9 +1,7 @@
 require('settings')
-require('keybindings')
+require('keymaps')
 require('ykm22_theme')
 ykm22_theme.setup()
 
-require("plugins.lazy")
-require("plugins.nvim-tree")
-require("plugins.lualine")
+require("plugins.lazy-setup")
 

@@ -16,14 +16,7 @@ vim.opt.rtp:prepend(lazypath)
 -- plugin lists
 require("lazy").setup(
 {
-	"nvim-lua/plenary.nvim",
-	
-	-- file explorer
-	"nvim-tree/nvim-tree.lua",
-
-	-- icons
-	"kyazdani42/nvim-web-devicons",
-
-	-- lualine
-	"nvim-lualine/lualine.nvim",
+	{import="plugins.nvim-tree"},
+	{import = "plugins.lualine"},
+	{import = "plugins.bufferline"},
 })
