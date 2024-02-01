@@ -1,6 +1,5 @@
 -- basics
 local set = vim.o
-
 vim.cmd("syntax on")
 vim.cmd("filetype plugin indent on")
 vim.cmd("nohlsearch")

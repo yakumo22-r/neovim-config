@@ -32,7 +32,7 @@ return {
 			keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<CR>", opts) -- show lsp implementations
 
 			opts.desc = "Show LSP type definitions"
-			keymap.set("n", "gt", "<cmd>Telescope lsp_type_definitions<CR>", opts) -- show lsp type definitions
+			keymap.set("n", "<leader>gt", "<cmd>Telescope lsp_type_definitions<CR>", opts) -- show lsp type definitions
 
 			opts.desc = "See available code actions"
 			keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts) -- see available code actions, in visual mode will apply to selection
@@ -65,10 +65,10 @@ return {
 		-- Change the Diagnostic symbols in the sign column (gutter)
 		-- (not in youtube nvim video)
 		local signs = { 
-			Error = " ", 
-			Warn = " ", 
-			Hint = "󰠠 ", 
-			Info = " " 
+			Error = " ", 
+			Warn = " ", 
+			Hint = "󰦩 ", 
+			Info = "" 
 		}
 		for type, icon in pairs(signs) do
 			local hl = "DiagnosticSign" .. type
@@ -79,10 +79,14 @@ return {
 		lspconfig["lua_ls"].setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
-			filetypes = {"lua.txt", "lua"},
+			single_file_support = false,
+			filetypes = {"lua", "lua.txt"},
 			settings = { -- custom settings for lua
 			Lua = {
 				-- make the language server recognize "vim" global
+				runtime={
+					path = {"?.lua","?.lua.txt","?/init.lua","?/init.lua.txt"},
+				},
 				diagnostics = {
 					globals = { "vim" },
 				},
