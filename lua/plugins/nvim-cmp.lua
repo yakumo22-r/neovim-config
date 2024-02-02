@@ -34,7 +34,7 @@ return {
         ["<C-->"] = cmp.mapping.scroll_docs(-4),
         ["<C->"] = cmp.mapping.scroll_docs(4),
         ["<C-Space>"] = cmp.mapping.complete(), -- show completion suggestions
-		["<leader>e"] = cmp.mapping.abort(), -- close completion window
+		["<Esc>"] = cmp.mapping.abort(), -- close completion window
         ["<CR>"] = cmp.mapping.confirm({ select = false }),
       }),
       -- sources for autocompletion

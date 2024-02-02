@@ -15,6 +15,7 @@ return
 		vim.keymap.set("n", "gt", ":BufferLineCycleNext<CR>", opt)
 		vim.keymap.set("n", "gT", ":BufferLineCyclePrev<CR>", opt)
 		vim.keymap.set("n", "<leader>bc", ":bdelete %<CR>", opt)
+		vim.keymap.set("n", "<leader>abc", ":%bdelete<CR>", opt)
 		vim.keymap.set("n", "<leader>bg", ":BufferLinePick<CR>", opt)
 		vim.keymap.set("n", "<leader>bq", ":BufferLinePickClose<CR>", opt)
 	end

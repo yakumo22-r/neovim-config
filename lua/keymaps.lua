@@ -17,8 +17,6 @@ vim.keymap.set("n", "W", ":w<CR>", opt)
 vim.keymap.set("n", "Q", ":q!<CR>", opt)
 
 -- quick movement
-vim.keymap.set("n", "J", "5j", opt)
-vim.keymap.set("n", "K", "5k", opt)
 vim.keymap.set("n", "H", "0", opt)
 vim.keymap.set("n", "L", "$", opt)
 
