@@ -1,3 +1,17 @@
+local dir = vim.loop.os_homedir().."/.config/wezterm/"
+local filepath = dir.."colors/ykm22_wez_colors.lua"
+local file = io.open(filepath, "r")
+
+if file then
+	file.close()
+
+	local originalPath = package.path
+	package.path = filepath..";" .. package.path
+	local result = require("ykm22_wez_colors")
+	package.path = originalPath
+	return result
+end
+
 -- version: 0.0.5
 -- author: yakumo22
 local colors = {

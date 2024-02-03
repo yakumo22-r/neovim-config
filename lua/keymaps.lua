@@ -1,14 +1,28 @@
 local opt = {noremap = true, silent = true}
 vim.g.mapleader = " "
-vim.keymap.set ("n", "<C-h>", "<C-w>h", opt)
-vim.keymap.set ("n", "<C-l>", "<C-w>l", opt)
-vim.keymap.set ("n", "<C-j>", "<C-w>j", opt)
-vim.keymap.set ("n", "<C-k>", "<C-w>k", opt)
-vim.keymap.set ("n", "<Leader>v", "<C-w>v", opt)
-vim.keymap.set ("n", "<Leader>s", "<C-w>s", opt)
+-- sheild
+vim.keymap.set ("n", "z", "", opt)
+vim.keymap.set ("n", "c", "", opt)
+vim.keymap.set ("n", "q", "", opt)
 
-vim.keymap.set("n", "j", [[v:count ? 'j' : 'gj']], {noremap=true, expr = true})
-vim.keymap.set("n", "k", [[v:count ? 'k' : 'gk']], {noremap=true, expr = true})
+-- window
+vim.keymap.set ("n", "<Leader>h", "<C-w>h", opt)
+vim.keymap.set ("n", "<Leader>l", "<C-w>l", opt)
+vim.keymap.set ("n", "<Leader>j", "<C-w>j", opt)
+vim.keymap.set ("n", "<Leader>k", "<C-w>k", opt)
+
+vim.keymap.set ("n", "<leader>sk", ":set nosplitbelow<CR>:split<CR>", opt)
+vim.keymap.set ("n", "<leader>sj", ":set splitbelow<CR>:split<CR>", opt)
+vim.keymap.set ("n", "<leader>sh", ":set nosplitright<CR>:vsplit<CR>", opt)
+vim.keymap.set ("n", "<leader>sl", ":set splitright<CR>:vsplit<CR>", opt)
+
+vim.keymap.set("n", "<leader>srh", "<C-w>b<C-w>K", opt)
+vim.keymap.set("n", "<leader>srv", "<C-w>b<C-w>H", opt)
+
+vim.keymap.set("n", "<A-up>", ":res +2<cr>", opt)
+vim.keymap.set("n", "<A-down>", ":res -2<cr>", opt)
+vim.keymap.set("n", "<A-left>", ":vertical resize -2<cr>", opt)
+vim.keymap.set("n", "<A-right>", ":vertical resize +2<cr>", opt)
 
 vim.keymap.set("n", "<Leader><CR>", ":nohlsearch<CR>", opt)
 
@@ -16,6 +30,9 @@ vim.keymap.set("n", "<Leader><CR>", ":nohlsearch<CR>", opt)
 vim.keymap.set("n", "W", ":w<CR>", opt)
 vim.keymap.set("n", "Q", ":q!<CR>", opt)
 
+-- move
+vim.keymap.set("n", "j", [[v:count ? 'j' : 'gj']], {noremap=true, expr = true})
+vim.keymap.set("n", "k", [[v:count ? 'k' : 'gk']], {noremap=true, expr = true})
 -- quick movement
 vim.keymap.set("n", "H", "0", opt)
 vim.keymap.set("n", "L", "$", opt)

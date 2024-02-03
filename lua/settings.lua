@@ -1,27 +1,26 @@
 -- basics
-local set = vim.o
 vim.cmd("syntax on")
 vim.cmd("filetype plugin indent on")
-vim.cmd("nohlsearch")
-set.number = true
-set.relativenumber = true
-set.clipboard = "unnamed"
-set.cursorline = true
+vim.opt.number = true
+vim.opt.relativenumber = true
+vim.opt.clipboard = "unnamed"
+vim.opt.cursorline = true
 
 
 -- search
-set.hlsearsh = true
-set.showmatch = true
+vim.opt.hlsearch = true
+vim.opt.showmatch = true
 
 
 -- tabs
-set.autoindent = true
-set.tabstop=4
-set.shiftwidth=4
-set.softtabstop=4
-set.backspace=indent,eol,start
-set.smartindent = true
-set.list=true
+vim.opt.autoindent = true
+vim.opt.tabstop=4
+vim.opt.shiftwidth=4
+vim.opt.softtabstop=4
+vim.opt.backspace="indent,eol,start"
+vim.opt.smartindent = true
+vim.opt.list=true
+
 -- highlight after copy
 vim.api.nvim_create_autocmd({ "textyankpost" }, {
 	pattern = { "*" },
@@ -32,3 +31,17 @@ vim.api.nvim_create_autocmd({ "textyankpost" }, {
 	end,
 })
 vim.cmd([[set iskeyword+=-]])
+
+
+vim.opt.scrolloff = 2
+
+-- presistent undo
+vim.bo.undofile = true
+vim.opt.undodir = vim.fn.expand('~/.config/nvim/.tmp/undo')
+
+-- disable automatic commenting on newline
+vim.api.nvim_create_autocmd({"FileType"},{
+	pattern = {"*"},
+	command = "setlocal formatoptions-=c formatoptions-=r formatoptions-=o",
+})
+
