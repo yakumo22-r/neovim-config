@@ -16,6 +16,9 @@ return {
 
 		local opts = { noremap = true, silent = true }
 		local on_attach = function(client, bufnr)
+			-- no highlight
+			client.server_capabilities.semanticTokensProvider = nil
+
 			opts.buffer = bufnr
 
 			-- set keybinds
