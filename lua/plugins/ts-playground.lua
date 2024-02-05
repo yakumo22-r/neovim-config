@@ -1,6 +1,5 @@
 return {
 	'nvim-treesitter/playground',
-	lazy=true,
 	event = "VeryLazy",
 	config = function()
 		require "nvim-treesitter.configs".setup {
@@ -23,6 +22,7 @@ return {
 				},
 			}
 		}
-		vim.keymap.set("n", "H", ":TSHighlightCapturesUnderCursor<CR>", {silent=true, noremap=true})
+		vim.keymap.set("n", "<A-H>", ":TSHighlightCapturesUnderCursor<Enter>", {silent=true, noremap=true})
+
 	end,
 }

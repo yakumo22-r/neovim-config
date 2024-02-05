@@ -1,9 +1,10 @@
 return {
 	"neovim/nvim-lspconfig",
-	event = { "BufReadPre", "BufNewFile" },
+	event = "VeryLazy",
 	dependencies = {
 		"hrsh7th/cmp-nvim-lsp",
 		{ "antosha417/nvim-lsp-file-operations", config = true },
+		"williamboman/mason.nvim",
 	},
 	config = function()
 		-- import lspconfig plugin
@@ -19,6 +20,9 @@ return {
 			-- no highlight
 			client.server_capabilities.semanticTokensProvider = nil
 
+			-- load navbuddy
+			-- require("nvim-navbuddy").on_attach(client, bufnr)
+
 			opts.buffer = bufnr
 
 			-- set keybinds
@@ -30,6 +34,10 @@ return {
 
 			opts.desc = "Show LSP definitions"
 			keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<CR>", opts) -- show lsp definitions
+
+			opts.desc = "Show LSP references"
+			-- keymap.set("n", "gu", vim.lsp.buf.references, opts) -- show lsp references
+			keymap.set("n", "gu", "<cmd>Telescope lsp_references<CR>", opts) -- show lsp references
 
 			opts.desc = "Show LSP implementations"
 			keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<CR>", opts) -- show lsp implementations

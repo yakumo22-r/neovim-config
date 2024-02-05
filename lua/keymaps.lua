@@ -19,12 +19,14 @@ vim.keymap.set ("n", "<leader>sl", ":set splitright<CR>:vsplit<CR>", opt)
 vim.keymap.set("n", "<leader>srh", "<C-w>b<C-w>K", opt)
 vim.keymap.set("n", "<leader>srv", "<C-w>b<C-w>H", opt)
 
+-- move line
 vim.keymap.set("n", "<A-up>", ":res +2<cr>", opt)
 vim.keymap.set("n", "<A-down>", ":res -2<cr>", opt)
 vim.keymap.set("n", "<A-left>", ":vertical resize -2<cr>", opt)
 vim.keymap.set("n", "<A-right>", ":vertical resize +2<cr>", opt)
 
-vim.keymap.set("n", "<Leader><CR>", ":nohlsearch<CR>", opt)
+-- hide search highlight
+vim.keymap.set({"v", "n"}, "<Leader><CR>", ":nohlsearch<CR>", opt)
 
 -- quick q! wq w
 vim.keymap.set("n", "W", ":w<CR>", opt)
@@ -33,10 +35,10 @@ vim.keymap.set("n", "Q", ":q!<CR>", opt)
 -- move
 vim.keymap.set("n", "j", [[v:count ? 'j' : 'gj']], {noremap=true, expr = true})
 vim.keymap.set("n", "k", [[v:count ? 'k' : 'gk']], {noremap=true, expr = true})
--- quick movement
-vim.keymap.set("n", "H", "0", opt)
-vim.keymap.set("n", "L", "$", opt)
 
+-- quick movement
+vim.keymap.set({"v", "n"}, "L", "$", opt)
+vim.keymap.set({"v", "n"}, "H", "^", opt)
 -- move text
 vim.keymap.set("n", "<", "<<", opt)
 vim.keymap.set("n", ">", ">>", opt)
@@ -48,3 +50,16 @@ vim.keymap.set("n", "<A-k>", ":m .-2<CR>==", opt)
 vim.keymap.set("v", "<A-j>", ":m '>+1<CR>gv=gv", opt)
 vim.keymap.set("v", "<A-k>", ":m '<-2<CR>gv=gv", opt)
 
+-- copy
+vim.keymap.set({'n','v'}, 'd', '"_d')
+vim.keymap.set({'n','v'}, 's', '"_s')
+vim.keymap.set('v', 'p', '"_dp')
+vim.keymap.set('v', 'P', '"_dP')
+
+-- ({["'
+vim.keymap.set("n", "<leader>{", "a{}<Esc>i", opt)
+vim.keymap.set("n", "<leader>[", "a[]<Esc>i", opt)
+vim.keymap.set("n", "<leader>(", "a()<Esc>i", opt)
+vim.keymap.set("n", "<leader><", "a<><Esc>i", opt)
+vim.keymap.set("n", "<leader>\"", "a\"<Esc>i", opt)
+vim.keymap.set("n", "<leader>'", "a\'<Esc>i", opt)
