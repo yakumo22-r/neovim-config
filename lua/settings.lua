@@ -36,8 +36,8 @@ vim.cmd([[set iskeyword+=-]])
 vim.opt.scrolloff = 2
 
 -- presistent undo
-vim.bo.undofile = true
-vim.opt.undodir = vim.fn.expand('~/.config/nvim/.tmp/undo')
+vim.cmd 'set undofile'
+vim.opt.undodir = vim.fn.stdpath('config') .. '/.tmp/undo'
 
 -- disable automatic commenting on newline
 vim.api.nvim_create_autocmd({"FileType"},{
