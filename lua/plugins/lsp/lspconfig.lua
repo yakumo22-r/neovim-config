@@ -1,6 +1,6 @@
 return {
 	"neovim/nvim-lspconfig",
-	event = "VeryLazy",
+	event = { "BufReadPre", "BufNewFile" },
 	dependencies = {
 		"hrsh7th/cmp-nvim-lsp",
 		{ "antosha417/nvim-lsp-file-operations", config = true },
@@ -94,7 +94,6 @@ return {
 			filetypes = {"lua", "lua.txt"},
 			settings = { -- custom settings for lua
 			Lua = {
-				-- make the language server recognize "vim" global
 				runtime={
 					path = {"?.lua","?.lua.txt","?/init.lua","?/init.lua.txt"},
 				},
@@ -108,8 +107,10 @@ return {
 						[vim.fn.stdpath("config") .. "/lua"] = true,
 					},
 				},
-			},
-		},
-	})
+			},},
+		})
+
+		lspconfig["neocmake"].setup{}
+		lspconfig["clangd"].setup{}
 end,
 }

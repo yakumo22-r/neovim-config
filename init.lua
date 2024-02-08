@@ -1,3 +1,10 @@
+user = 
+{
+	{import = "plugins"},
+	{import = "plugins.lsp"},
+	-- {import = "plugins.more"}
+}
+
 require('settings')
 require('keymaps')
 require('ykm22_theme')

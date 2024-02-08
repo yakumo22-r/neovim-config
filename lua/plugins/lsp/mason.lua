@@ -1,6 +1,6 @@
 return {
 	"williamboman/mason.nvim",
-	event = "VeryLazy",
+	event = { "BufReadPre", "BufNewFile" },
 	dependencies = {
 		"williamboman/mason-lspconfig.nvim",
 		"WhoIsSethDaniel/mason-tool-installer.nvim",
@@ -29,6 +29,9 @@ return {
 			-- list of servers for mason to install
 			ensure_installed = {
 				"lua_ls",
+
+				"neocmake",
+				"clangd",
 			},
 			-- auto-install configured servers (with lspconfig)
 			automatic_installation = true, -- not the same as ensure_installed
