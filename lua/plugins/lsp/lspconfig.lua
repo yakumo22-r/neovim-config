@@ -110,7 +110,18 @@ return {
 			},},
 		})
 
-		lspconfig["neocmake"].setup{}
-		lspconfig["clangd"].setup{}
+		lspconfig["neocmake"].setup
+		{
+			capabilities = capabilities,
+			on_attach = on_attach,
+			single_file_support = true,
+		}
+
+		lspconfig["clangd"].setup
+		{
+			capabilities = capabilities,
+			on_attach = on_attach,
+			single_file_support = true,
+		}
 end,
 }
