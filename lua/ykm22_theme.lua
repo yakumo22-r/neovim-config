@@ -25,10 +25,10 @@ ykm22.config = {
 }
 
 ykm22.palette = require("ykm22_colors")
+local p = ykm22.palette
 
 -- get a hex list of gruvbox colors based on current bg and constrast config
 local function get_colors()
-	local p = ykm22.palette
 	local config = ykm22.config
 
 	local bg = vim.o.background
@@ -220,14 +220,14 @@ local function get_groups()
 		Repeat = { link = "ykm22Red" },
 		Label = { link = "ykm22Red" },
 		Exception = { link = "ykm22Red" },
-		Operator = { fg = colors.aqua, italic = config.italic.operators },
+		Operator = { fg = p.light_red, italic = config.italic.operators },
 		Keyword = { link = "ykm22Red" },
-		Identifier = { link = "ykm22Blue" },
+		Identifier = { fg = "#ffceb0" },
 		Function = { link = "ykm22Orange" },
 		PreProc = { link = "ykm22Aqua" },
 		Include = { link = "ykm22Aqua" },
 		Define = { link = "ykm22Aqua" },
-		Macro = { link = "ykm22Aqua" },
+		Macro = { fg = p.light_red },
 		PreCondit = { link = "ykm22Aqua" },
 		Constant = { link = "ykm22Purple" },
 		Character = { link = "ykm22Purple" },
@@ -853,7 +853,7 @@ local function get_groups()
 		["@method"] = { link = "Function" },
 		["@method.call"] = { link = "Function" },
 		["@constructor"] = { link = "ykm22RedBold" },
-		["@parameter"] = { link = "Identifier" },
+		["@parameter"] = { fg = "#b9c0b9" },
 		["@keyword"] = { link = "Keyword" },
 		["@keyword.function"] = { link = "Keyword" },
 		["@keyword.operator"] = { link = "ykm22Red" },
@@ -911,7 +911,7 @@ local function get_groups()
 		["@lsp.type.comment"] = { link = "@comment" },
 		["@lsp.type.decorator"] = { link = "@macro" },
 		["@lsp.type.enum"] = { link = "@type" },
-		["@lsp.type.enumMember"] = { link = "@constant" },
+		["@lsp.type.enumMember"] = { fg = p.light_green },
 		["@lsp.type.function"] = { link = "@function" },
 		["@lsp.type.interface"] = { link = "@constructor" },
 		["@lsp.type.macro"] = { link = "@macro" },
