@@ -1,18 +1,22 @@
-local dir = vim.loop.os_homedir().."/.config/wezterm/colors"
-local filepath = dir.."/ykm22_wez_colors.lua"
+local dir = vim.loop.os_homedir() .. "/.config/wezterm/colors"
+local filepath = dir .. "/ykm22_wez_colors.lua"
 local file = io.open(filepath, "r")
 
 if file then
 	file:close()
 else
 	if not vim.loop.fs_stat(dir) then
-		vim.fn.system('mkdir -p "'..dir..'"')
+		vim.fn.system('mkdir -p "' .. dir .. '"')
 	end
-	vim.fn.system('wget -O '..filepath..' https://raw.githubusercontent.com/yakumo22-r/wezterm-config/master/colors/ykm22_wez_colors.lua')
+	vim.fn.system(
+		"wget -O "
+			.. filepath
+			.. " https://raw.githubusercontent.com/yakumo22-r/wezterm-config/master/colors/ykm22_wez_colors.lua"
+	)
 end
 
 local originalPath = package.path
-package.path = filepath..";" .. package.path
+package.path = filepath .. ";" .. package.path
 local result = require("ykm22_wez_colors")
 package.path = originalPath
 return result

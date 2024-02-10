@@ -1,12 +1,11 @@
 return {
-	'norcalli/nvim-colorizer.lua',
-	config=function()
+	"norcalli/nvim-colorizer.lua",
+	config = function()
 		require("colorizer").setup({
-			'css',
-			'javascript',
-			'json',
-			'lua',
-
+			"css",
+			"javascript",
+			"json",
+			"lua",
 		})
 	end,
 }

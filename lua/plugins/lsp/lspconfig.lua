@@ -75,11 +75,11 @@ return {
 
 		-- Change the Diagnostic symbols in the sign column (gutter)
 		-- (not in youtube nvim video)
-		local signs = { 
-			Error = " ", 
-			Warn = " ", 
-			Hint = "󰦩 ", 
-			Info = "" 
+		local signs = {
+			Error = " ",
+			Warn = " ",
+			Hint = "󰦩 ",
+			Info = "",
 		}
 		for type, icon in pairs(signs) do
 			local hl = "DiagnosticSign" .. type
@@ -91,37 +91,36 @@ return {
 			capabilities = capabilities,
 			on_attach = on_attach,
 			single_file_support = false,
-			filetypes = {"lua", "lua.txt"},
+			filetypes = { "lua", "lua.txt" },
 			settings = { -- custom settings for lua
-			Lua = {
-				runtime={
-					path = {"?.lua","?.lua.txt","?/init.lua","?/init.lua.txt"},
-				},
-				diagnostics = {
-					globals = { "vim" },
-				},
-				workspace = {
-					-- make language server aware of runtime files
-					library = {
-						[vim.fn.expand("$VIMRUNTIME/lua")] = true,
-						[vim.fn.stdpath("config") .. "/lua"] = true,
+				Lua = {
+					runtime = {
+						path = { "?.lua", "?.lua.txt", "?/init.lua", "?/init.lua.txt" },
+					},
+					diagnostics = {
+						globals = { "vim" },
+					},
+					workspace = {
+						-- make language server aware of runtime files
+						library = {
+							[vim.fn.expand("$VIMRUNTIME/lua")] = true,
+							[vim.fn.stdpath("config") .. "/lua"] = true,
+						},
 					},
 				},
-			},},
+			},
 		})
 
-		lspconfig["neocmake"].setup
-		{
+		lspconfig["neocmake"].setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 			single_file_support = true,
-		}
+		})
 
-		lspconfig["clangd"].setup
-		{
+		lspconfig["clangd"].setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 			single_file_support = true,
-		}
-end,
+		})
+	end,
 }

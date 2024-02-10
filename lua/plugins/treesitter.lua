@@ -1,8 +1,8 @@
-return{
-	'nvim-treesitter/nvim-treesitter',
+return {
+	"nvim-treesitter/nvim-treesitter",
 	build = ":TSUpdate",
-	config=function()
-		require'nvim-treesitter.configs'.setup {
+	config = function()
+		require("nvim-treesitter.configs").setup({
 			-- A list of parser names, or "all" (the five listed parsers should always be installed)
 			ensure_installed = { "c", "lua", "vim", "vimdoc", "query" },
 
@@ -44,9 +44,9 @@ return{
 					init_selection = "<CR>",
 					node_incremental = "<CR>",
 					node_decremental = "<BS>",
-					scope_incremental = "<TAB>"
-				}
+					scope_incremental = "<TAB>",
+				},
 			},
-		}
+		})
 	end,
 }
