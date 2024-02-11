@@ -9,10 +9,19 @@ else
 		vim.fn.system('mkdir -p "' .. dir .. '"')
 	end
 	local default_user_table = [[
+local default_formatrc_path = vim.fn.stdpath('config')..'/formatrc/'
 return
 {
-	{import = "plugins"},
-	{import = "plugins.lsp"},
+	plugins={
+		{import = "plugins"},
+		{import = "plugins.lsp"},
+	},
+
+	formatrc={
+		prettier = default_formatrc_path..'.prettierrc.json',
+		clangformat = default_formatrc_path..'.clang-format',
+		stylua = default_formatrc_path..'.stylua.toml',
+	},
 }
 ]]
 	file = io.open(filepath, "w")
