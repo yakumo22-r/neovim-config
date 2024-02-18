@@ -2,7 +2,6 @@ local opt = { noremap = true, silent = true }
 vim.g.mapleader = " "
 -- sheild
 vim.keymap.set("n", "z", "", opt)
-vim.keymap.set("n", "c", "", opt)
 vim.keymap.set("n", "q", "", opt)
 
 -- window
@@ -33,8 +32,18 @@ vim.keymap.set("n", "W", ":w<CR>", opt)
 vim.keymap.set("n", "Q", ":q!<CR>", opt)
 
 -- move
-vim.keymap.set("n", "j", [[v:count ? 'j' : 'gj']], { noremap = true, expr = true })
-vim.keymap.set("n", "k", [[v:count ? 'k' : 'gk']], { noremap = true, expr = true })
+vim.keymap.set(
+    "n",
+    "j",
+    [[v:count ? 'j' : 'gj']],
+    { noremap = true, expr = true }
+)
+vim.keymap.set(
+    "n",
+    "k",
+    [[v:count ? 'k' : 'gk']],
+    { noremap = true, expr = true }
+)
 
 -- quick movement
 vim.keymap.set({ "v", "n" }, "L", "$", opt)
@@ -51,15 +60,20 @@ vim.keymap.set("v", "<A-j>", ":m '>+1<CR>gv=gv", opt)
 vim.keymap.set("v", "<A-k>", ":m '<-2<CR>gv=gv", opt)
 
 -- copy
-vim.keymap.set({ "n", "v" }, "d", '"_d')
-vim.keymap.set({ "n", "v" }, "s", '"_s')
-vim.keymap.set("v", "p", '"_dp')
-vim.keymap.set("v", "P", '"_dP')
+vim.keymap.set({ "n", "v" }, "d", '"_d', opt)
+vim.keymap.set({ "n", "v" }, "s", '"_s', opt)
+vim.keymap.set({ "n", "v" }, "c", '"_c', opt)
+vim.keymap.set("v", "p", '"_dp', opt)
+vim.keymap.set("v", "P", '"_dP', opt)
 
 -- ({["'
-vim.keymap.set("n", "<leader>{", "a{}<Esc>i", opt)
-vim.keymap.set("n", "<leader>[", "a[]<Esc>i", opt)
-vim.keymap.set("n", "<leader>(", "a()<Esc>i", opt)
-vim.keymap.set("n", "<leader><", "a<><Esc>i", opt)
-vim.keymap.set("n", '<leader>"', 'a"<Esc>i', opt)
-vim.keymap.set("n", "<leader>'", "a'<Esc>i", opt)
+vim.keymap.set("i", "{ ", "{}<Esc>i", opt)
+vim.keymap.set("i", "[ ", "[]<Esc>i", opt)
+vim.keymap.set("i", "< ", "<><Esc>i", opt)
+vim.keymap.set("i", "( ", "()<Esc>i", opt)
+vim.keymap.set("i", '" ', '"<Esc>i', opt)
+vim.keymap.set("i", "' ", "'<Esc>i", opt)
+vim.keymap.set("i", "{<CR>", "{\n}<Esc>O", opt)
+vim.keymap.set("i", "[<CR>", "[\n]<Esc>O", opt)
+vim.keymap.set("i", "<<CR>", "<\n><Esc>O", opt)
+vim.keymap.set("i", "(<CR>", "(\n)<Esc>O", opt)
