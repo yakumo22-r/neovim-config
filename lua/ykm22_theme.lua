@@ -975,7 +975,7 @@ local function get_groups()
         ["@function.macro"] = { link = "Macro" },
         ["@method"] = { link = "Function" },
         ["@method.call"] = { link = "Function" },
-        ["@constructor"] = { link = "ykm22RedBold" },
+        ["@constructor"] = { link = "ykm22Red" },
         ["@parameter"] = { fg = "#b9c0b9" },
         ["@keyword"] = { link = "Keyword" },
         ["@keyword.function"] = { link = "Keyword" },
