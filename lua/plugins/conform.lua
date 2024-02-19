@@ -15,6 +15,7 @@ return {
                 scss = { "prettierd" },
                 less = { "prettierd" },
                 html = { "prettierd" },
+                sh = { "shfmt" },
             },
         })
 
@@ -26,6 +27,11 @@ return {
             }
         end
 
+        conform.formatters.shfmt = {
+            inherit = false,
+            command = "shfmt",
+            args = {"-i", "4", "-filename", "$FILENAME"},
+        }
         local opt = { noremap = true, silent = true }
         vim.keymap.set({ "n", "v" }, "=", "", {
             noremap = true,

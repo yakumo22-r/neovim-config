@@ -40,7 +40,8 @@ return {
             ensure_installed = {
                 "stylua", -- lua formatter
                 "prettierd",
-				"clang-format",
+                "clang-format",
+                "shfmt",
             },
         })
     end,

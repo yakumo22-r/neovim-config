@@ -5,10 +5,20 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.clipboard = "unnamed"
 vim.opt.cursorline = true
-
 -- search
 vim.opt.hlsearch = true
 vim.opt.showmatch = true
+-- make zsh files recognized as sh for bash-ls & treesitter
+vim.filetype.add {
+	extension = {
+		zsh = "sh",
+		sh = "sh", -- force sh-files with zsh-shebang to still get sh as filetype
+	},
+	filename = {
+		[".zshrc"] = "sh",
+		[".zshenv"] = "sh",
+	},
+}
 
 -- tabs
 vim.opt.autoindent = true

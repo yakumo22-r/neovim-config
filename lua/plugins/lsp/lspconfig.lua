@@ -80,12 +80,6 @@ return {
             },
         })
 
-        lspconfig["neocmake"].setup({
-            capabilities = capabilities,
-            on_attach = keybindings,
-            single_file_support = true,
-        })
-
         lspconfig["clangd"].setup({
             capabilities = capabilities,
             on_attach = keybindings,
