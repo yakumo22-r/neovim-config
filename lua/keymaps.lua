@@ -77,3 +77,4 @@ vim.keymap.set("i", "{<CR>", "{\n}<Esc>O", opt)
 vim.keymap.set("i", "[<CR>", "[\n]<Esc>O", opt)
 vim.keymap.set("i", "<<CR>", "<\n><Esc>O", opt)
 vim.keymap.set("i", "(<CR>", "(\n)<Esc>O", opt)
+

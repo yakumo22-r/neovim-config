@@ -38,5 +38,6 @@ package.path = originalPath
 
 require("settings")
 require("keymaps")
+require("comment")
 require("ykm22_theme")
 require("lazy-setup")
