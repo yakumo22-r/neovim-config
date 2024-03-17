@@ -97,5 +97,5 @@ function ToggleCommentVisual()
 end
 
 local opt = { noremap = true, silent = true }
-vim.api.nvim_set_keymap("n", "<C-_>", ":lua ToggleCommentNormal()<CR>", opt)
-vim.api.nvim_set_keymap("v", "<C-_>", ":lua ToggleCommentVisual()<CR>", opt)
+vim.api.nvim_set_keymap("n", "<C-/>", ":lua ToggleCommentNormal()<CR>", opt)
+vim.api.nvim_set_keymap("v", "<C-/>", ":lua ToggleCommentVisual()<CR>", opt)
