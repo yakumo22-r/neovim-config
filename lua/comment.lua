@@ -71,7 +71,7 @@ function ToggleCommentVisual()
             mode_comment = false
         end
         local leading_whitespace = string.match(line, "^%s*")
-        if #leading_whitespace < min_p and #leading_whitespace ~= 0 then
+        if #leading_whitespace < min_p and #leading_whitespace >= 0 then
             prefix_whitespace = leading_whitespace
             min_p = #leading_whitespace
         end
@@ -97,5 +97,5 @@ function ToggleCommentVisual()
 end
 
 local opt = { noremap = true, silent = true }
-vim.api.nvim_set_keymap("n", "<C-/>", ":lua ToggleCommentNormal()<CR>", opt)
-vim.api.nvim_set_keymap("v", "<C-/>", ":lua ToggleCommentVisual()<CR>", opt)
+vim.keymap.set("n", "<leader>=", ":lua ToggleCommentNormal()<CR>", opt)
+vim.keymap.set("v", "<leader>=", ":lua ToggleCommentVisual()<CR>", opt)
