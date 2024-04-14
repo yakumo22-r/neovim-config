@@ -1,3 +1,4 @@
+require("tools")
 require("user")
 require("settings")
 require("keymaps")

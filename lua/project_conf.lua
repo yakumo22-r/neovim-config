@@ -1,11 +1,23 @@
+vim.cmd("command! ProjectConf lua project_conf:reload()")
+vim.cmd("command! CreateProjectConf lua project_conf:create()")
+vim.cmd("command! -nargs=* Build lua project_conf:build(<f-args>)")
+vim.cmd("command! -nargs=* Run lua project_conf:run(<f-args>)")
+
 project_conf = {}
 
 local template_lua = {}
 
 template_lua.default = [[local conf = {}
 
+conf.terminal = "default" -- system | toggle
+-- <internal value>
+-- conf.mac         | is mac            (bool)
+-- conf.win         | is win            (bool)
+-- conf.unix        | is unix           (bool)
+-- conf.mac_unix    | is mac or unix    (bool)
+-- conf.path        | working path      (string)
+
 -- internal run by neovim
-function conf:set_path(path) self.path = path end
 
 function conf:build(args)
     print("build not implementation")
@@ -25,6 +37,13 @@ local function load_project_config()
         if Tool.file_exists(project_config_file) then
             local conf = dofile(project_config_file)
             conf:set_path(Tool.get_current_directory())
+            conf.path = Tool.get_current_directory()
+
+            conf.mac = vim.fn.has("mac") == 1
+            conf.win = vim.fn.has("win32") == 1
+            conf.unix = vim.fn.has("unix") == 1
+            conf.mac_unix = conf.mac == true or conf.unix == true
+
             return conf
         end
         current_dir = vim.fn.fnamemodify(current_dir, ":h")
@@ -72,9 +91,9 @@ function project_conf:build(name, ...)
         end
     end
 
-    res = Tool.get_value(res, self.conf, {...})
+    res = Tool.get_value(res, self.conf, { ... })
     if res then
-        Tool.execute_shell_command(res)
+        Tool.execute_shell_command(res, self.conf.terminal)
     end
 end
 
@@ -91,16 +110,12 @@ function project_conf:run(name, ...)
         res = self.conf.run
         if not res then
             print("run not defined")
-            return 
+            return
         end
     end
-    res = Tool.get_value(res, self.conf, {...})
+    res = Tool.get_value(res, self.conf, { ... })
     if res then
-        Tool.execute_shell_command(res)
+        Tool.execute_shell_command(res, self.conf.terminal)
     end
 end
 
-vim.cmd("command! ProjectConf lua project_conf:reload()")
-vim.cmd("command! CreateProjectConf lua project_conf:create()")
-vim.cmd("command! -nargs=* Build lua project_conf:build(<f-args>)")
-vim.cmd("command! -nargs=* Run lua project_conf:run(<f-args>)")
