@@ -13,6 +13,8 @@ return {
         local opt = { noremap = true, silent = true }
         vim.keymap.set("n", "gt", ":BufferLineCycleNext<CR>", opt)
         vim.keymap.set("n", "gT", ":BufferLineCyclePrev<CR>", opt)
+        vim.keymap.set("n", "g,", ":BufferLineCyclePrev<CR>", opt)
+        vim.keymap.set("n", "g.", ":BufferLineCycleNext<CR>", opt)
         vim.keymap.set("n", "<bs>c", ":bdelete %<CR>", opt)
         vim.keymap.set("n", "<bs>a", ":%bdelete<CR>", opt)
         vim.keymap.set("n", "<bs>o", ":%bd|e#|bd#<CR>", opt)
