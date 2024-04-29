@@ -1,50 +1,75 @@
 vim.cmd("command! DepReload lua deploy_conf:reload()")
 vim.cmd("command! -nargs=* DepUpload lua deploy_conf:upload({<f-args>})")
 vim.cmd("command! -nargs=* DepUploadAll lua deploy_conf:upload_all({<f-args>})")
-vim.cmd("command! DepChoose lua project_conf:create()")
-vim.cmd("command! DepList lua project_conf:create()")
+vim.cmd("command! CreateDepConf lua deploy_conf:create()")
+--vim.cmd("command! DepChoose lua project_conf:create()")
+--vim.cmd("command! DepList lua project_conf:create()")
 vim.cmd("command! -nargs=* DepSwitch lua deploy_conf:switch({<f-args>})")
 
-local function load_project_config()
-    local current_dir = Tool.get_current_directory()
-    local project_config_file = current_dir .. "/.deploy.lua"
-    -- Check if the file exists in the current directory or any parent directory
-    while current_dir ~= vim.fn.fnamemodify(current_dir, ":h") do
-        if Tool.file_exists(project_config_file) then
-            local conf = dofile(project_config_file)
-            conf.path = current_dir
+local template = [[return {
+    localPath = "/",
+    targets = {
+        target = {
+            method = "sftp",
+            server = "1.2.3.4",
+            user = "root",
+            pasword = "******",
+            system = "linux",
+            path = "/home/prod/server",
+        },
+    },
+    ignores = {
+        ".ykm.nvim.proj/",
+        ".git/",
+        ".tmp/",
+    },
+}
+]]
 
-            conf.mac = vim.fn.has("mac") == 1
-            conf.win = vim.fn.has("win32") == 1
-            conf.unix = vim.fn.has("unix") == 1
-            conf.mac_unix = conf.mac == true or conf.unix == true
-
-            return conf
-        end
-        current_dir = vim.fn.fnamemodify(current_dir, ":h")
-        project_config_file = current_dir .. "/.deploy.lua"
-    end
-    print("no .deploy.lua defined")
-end
-
+local temp_deploy_path = ".ykm.nvim.proj/.temp_deploy_path"
 local function process_upload(dirs, files, target, path)
     local terminal = require("toggleterm")
     if target.method == "scp" then
-        local mkdir_cmd
+        local temp_path = Tool.create_directory(path, temp_deploy_path)
+        local sub_root = {}
         for i, d in ipairs(dirs) do
-            local c = string.format("mkdir -p %s/%s", target.path, d)
-            mkdir_cmd = mkdir_cmd and (mkdir_cmd .. " && " .. c) or c
+            if string.find(d, "/") == nil then
+                table.insert(sub_root, d)
+            end
+            Tool.create_directory(temp_path, d)
         end
 
-        if mkdir_cmd then
-            Tool.execute_shell_command(string.format('ssh %s "%s"\n', target.server, mkdir_cmd))
+        for i, d in ipairs(sub_root) do
+            terminal.exec(string.format('scp -r "%s/%s" %s:%s', temp_path, d, target.server, target.path), 101)
         end
+
+        terminal.exec(string.format('rm -r "%s"', temp_path), 101)
 
         for i, f in ipairs(files) do
             terminal.exec(string.format('scp "%s/%s" %s:%s/%s', path, f, target.server, target.path, f), 101)
         end
 
-        terminal.exec(string.format('echo "upload %d files to %s, all down at %s"',#files , target.server, os.date("%H:%M:%S")))
+        terminal.exec(string.format('echo "upload %d files to %s, all down at %s"', #files, target.server, os.date("%H:%M:%S")))
+    elseif target.method == "sftp" then
+        local sftp = require("sftp")
+        sftp:init()
+        print("login to " .. target.server .. "...")
+        vim.schedule(function()
+            local c
+            c = sftp:create_conection(target.server, target.port, target.username, target.password)
+            if c then
+                print("login to " .. target.server .. " success")
+                for i, f in ipairs(files) do
+                    local rc, rmsg = c:upload_file(string.format("%s/%s", path, f), string.format("%s/%s", target.path, f))
+                    print(string.format("upload %d: %s  %s code: %d", i, f, rc == 0 and "success" or (rmsg or "failed"), rc))
+                end
+                print(string.format('upload %d files to %s, all down at %s"', #files, target.server, os.date("%H:%M:%S")))
+                vim.schedule()
+                c:close()
+            end
+        end)
+
+        sftp:exit()
     end
 end
 
@@ -57,20 +82,23 @@ function deploy_conf:azure()
 end
 
 function deploy_conf:reload()
-    self.conf = load_project_config()
+    self.conf = Tool.load_project_conf("deploy")
     for k, v in pairs(self.conf.targets) do
         self.curr_target = v
         break
     end
 end
 
+function deploy_conf:create()
+    Tool.create_project_conf("deploy", template)
+end
+
 function deploy_conf:upload_all(args)
     self:azure()
     local files, dirs = Tool.traverse_directory(self.conf.path, nil, self.conf.ignores)
 
-
     local my_args = {}
-    for i,v in ipairs(args) do
+    for i, v in ipairs(args) do
         if v == "-mkdir" then
             my_args.mkdir = true
         end
@@ -81,11 +109,11 @@ end
 function deploy_conf:upload(args)
     self:azure()
     local my_args = {}
-    for i,v in ipairs(args) do
+    for i, v in ipairs(args) do
         if v == "-list" then
             my_args.list = true
         elseif v == "-d" then
-            my_args.d = args[i+1]
+            my_args.d = args[i + 1]
         elseif v == "-mkdir" then
             my_args.mkdir = true
         end
@@ -94,7 +122,7 @@ function deploy_conf:upload(args)
     if my_args.list then
         -- upload selected file
     elseif my_args.d then
-        local files, dirs = Tool.traverse_directory(self.conf.path .. "/" .. my_args.d,  my_args.d .. "/", self.conf.ignores)
+        local files, dirs = Tool.traverse_directory(self.conf.path .. "/" .. my_args.d, my_args.d .. "/", self.conf.ignores)
         process_upload(my_args.mkdir and dirs or {}, files, self.curr_target, self.conf.path)
     else
         -- upload current file

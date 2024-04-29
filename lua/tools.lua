@@ -1,5 +1,81 @@
 Tool = {}
 
+local projectConfDir = ".ykm.nvim.proj"
+function Tool.load_project_conf(name)
+    local current_dir = Tool.get_current_directory()
+    local project_config_file = string.format("%s/%s/.%s.lua", current_dir, projectConfDir, name)
+    -- Check if the file exists in the current directory or any parent directory
+    while current_dir ~= vim.fn.fnamemodify(current_dir, ":h") do
+        if Tool.file_exists(project_config_file) then
+            local conf = dofile(project_config_file)
+
+            conf.path = current_dir
+            conf.mac = vim.fn.has("mac") == 1
+            conf.win = vim.fn.has("win32") == 1
+            conf.unix = vim.fn.has("unix") == 1
+            conf.mac_unix = conf.mac == true or conf.unix == true
+
+            return conf
+        end
+        current_dir = vim.fn.fnamemodify(current_dir, ":h")
+        project_config_file = string.format("%s/%s/.%s.lua", current_dir, projectConfDir, name)
+    end
+    print(string.format("no .%s.lua file found please run create"), name)
+end
+
+function Tool.get_project_dir()
+    local current_dir = Tool.get_current_directory()
+    local dir = string.format("%s/%s", current_dir, projectConfDir)
+    while current_dir ~= vim.fn.fnamemodify(current_dir, ":h") do
+        if Tool.dir_exsists(dir) then
+            return dir
+        end
+        current_dir = vim.fn.fnamemodify(current_dir, ":h")
+        dir = string.format("%s/%s", current_dir, projectConfDir)
+    end
+    return Tool.get_current_directory()
+end
+
+function Tool.get_parent_dir(dir)
+    return vim.fn.fnamemodify(dir, ":h")
+end
+
+function Tool.create_directory(...)
+    local pathes = { ... }
+    local path
+    if vim.fn.has("win32") == 1 then
+        for i, v in ipairs(pathes) do
+            path = path and string.format("%s\\%s", path, v) or v
+        end
+        os.execute('mkdir "' .. path .. '"')
+    else
+        for i, v in ipairs(pathes) do
+            path = path and string.format("%s/%s", path, v) or v
+        end
+        os.execute('mkdir -p "' .. path .. '"')
+    end
+    return path
+end
+
+function Tool.create_project_conf(name, content)
+    Tool.create_directory(Tool.get_current_directory(), projectConfDir)
+    local project_config_file = string.format("%s/%s/.%s.lua", Tool.get_current_directory(), projectConfDir, name)
+    file = io.open(project_config_file, "w")
+    if file then
+        if content then
+            file:write(content)
+        end
+        file:close()
+    else
+        print("cannot open file for writting: " .. project_config_file)
+    end
+end
+
+function Tool.dir_exsists(path)
+    local stat = vim.loop.fs_stat(path)
+    print(stat and stat.type or false)
+    return stat and stat.type or false
+end
 function Tool.file_exists(name)
     local f = io.open(name, "r")
     if f ~= nil then

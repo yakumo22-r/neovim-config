@@ -1,7 +1,7 @@
 local T = {}
 
 function T.cxx_compile_flags(info)
-    local project_config_file = Tool.get_current_directory()
+    local project_config_file = Tool.get_parent_dir(Tool.get_project_dir())
         .. "/compile_flags.txt"
     file = io.open(project_config_file, "w")
     if file then
