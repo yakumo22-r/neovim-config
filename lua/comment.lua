@@ -115,3 +115,5 @@ end
 local opt = { noremap = true, silent = true }
 vim.keymap.set("n", "<C-_>", ":lua ToggleCommentNormal()<CR>", opt)
 vim.keymap.set("v", "<C-_>", ":lua ToggleCommentVisual()<CR>", opt)
+vim.keymap.set("n", "<C-/>", ":lua ToggleCommentNormal()<CR>", opt)
+vim.keymap.set("v", "<C-/>", ":lua ToggleCommentVisual()<CR>", opt)
