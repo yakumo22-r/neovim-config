@@ -10,6 +10,8 @@ return {
         local telescope = require("telescope")
         local actions = require("telescope.actions")
 
+        local tb = require("telescope.builtin")
+
         telescope.setup({
             defaults = {
                 path_display = { "truncate " },
@@ -17,9 +19,34 @@ return {
                     i = {
                         ["<C-k>"] = actions.move_selection_previous, -- move to prev result
                         ["<C-j>"] = actions.move_selection_next, -- move to next result
-                        ["<C-q>"] = actions.send_selected_to_qflist
-                            + actions.open_qflist,
                     },
+                    n = {
+                        ["<C-j>"] = actions.cycle_history_next, -- next history
+                        ["<C-k>"] = actions.cycle_history_prev, -- prev history
+                    },
+                },
+                vimgrep_arguments = {
+                    "rg",
+                    "--color=never",
+                    "--no-heading",
+                    "--with-filename",
+                    "--line-number",
+                    "--column",
+                    "--smart-case",
+                    "--trim", -- add this value
+                },
+            },
+            pickers = {
+                buffers = {
+                    mappings = {
+                        n = {
+                            ["d"] = actions.delete_buffer + actions.move_to_top,
+                        },
+                    },
+                },
+                find_files = {
+                    -- `hidden = true` will still show the inside of `.git/` as it's not `.gitignore`d.
+                    find_command = { "fd", "--type", "f", "--strip-cwd-prefix", "--hidden" },
                 },
             },
         })
@@ -29,29 +56,22 @@ return {
         -- set keymaps
         local keymap = vim.keymap -- for conciseness
 
-        keymap.set(
-            "n",
-            "<leader>ff",
-            "<cmd>Telescope find_files<cr>",
-            { desc = "Fuzzy find files in cwd" }
-        )
-        keymap.set(
-            "n",
-            "<leader>fr",
-            "<cmd>Telescope oldfiles<cr>",
-            { desc = "Fuzzy find recent files" }
-        )
-        keymap.set(
-            "n",
-            "<leader>fs",
-            "<cmd>Telescope live_grep<cr>",
-            { desc = "Find string in cwd" }
-        )
-        keymap.set(
-            "n",
-            "<leader>fc",
-            "<cmd>Telescope grep_string<cr>",
-            { desc = "Find string under cursor in cwd" }
-        )
+        keymap.set("n", "<leader>ff", tb.find_files, { desc = "Fuzzy find files in cwd" })
+
+        keymap.set("n", "<leader>fs", tb.live_grep, { desc = "Find string in cwd" })
+
+        keymap.set("n", "<leader>fb", tb.buffers, { desc = "Find open buffers" })
+
+        keymap.set("n", "<leader>fg", tb.buffers, { desc = "Find string in git files " })
+
+        keymap.set("n", "<leader>fr", tb.resume, { desc = "resume last search" })
+
+        keymap.set("n", "<leader>fp", tb.pickers, { desc = "show all pickers" })
+
+        keymap.set("n", "<leader>fd", tb.diagnostics, { desc = "show all lsp diagnotics" })
+
+        keymap.set("n", "<leader>gc", tb.git_bcommits, { desc = "show all lsp diagnotics" })
+        keymap.set("n", "<leader>gC", tb.git_commits, { desc = "show all lsp diagnotics" })
+        keymap.set("n", "<leader>gs", tb.git_status, { desc = "show all lsp diagnotics" })
     end,
 }

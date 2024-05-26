@@ -50,8 +50,19 @@ return {
             vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
         end
 
+        local function lua_ignores(fname)
+            local util = require("lspconfig/util")
+            local path = util.path
+            if fname:match("xmake.lua$") then
+                return nil -- ignore
+            else
+                return util.find_git_ancestor(fname) or util.path.dirname(fname)
+            end
+        end
+
         -- configure lua server (with special settings)
         lspconfig["lua_ls"].setup({
+            root_dir = lua_ignores,
             capabilities = capabilities,
             on_attach = keybindings,
             single_file_support = false,
@@ -68,6 +79,7 @@ return {
                     },
                     diagnostics = {
                         globals = { "vim" },
+                        disable = { "lowercase-global" },
                     },
                     workspace = {
                         -- make language server aware of runtime files
