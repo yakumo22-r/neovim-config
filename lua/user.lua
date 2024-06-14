@@ -10,6 +10,10 @@ else
     end
     local default_user_table = [[
 local default_formatrc_path = vim.fn.stdpath('config')..'/formatrc/'
+--vim.opt.shell = "zsh"
+--vim.opt.shellcmdflag = '-c'
+--vim.opt.shellquote = '"'
+--vim.opt.shellxquote = ''
 -- stylua: ignore
 return {
     plugins = {
