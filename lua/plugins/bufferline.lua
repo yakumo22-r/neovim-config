@@ -1,10 +1,37 @@
 local bufferline = {}
 
-function close_curr_buffer()
-    local curr_buf = vim.api.nvim_get_current_buf()
-    vim.cmd("BufferLineCyclePrev")
-    vim.cmd("bdelete "..curr_buf)
+-- Function to delete the current buffer
+local function delete_current_buffer(force)
+    -- Check if the buffer has unsaved changes
+    if not force and vim.bo.modified then
+        -- Prompt the user to save changes or force delete
+        print("Buffer has unsaved changes. Use :w to save or :q! to force delete.")
+        return
+    end
+
+    close_curr_buffer()
 end
+
+-- Function to save and delete the current buffer
+local function save_and_delete_current_buffer()
+    -- Save the current buffer
+    vim.cmd('w')
+    -- Delete the current buffer
+    delete_current_buffer(false)
+end
+
+-- Create custom commands with uppercase names
+vim.api.nvim_create_user_command('QuitBuffer', function() delete_current_buffer(false) end, {})
+vim.api.nvim_create_user_command('QuitBufferForce', function() delete_current_buffer(true) end, {})
+vim.api.nvim_create_user_command('WriteQuitBuffer', save_and_delete_current_buffer, {})
+
+-- Remap :q, :q!, and :wq commands to custom commands
+vim.cmd([[
+  cnoreabbrev x QuitBuffer 
+  cnoreabbrev x! QuitBufferForce
+  cnoreabbrev xx WriteQuitBuffer
+]])
+
 
 return {
     "akinsho/bufferline.nvim",

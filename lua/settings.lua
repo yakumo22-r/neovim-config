@@ -1,13 +1,4 @@
 -- basics
-vim.cmd("syntax on")
-vim.cmd("filetype plugin indent on")
-vim.opt.number = true
-vim.opt.relativenumber = true
-vim.opt.clipboard = "unnamed"
-vim.opt.cursorline = true
--- search
-vim.opt.hlsearch = true
-vim.opt.showmatch = true
 -- make zsh files recognized as sh for bash-ls & treesitter
 vim.filetype.add {
 	extension = {
@@ -20,16 +11,6 @@ vim.filetype.add {
 	},
 }
 
--- tabs
-vim.opt.autoindent = true
-vim.opt.tabstop = 4
-vim.opt.expandtab = true
-vim.opt.shiftwidth = 4
-vim.opt.softtabstop = 4
-vim.opt.backspace = "indent,eol,start"
-vim.opt.smartindent = true
-vim.opt.list = true
-
 -- highlight after copy
 vim.api.nvim_create_autocmd({ "textyankpost" }, {
     pattern = { "*" },
@@ -39,9 +20,6 @@ vim.api.nvim_create_autocmd({ "textyankpost" }, {
         })
     end,
 })
-vim.cmd([[set iskeyword+=-]])
-
-vim.opt.scrolloff = 2
 
 -- presistent undo
 vim.cmd("set undofile")
