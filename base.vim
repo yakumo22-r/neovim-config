@@ -94,14 +94,14 @@ inoremap <silent> <> <><Esc>i
 inoremap <silent> () ()<Esc>i
 inoremap <silent> "" ""<Esc>i
 inoremap <silent> '' ''<Esc>i
-inoremap <silent> {<CR> {\n}<Esc>O
-inoremap <silent> [<CR> [\n]<Esc>O
-inoremap <silent> <<CR> <\n><Esc>O
-inoremap <silent> (<CR> (\n)<Esc>O
-inoremap <silent> {; {\n};<Esc>O
-inoremap <silent> [; [\n];<Esc>O
-inoremap <silent> <; <\n>;<Esc>O
-inoremap <silent> (; (\n);<Esc>O
+inoremap <silent> {<CR> {<CR>}<Esc>O
+inoremap <silent> [<CR> [<CR>]<Esc>O
+inoremap <silent> <<CR> <<CR>><Esc>O
+inoremap <silent> (<CR> (<CR>)<Esc>O
+inoremap <silent> {; {<CR>};<Esc>O
+inoremap <silent> [; [<CR>];<Esc>O
+inoremap <silent> <; <<CR>>;<Esc>O
+inoremap <silent> (; (<CR>);<Esc>O
 
 "Invoker!!!"
 nnoremap <silent> qqwrv :qa<CR>
