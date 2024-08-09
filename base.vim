@@ -6,6 +6,8 @@ set relativenumber
 set clipboard=unnamed
 set cursorline
 
+
+
 set hlsearch
 set showmatch
 
@@ -17,7 +19,7 @@ set shiftwidth=4
 set softtabstop=4
 set backspace=indent,eol,start
 set smartindent
-set list
+set nolist
 
 set scrolloff=2
 set iskeyword+=-
@@ -55,7 +57,6 @@ nnoremap <silent> <Leader><CR> :nohlsearch<CR>
 vnoremap <silent> <Leader><CR> :nohlsearch<CR>
 
 " Quick q! wq w
-nnoremap <silent> W :w<CR>
 nnoremap <silent> Q :q!<CR>
 
 " Move
@@ -63,12 +64,14 @@ nnoremap <expr> j v:count ? 'j' : 'gj'
 nnoremap <expr> k v:count ? 'k' : 'gk'
 
 " Quick movement
-nnoremap <silent> L $
-vnoremap <silent> L $
-nnoremap <silent> H ^
-vnoremap <silent> H ^
+nnoremap <silent> <C-j> 5j
+nnoremap <silent> <C-k> 5k
+nnoremap <silent> <C-l> 2w
+nnoremap <silent> <C-h> 2b
 
 " Move text
+nnoremap <silent> < <<
+nnoremap <silent> > >>
 vnoremap <silent> < <gv
 vnoremap <silent> > >gv
 
@@ -88,12 +91,12 @@ vnoremap <silent> p "_dp
 vnoremap <silent> P "_dP
 
 " ({["'
-inoremap <silent> {} {}<Esc>i
-inoremap <silent> [] []<Esc>i
-inoremap <silent> <> <><Esc>i
-inoremap <silent> () ()<Esc>i
-inoremap <silent> "" ""<Esc>i
-inoremap <silent> '' ''<Esc>i
+inoremap <silent> {<space> {}<Esc>i 
+inoremap <silent> [<space> []<Esc>i
+inoremap <silent> <<space> <><Esc>i
+inoremap <silent> (<space> ()<Esc>i
+inoremap <silent> "<space> ""<Esc>i
+inoremap <silent> '<space> ''<Esc>i
 inoremap <silent> {<CR> {<CR>}<Esc>O
 inoremap <silent> [<CR> [<CR>]<Esc>O
 inoremap <silent> <<CR> <<CR>><Esc>O
@@ -115,3 +118,49 @@ au BufRead,BufNewFile *.lua						set filetype=lua
 au BufRead,BufNewFile *.lua.txt					set filetype=lua
 au BufRead,BufNewFile *.zsh					    set filetype=sh
 au BufRead,BufNewFile .zshrc					set filetype=sh
+
+highlight Visual ctermfg=NONE ctermbg=darkgray
+
+function! Terminal_MetaMode(mode)
+    set ttimeout
+    if $TMUX != ''
+        set ttimeoutlen=30
+    elseif &ttimeoutlen > 80 || &ttimeoutlen <= 0
+        set ttimeoutlen=80
+    endif
+    if has('nvim') || has('gui_running')
+        return
+    endif
+    function! s:metacode(mode, key)
+        if a:mode == 0
+            exec "set <M-".a:key.">=\e".a:key
+        else
+            exec "set <M-".a:key.">=\e]{0}".a:key."~"
+        endif
+    endfunc
+    for i in range(10)
+        call s:metacode(a:mode, nr2char(char2nr('0') + i))
+    endfor
+    for i in range(26)
+        call s:metacode(a:mode, nr2char(char2nr('a') + i))
+        call s:metacode(a:mode, nr2char(char2nr('A') + i))
+    endfor
+    if a:mode != 0
+        for c in [',', '.', '/', ';', '[', ']', '{', '}']
+            call s:metacode(a:mode, c)
+        endfor
+        for c in ['?', ':', '-', '_']
+            call s:metacode(a:mode, c)
+        endfor
+    else
+        for c in [',', '.', '/', ';', '{', '}']
+            call s:metacode(a:mode, c)
+        endfor
+        for c in ['?', ':', '-', '_']
+            call s:metacode(a:mode, c)
+        endfor
+    endif
+endfunc
+
+
+call Terminal_MetaMode(0)
