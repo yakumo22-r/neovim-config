@@ -52,6 +52,21 @@ return {
                     ellipsis_char = "...",
                 }),
             },
+            window = {
+                -- 自定义补全弹窗的外观
+                completion = {
+                    border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }, -- 自定义边框符号
+                    winhighlight = "NormalFloat:CmpNormal,FloatBorder:CmpBorder", -- 自定义窗口高亮
+                },
+                documentation = {
+                    border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }, -- 自定义文档弹窗的边框符号
+                    winhighlight = "NormalFloat:CmpDocNormal,FloatBorder:CmpDocBorder", -- 自定义文档窗口高亮
+                },
+            },
         })
+        vim.api.nvim_set_hl(0, 'CmpNormal', { fg = '#c0c0c0' })  -- 补全弹窗的背景和前景颜色
+        vim.api.nvim_set_hl(0, 'CmpBorder', { fg = '#88aacc' })   -- 补全弹窗的边框颜色
+        vim.api.nvim_set_hl(0, 'CmpDocNormal', { fg = '#c0c0c0' }) -- 文档弹窗的背景和前景颜色
+        vim.api.nvim_set_hl(0, 'CmpDocBorder', { fg = '#88aacc' }) -- 文档弹窗的边框颜色
     end,
 }

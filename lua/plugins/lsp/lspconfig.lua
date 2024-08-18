@@ -103,5 +103,16 @@ return {
             on_attach = keybindings,
             single_file_support = true,
         })
+
+        local original_open_floating_preview = vim.lsp.util.open_floating_preview
+        vim.lsp.util.open_floating_preview = function (contents, syntax, opts, ...)
+             opts = opts or {}
+                opts.border = 'rounded' -- 设置边框样式: 'single', 'double', 'rounded', 'solid', 'shadow'
+                -- 自定义背景颜色
+                -- vim.api.nvim_set_hl(0, 'NormalFloat', { bg = '#1e1e1e' })
+                vim.api.nvim_set_hl(0, 'FloatBorder', { fg = '#88aacc' })
+            return original_open_floating_preview(contents,syntax,opts,...)
+        end
     end,
 }
+

@@ -6,8 +6,6 @@ set relativenumber
 set clipboard=unnamed
 set cursorline
 
-
-
 set hlsearch
 set showmatch
 
@@ -54,20 +52,32 @@ nnoremap <silent> <A-right> :vertical resize +2<CR>
 
 " Hide search highlight
 nnoremap <silent> <Leader><CR> :nohlsearch<CR>
-vnoremap <silent> <Leader><CR> :nohlsearch<CR>
 
 " Quick q! wq w
 nnoremap <silent> Q :q!<CR>
 
 " Move
-nnoremap <expr> j v:count ? 'j' : 'gj'
-nnoremap <expr> k v:count ? 'k' : 'gk'
+noremap <expr> j v:count ? 'j' : 'gj'
+noremap <expr> k v:count ? 'k' : 'gk'
+noremap <expr> j v:count ? 'j' : 'gj'
+noremap <expr> k v:count ? 'k' : 'gk'
 
 " Quick movement
-nnoremap <silent> <C-j> 5j
-nnoremap <silent> <C-k> 5k
-nnoremap <silent> <C-l> 2w
-nnoremap <silent> <C-h> 2b
+noremap <silent> <C-j> 6j
+noremap <silent> <C-k> 6k
+noremap <silent> <C-l> 6w
+noremap <silent> <C-h> 6b
+noremap <silent> <C-y> 6<c-y>
+noremap <silent> <C-e> 6<c-e>
+
+inoremap <C-h> <Left>
+inoremap <C-l> <Right>
+inoremap <C-j> <Down>
+inoremap <C-k> <Up>
+inoremap <C-d> <Del>
+inoremap <C-b> <BS>
+inoremap <C-e> <Esc>ea
+inoremap <C-w> <Esc>wa
 
 " Move text
 nnoremap <silent> < <<
@@ -89,30 +99,31 @@ nnoremap <silent> c "_c
 vnoremap <silent> c "_c
 vnoremap <silent> p "_dp
 vnoremap <silent> P "_dP
-
 " ({["'
-inoremap <silent> {<space> {}<Esc>i 
-inoremap <silent> [<space> []<Esc>i
-inoremap <silent> <<space> <><Esc>i
-inoremap <silent> (<space> ()<Esc>i
-inoremap <silent> "<space> ""<Esc>i
-inoremap <silent> '<space> ''<Esc>i
+inoremap <silent> {{ {{}}<Esc>hi
+inoremap <silent> {} {}<Esc>i
+inoremap <silent> [] []<Esc>i
+inoremap <silent> <> <><Esc>i
+inoremap <silent> () ()<Esc>i
+inoremap <silent> "" ""<Esc>i
+inoremap <silent> '' ''<Esc>i
 inoremap <silent> {<CR> {<CR>}<Esc>O
-inoremap <silent> [<CR> [<CR>]<Esc>O
 inoremap <silent> <<CR> <<CR>><Esc>O
+inoremap <silent> [<CR> [<CR>]<Esc>O
 inoremap <silent> (<CR> (<CR>)<Esc>O
 inoremap <silent> {; {<CR>};<Esc>O
 inoremap <silent> [; [<CR>];<Esc>O
 inoremap <silent> <; <<CR>>;<Esc>O
 inoremap <silent> (; (<CR>);<Esc>O
 
-"Invoker!!!"
 nnoremap <silent> qqwrv :qa<CR>
 nnoremap <silent> <Leader>qqq :qa<CR>
 nnoremap <silent> <Leader>www :wqa<CR>
 nnoremap <silent> <Leader>eee :qa!<CR>
 
 vnoremap <silent> q <Esc>
+
+nnoremap <C-\> :echo expand("%")<CR>
 
 au BufRead,BufNewFile *.lua						set filetype=lua
 au BufRead,BufNewFile *.lua.txt					set filetype=lua
@@ -161,6 +172,5 @@ function! Terminal_MetaMode(mode)
         endfor
     endif
 endfunc
-
 
 call Terminal_MetaMode(0)
