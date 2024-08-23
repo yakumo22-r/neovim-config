@@ -9,6 +9,9 @@ require("comment")
 require("compile_conf")
 require("deploy_conf")
 require("formatcmd")
+
+_G.ykm22_cols = require("ykm22_colors")
+
 require("ykm22_theme")
 
 require("xmake_conf")

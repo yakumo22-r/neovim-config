@@ -19,6 +19,9 @@ set backspace=indent,eol,start
 set smartindent
 set nolist
 
+set fileencoding=utf-8
+set encoding=utf-8
+
 set scrolloff=2
 set iskeyword+=-
 set undofile
@@ -28,7 +31,7 @@ let mapleader = " "
 
 " Shield keys
 nnoremap <silent> z <Nop>
-nnoremap <silent> q <Nop>
+" nnoremap <silent> q <Nop>
 
 " Window navigation
 nnoremap <silent> <Leader>h <C-w>h

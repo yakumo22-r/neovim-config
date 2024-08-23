@@ -15,89 +15,80 @@ else
     )
 end
 
+
 local originalPath = package.path
 package.path = filepath .. ";" .. package.path
+
+---@type COLORS
 local result = require("ykm22_wez_colors")
 package.path = originalPath
+
+
+---@class COLORS
+---@field fuck string
+---@field dark0_hard string
+---@field dark0 string
+---@field dark0_soft string
+---@field dark1 string
+---@field dark2 string
+---@field dark3 string
+---@field dark4 string
+---@field light0_hard string
+---@field light0 string
+---@field light0_soft string
+---@field light1 string
+---@field light2 string
+---@field light3 string
+---@field light4 string
+---@field bright_red string
+---@field bright_green string
+---@field bright_yellow string
+---@field bright_blue string
+---@field bright_purple string
+---@field bright_aqua string
+---@field bright_orange string
+---@field neutral_red string
+---@field neutral_green string
+---@field neutral_yellow string
+---@field neutral_blue string
+---@field neutral_purple string
+---@field neutral_aqua string
+---@field neutral_orange string
+---@field faded_red string
+---@field faded_green string
+---@field faded_yellow string
+---@field faded_blue string
+---@field faded_purple string
+---@field faded_aqua string
+---@field faded_orange string
+---@field dark_red_hard string
+---@field dark_red string
+---@field dark_red_soft string
+---@field light_red_hard string
+---@field light_red string
+---@field light_red_soft string
+---@field dark_green_hard string
+---@field dark_green string
+---@field dark_green_soft string
+---@field light_green_hard string
+---@field light_green string
+---@field light_green_soft string
+---@field dark_aqua_hard string
+---@field dark_aqua string
+---@field dark_aqua_soft string
+---@field light_aqua_hard string
+---@field light_aqua string
+---@field light_aqua_soft string
+---@field gray string
+---@field warm_light string
+---@field rosewater string
+---@field surface2 string
+---@field surface1 string
+---@field surface0 string
+---@field flamingo string
+---@field peach string
+---@field subtext string
+---@field overlay string
+---@field term table<integer,string>
+
 return result
---
--- -- version: 0.0.5
--- -- author: yakumo22
--- local colors = {
--- 	dark0_hard = "#1d2021",
--- 	dark0 = "#282828",
--- 	dark0_soft = "#32302f",
--- 	dark1 = "#3c3836",
--- 	dark2 = "#504945",
--- 	dark3 = "#665c54",
--- 	dark4 = "#7c6f64",
--- 	light0_hard = "#f9f5d7",
--- 	light0 = "#fbf1c7",
--- 	light0_soft = "#f2e5bc",
--- 	light1 = "#ebd6c0",
--- 	light2 = "#d5c4a1",
--- 	light3 = "#bdae93",
--- 	light4 = "#a89984",
--- 	bright_red = "#f85a50",
--- 	bright_green = "#80b270",
--- 	bright_yellow = "#fabd2f",
--- 	bright_blue = "#73b5e8",
--- 	bright_purple = "#d3869b",
--- 	bright_aqua = "#8ec07c",
--- 	bright_orange = "#fe8019",
--- 	neutral_red = "#cc241d",
--- 	neutral_green = "#98971a",
--- 	neutral_yellow = "#d79921",
--- 	neutral_blue = "#458588",
--- 	neutral_purple = "#b16286",
--- 	neutral_aqua = "#689d6a",
--- 	neutral_orange = "#d65d0e",
--- 	faded_red = "#9d0006",
--- 	faded_green = "#79740e",
--- 	faded_yellow = "#b57614",
--- 	faded_blue = "#076678",
--- 	faded_purple = "#8f3f71",
--- 	faded_aqua = "#427b58",
--- 	faded_orange = "#af3a03",
--- 	dark_red_hard = "#792329",
--- 	dark_red = "#722529",
--- 	dark_red_soft = "#7b2c2f",
--- 	light_red_hard = "#fc9690",
--- 	light_red = "#fc9487",
--- 	light_red_soft = "#f78b7f",
--- 	dark_green_hard = "#5a633a",
--- 	dark_green = "#62693e",
--- 	dark_green_soft = "#686d43",
--- 	light_green_hard = "#d3d6a5",
--- 	light_green = "#d5d39b",
--- 	light_green_soft = "#cecb94",
--- 	dark_aqua_hard = "#3e4934",
--- 	dark_aqua = "#49503b",
--- 	dark_aqua_soft = "#525742",
--- 	light_aqua_hard = "#e6e9c1",
--- 	light_aqua = "#e8e5b5",
--- 	light_aqua_soft = "#e1dbac",
--- 	gray = "#928374",
--- 	warm_light = "#f5c0b2",
--- }
---
--- colors.term = {
--- 	colors.bg0,
--- 	colors.neutral_red,
--- 	colors.neutral_green,
--- 	colors.neutral_yellow,
--- 	colors.neutral_blue,
--- 	colors.neutral_purple,
--- 	colors.neutral_aqua,
--- 	colors.fg4,
--- 	colors.gray,
--- 	colors.red,
--- 	colors.green,
--- 	colors.yellow,
--- 	colors.blue,
--- 	colors.purple,
--- 	colors.aqua,
--- 	colors.fg1,
--- }
---
--- return colors

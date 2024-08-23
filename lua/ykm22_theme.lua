@@ -24,8 +24,7 @@ ykm22.config = {
     transparent_mode = true,
 }
 
-ykm22.palette = require("ykm22_colors")
-local p = ykm22.palette
+local p = ykm22_cols
 
 -- get a hex list of gruvbox colors based on current bg and constrast config
 local function get_colors()
@@ -112,7 +111,7 @@ local function get_groups()
     local config = ykm22.config
 
     if config.terminal_colors then
-        for index, value in ipairs(ykm22.palette.term) do
+        for index, value in ipairs(ykm22_cols.term) do
             vim.g["terminal_color_" .. index - 1] = value
         end
     end

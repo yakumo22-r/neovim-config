@@ -38,7 +38,6 @@ return {
     dependencies = "nvim-tree/nvim-web-devicons",
     version = "*",
     config = function()
-        local colors = require("ykm22_colors")
         bufferline = require("bufferline")
         bufferline.setup({
             options = {
