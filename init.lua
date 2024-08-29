@@ -1,4 +1,4 @@
-vim.cmd('source ' .. vim.fn.stdpath('config')..'/base.vim')
+vim.cmd("source " .. vim.fn.stdpath("config") .. "/base.vim")
 vim.g.mapleader = " "
 
 require("base_func")
@@ -18,7 +18,6 @@ require("xmake_conf")
 
 require("lazy-setup")
 
-
 local script_dir = vim.fn.expand("<sfile>:p:h")
-package.path = package.path .. ";"..script_dir.."/".."lib/?.lua"
+package.path = package.path .. ";" .. script_dir .. "/" .. "lib/?.lua"
 require("c_api")

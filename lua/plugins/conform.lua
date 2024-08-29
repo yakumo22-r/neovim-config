@@ -30,18 +30,33 @@ return {
         conform.formatters.shfmt = {
             inherit = false,
             command = "shfmt",
-            args = {"-i", "4", "-filename", "$FILENAME"},
+            args = { "-i", "4", "-filename", "$FILENAME" },
         }
-        local opt = { noremap = true, silent = true }
-        vim.keymap.set({ "n", "v" }, "=", "", {
-            noremap = true,
-            silent = true,
-            callback = function()
+
+        vim.keymap.set("n", "<leader>FM", function()
+            require("conform").format({
+                async = true,
+                lsp_fallback = true,
+            })
+        end)
+
+        vim.keymap.set("v", "<leader>fm", function()
+            require("conform").format({
+                async = true,
+                lsp_fallback = true,
+            })
+        end)
+
+        vim.keymap.set("n", "<leader>fm", function()
+            vim.api.nvim_feedkeys("V", "n", false)
+            vim.schedule(function()
                 require("conform").format({
                     async = true,
                     lsp_fallback = true,
-                })
-            end,
-        })
+                },function ()
+                    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", true)
+                end)
+            end)
+        end)
     end,
 }
