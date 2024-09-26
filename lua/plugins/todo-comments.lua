@@ -21,6 +21,7 @@ return {
     NOTE = { icon = "", color = "hint", alt = { "INFO" } },
     TAG = { icon = "", color = "tag", alt = { "TAG" } },
     TEST = { icon = "⏲ ", color = "test", alt = { "TESTING", "PASSED", "FAILED" } },
+    END = { icon = "⏲ ", color = "_end", alt = { "TESTING", "PASSED", "FAILED" } },
   },
   gui_style = {
     fg = "NONE", -- The gui style to use for the fg highlight group.
@@ -32,7 +33,7 @@ return {
   -- * keyword: highlights of the keyword
   -- * after: highlights after the keyword (todo text)
   highlight = {
-    multiline = true, -- enable multine todo comments
+    multiline = false, -- enable multine todo comments
     multiline_pattern = "^.", -- lua pattern to match the next multiline from the start of the matched keyword
     multiline_context = 10, -- extra lines that will be re-evaluated when changing a line
     before = "", -- "fg" or "bg" or empty
@@ -52,7 +53,8 @@ return {
     tag = { "#66b0d0" },
     hint = {"#8F8F84" },
     default = { "#7C6Ad0" },
-    test = { "#d090d0" }
+    test = { "#d090d0" },
+    _end = { "#555555" }
   },
   search = {
     command = "rg",
