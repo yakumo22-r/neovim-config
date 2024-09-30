@@ -33,6 +33,7 @@ vim.api.nvim_create_autocmd({ "textyankpost" }, {
         vim.highlight.on_yank({
             timeout = 400,
         })
+
     end,
 })
 
@@ -45,3 +46,37 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
     pattern = { "*" },
     command = "setlocal formatoptions-=c formatoptions-=r formatoptions-=o",
 })
+
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "markdown",
+    callback = function ()
+        require('markdown-keys')
+    end,
+})
+
+local opt = { noremap = true, silent = true }
+require('bufutils')
+vim.api.nvim_set_keymap("v", "<leader>\"", ":lua YKM.bufu.SurroundSymbols('\\\"')<CR>", opt)
+vim.api.nvim_set_keymap("v", "<leader>\'", ":lua YKM.bufu.SurroundSymbols('\\\'')<CR>", opt)
+vim.api.nvim_set_keymap("v", "<leader>(", ":lua YKM.bufu.SurroundSymbols('(',')')<CR>", opt)
+vim.api.nvim_set_keymap("v", "<leader>{", ":lua YKM.bufu.SurroundSymbols('{','}')<CR>", opt)
+vim.api.nvim_set_keymap("v", "<leader>`", ":lua YKM.bufu.SurroundSymbols('`')<CR>", opt)
+
+vim.api.nvim_create_user_command('OpenInSystem', function()
+    local filepath = vim.api.nvim_buf_get_name(0)
+
+    if filepath == "" then
+        print("No file associated with the current buffer")
+        return
+    end
+
+    if vim.fn.has("mac") == 1 then
+        vim.fn.system("open "..'"'..filepath..'"')
+    elseif vim.fn.has("unix") == 1 then
+        vim.fn.system("xdg-open "..'"'..filepath..'"')
+    elseif vim.fn.has("win32") == 1 then
+        vim.fn.system("start "..'"'..filepath..'"')
+    else
+        print("Unsupported system")
+    end
+end, {})

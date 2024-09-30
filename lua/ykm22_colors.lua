@@ -1,4 +1,5 @@
 local dir = vim.loop.os_homedir() .. "/.config/wezterm/colors"
+-- file ~/.config/wezterm/colors/ykm22_wez_colors.lua
 local filepath = dir .. "/ykm22_wez_colors.lua"
 local file = io.open(filepath, "r")
 

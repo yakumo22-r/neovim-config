@@ -3,3 +3,5 @@ function close_curr_buffer()
     vim.cmd("BufferLineCyclePrev")
     vim.cmd("bdelete "..curr_buf)
 end
+
+YKM = {}

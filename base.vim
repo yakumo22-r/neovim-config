@@ -3,7 +3,6 @@ syntax on
 filetype plugin indent on
 set number
 set relativenumber
-set clipboard=unnamed
 set cursorline
 
 set hlsearch
@@ -176,27 +175,32 @@ function! Terminal_MetaMode(mode)
     endif
 endfunc
 
-function! s:raw_echo(str)
-  if has('win32') && has('nvim')
-    call chansend(v:stderr, a:str)
-  else
-    if filewritable('/dev/fd/2')
-      call writefile([a:str], '/dev/fd/2', 'b')
-    else
-      exec("silent! !echo " . shellescape(a:str))
-      redraw!
-    endif
-  endif
-endfunction
 
-function! s:OSC52()
-  let c = join(v:event.regcontents,"\n")
-  let c64 = system("base64", c)
-  let s = "\e]52;c;" . trim(c64) . "\x07"
-  call s:raw_echo(s)
-endfunction
+if has('win32')
+    set clipboard=unnamed
+else
+    function! s:raw_echo(str)
+        if has('win32') && has('nvim')
+            call chansend(v:stderr, a:str)
+        else
+            if filewritable('/dev/fd/2')
+                call writefile([a:str], '/dev/fd/2', 'b')
+            else
+                exec("silent! !echo " . shellescape(a:str))
+                redraw!
+            endif
+        endif
+    endfunction
 
-autocmd TextYankPost * call s:OSC52()
+    function! s:OSC52()
+        let c = join(v:event.regcontents,"\n")
+        let c64 = system("base64", c)
+        let s = "\e]52;c;" . trim(c64) . "\x07"
+        call s:raw_echo(s)
+    endfunction
+
+    autocmd TextYankPost * call s:OSC52()
+endif
 
 
 call Terminal_MetaMode(0)
