@@ -118,11 +118,6 @@ inoremap <silent> [; [<CR>];<Esc>O
 inoremap <silent> <; <<CR>>;<Esc>O
 inoremap <silent> (; (<CR>);<Esc>O
 
-nnoremap <silent> qqwrv :qa<CR>
-nnoremap <silent> <Leader>qqq :qa<CR>
-nnoremap <silent> <Leader>www :wqa<CR>
-nnoremap <silent> <Leader>eee :qa!<CR>
-
 vnoremap <silent> q <Esc>
 
 nnoremap <C-\> :echo expand("%")<CR>

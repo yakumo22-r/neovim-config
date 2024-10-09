@@ -47,6 +47,7 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
     command = "setlocal formatoptions-=c formatoptions-=r formatoptions-=o",
 })
 
+-- markdown shortkeys
 vim.api.nvim_create_autocmd("FileType", {
     pattern = "markdown",
     callback = function ()

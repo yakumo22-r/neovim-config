@@ -1,3 +1,5 @@
+-- _G.Telescope = {}
+
 return {
     "nvim-telescope/telescope.nvim",
     branch = "0.1.x",
@@ -5,6 +7,19 @@ return {
         "nvim-lua/plenary.nvim",
         { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
         "nvim-tree/nvim-web-devicons",
+    },
+    cmd = "Telescope",
+    keys = {
+        { "<leader>ff" },
+        { "<leader>fs" },
+        { "<leader>fb" },
+        { "<leader>fg" },
+        { "<leader>fr" },
+        { "<leader>fp" },
+        { "<leader>fd" },
+        { "<leader>gc" },
+        { "<leader>gC" },
+        { "<leader>gs" },
     },
     config = function()
         local telescope = require("telescope")
@@ -53,25 +68,15 @@ return {
 
         telescope.load_extension("fzf")
 
-        -- set keymaps
-        local keymap = vim.keymap -- for conciseness
-
-        keymap.set("n", "<leader>ff", tb.find_files, { desc = "Fuzzy find files in cwd" })
-
-        keymap.set("n", "<leader>fs", tb.live_grep, { desc = "Find string in cwd" })
-
-        keymap.set("n", "<leader>fb", tb.buffers, { desc = "Find open buffers" })
-
-        keymap.set("n", "<leader>fg", tb.buffers, { desc = "Find string in git files " })
-
-        keymap.set("n", "<leader>fr", tb.resume, { desc = "resume last search" })
-
-        keymap.set("n", "<leader>fp", tb.pickers, { desc = "show all pickers" })
-
-        keymap.set("n", "<leader>fd", tb.diagnostics, { desc = "show all lsp diagnotics" })
-
-        keymap.set("n", "<leader>gc", tb.git_bcommits, { desc = "show all lsp diagnotics" })
-        keymap.set("n", "<leader>gC", tb.git_commits, { desc = "show all lsp diagnotics" })
-        keymap.set("n", "<leader>gs", tb.git_status, { desc = "show all lsp diagnotics" })
+        vim.keymap.set("n", "<leader>ff", tb.find_files, { desc = "Fuzzy find files in cwd" })
+        vim.keymap.set("n", "<leader>fs", tb.live_grep, { desc = "Find string in cwd" })
+        vim.keymap.set("n", "<leader>fb", tb.buffers, { desc = "Find open buffers" })
+        vim.keymap.set("n", "<leader>fg", tb.buffers, { desc = "Find string in git files " })
+        vim.keymap.set("n", "<leader>fr", tb.resume, { desc = "resume last search" })
+        vim.keymap.set("n", "<leader>fp", tb.pickers, { desc = "show all pickers" })
+        vim.keymap.set("n", "<leader>fd", tb.diagnostics, { desc = "show all lsp diagnotics" })
+        vim.keymap.set("n", "<leader>gc", tb.git_bcommits, { desc = "show all lsp diagnotics" })
+        vim.keymap.set("n", "<leader>gC", tb.git_commits, { desc = "show all lsp diagnotics" })
+        vim.keymap.set("n", "<leader>gs", tb.git_status, { desc = "show all lsp diagnotics" })
     end,
 }
