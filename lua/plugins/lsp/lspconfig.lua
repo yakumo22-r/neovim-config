@@ -102,6 +102,11 @@ return {
             capabilities = capabilities,
             on_attach = keybindings,
             single_file_support = true,
+            settings  = { -- custom settings for ts
+                diagnostics = {
+                    ignoredCodes = {7043,7044,7045,7046,7047,7048,7049,7050}
+                }
+            }
         })
 
         local original_open_floating_preview = vim.lsp.util.open_floating_preview
