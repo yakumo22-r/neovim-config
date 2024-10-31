@@ -28,8 +28,8 @@ set undofile
 " Set leader key to space
 let mapleader = " "
 
-" Shield keys
-nnoremap <silent> z <Nop>
+nnoremap <silent> <A-b> ge
+nnoremap <silent> <C-b> gE
 " nnoremap <silent> q <Nop>
 
 " Window navigation
@@ -121,6 +121,8 @@ inoremap <silent> (; (<CR>);<Esc>O
 vnoremap <silent> q <Esc>
 
 nnoremap <C-\> :echo expand("%")<CR>
+
+xnoremap * :<C-u>let @/ = '\V' . escape(@*, '\/')<CR>//<CR>
 
 au BufRead,BufNewFile *.lua						set filetype=lua
 au BufRead,BufNewFile *.lua.txt					set filetype=lua
