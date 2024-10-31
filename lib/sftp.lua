@@ -32,6 +32,8 @@ local libsftp = ffi.load(local_c_lib("libsftp"))
 
 local M = {}
 
+-- asdasdaaaaaaaaaaaaaaaaaaaaaaasdasdaaaaaaaaaaaaaaaaaaaaaaasdasdaaaaaaaaaaaaaaaaaaaaaaasdasdaaaaaaaaaaaaaaaaaaaaaaasdasdaaaaaaaaaaaaaaaaaaaaaaasdasdaaaaaaaaaaaaaaaaaaaaaa
+
 function M:create_conection(info, on_exit)
     if type(info.hostname) ~= "string" or type(info.port) ~= "number" or type(info.username) ~= "string" or type(info.password) ~= "string" then
         print(string.format("paramters error: %s: %s, %s: %s, %s: %s %s: %s"))

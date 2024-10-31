@@ -98,7 +98,7 @@ return {
             single_file_support = true,
         })
 
-        lspconfig["tsserver"].setup({
+        lspconfig["ts_ls"].setup({
             capabilities = capabilities,
             on_attach = keybindings,
             single_file_support = true,
