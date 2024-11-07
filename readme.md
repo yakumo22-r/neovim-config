@@ -21,8 +21,5 @@
 > make (gcc or clang or mingw),
 
 > nodejs for lsp
-
-> ripgrep for telescope
-> link: https://github.com/BurntSushi/ripgrep
-
-
+[ripgrep] (https://github.com/BurntSushi/ripgrep) for telescope
+[telescope-fzf-native fzf] (https://github.com/nvim-telescope/telescope-fzf-native.nvim) for telescope
