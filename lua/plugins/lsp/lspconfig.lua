@@ -132,17 +132,17 @@ return {
             return original_open_floating_preview(contents, syntax, opts, ...)
         end
 
-        if vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1 then
-            vim.api.nvim_create_autocmd("BufEnter", {
-              callback = function()
-                local bufname = vim.api.nvim_buf_get_name(0)
-                local relpath = vim.fn.fnamemodify(bufname, ":.")
-                if bufname ~= relpath then
-                  vim.api.nvim_buf_set_name(0, relpath)
-                end
-              end
-            })
-        end
+        -- if vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1 then
+        --     vim.api.nvim_create_autocmd("BufEnter", {
+        --       callback = function()
+        --         local bufname = vim.api.nvim_buf_get_name(0)
+        --         local relpath = vim.fn.fnamemodify(bufname, ":.")
+        --         if bufname ~= relpath then
+        --           vim.api.nvim_buf_set_name(0, relpath)
+        --         end
+        --       end
+        --     })
+        -- end
 
     end,
 }
