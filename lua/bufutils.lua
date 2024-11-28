@@ -46,27 +46,6 @@ function bufu.SurroundSymbols(_beg,_end)
     vim.fn.setline(start_row, lines)
 end
 
-
-function bufu.ToggleNormal(prefix_c, prefix_r, sp)
-    prefix_r = prefix_r or prefix_c
-
-    sp = sp or ''
-
-    local current_line = vim.api.nvim_get_current_line()
-    local prefix = string.match(current_line, "^%s*")
-
-    if string.find(current_line, "^%s*" .. prefix_r) then
-        local main_text = string.sub(current_line, #prefix + #prefix_c + 1)
-        vim.api.nvim_set_current_line(prefix .. stru.trim_one(main_text))
-    else
-        if #current_line == #prefix + #prefix_c then
-            string.sub(current_line, #prefix + #prefix_c + 1)
-        else
-            vim.api.nvim_set_current_line(prefix .. prefix_c .. sp .. string.sub(current_line, #prefix + 1))
-        end
-    end
-end
-
 YKM.bufu = bufu
 
 return bufu
