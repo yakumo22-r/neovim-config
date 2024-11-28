@@ -112,7 +112,7 @@ function Custom.config()
     vim.keymap.set("n", "<leader>fh", tb.buffers, { desc = "Find open buffers" })
     vim.keymap.set("n", "<leader>fb", tb.treesitter, { desc = "treesitter" })
     vim.keymap.set("n", "<leader>r", tb.resume, { desc = "resume" })
-    vim.keymap.set("n", "<leader>-", grep_this_buffer, { desc = "word search" })
+    vim.keymap.set("n", "<leader>_", grep_this_buffer, { desc = "word search" })
     vim.keymap.set("n", "<leader>/", grep_this_buffer, { desc = "word search" })
     vim.keymap.set("n", "<leader>fp", tb.pickers, { desc = "show all pickers" })
     vim.keymap.set("n", "<leader>fd", tb.diagnostics, { desc = "show all lsp diagnotics" })
@@ -197,7 +197,7 @@ return {
         { "<leader>gC" },
         { "<leader>gs" },
         { "<leader>/" },
-        { "<leader>-" },
+        { "<leader>_" },
     },
     config = Custom.config,
 }

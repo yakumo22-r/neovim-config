@@ -32,12 +32,9 @@ function bufu.SurroundSymbols(_beg,_end)
 
     local lines = vim.fn.getline(start_row, end_row)
 
-    -- 处理首行和尾行的部分
-
     local first_char = lines[1]:sub(start_col, start_col)
     local last_char = lines[#lines]:sub(end_col, end_col)
 
-    -- 如果首尾字符已经是符号，则移除它们
     if first_char == _beg and last_char == _end then
         lines[1] = lines[1]:sub(1, start_col - 1) .. lines[1]:sub(start_col + 1)
         lines[#lines] = lines[#lines]:sub(1, end_col-2) .. lines[#lines]:sub(end_col+1)
@@ -46,7 +43,6 @@ function bufu.SurroundSymbols(_beg,_end)
         lines[#lines] = lines[#lines]:sub(1, end_col+1) .. _end .. lines[#lines]:sub(end_col + 2)
     end
 
-    -- 更新选中的文本
     vim.fn.setline(start_row, lines)
 end
 

@@ -1,197 +1,141 @@
-local cmprefix = {
-    ["lua"] = "--",
+local cms = require("comment.pub_comment")
+cms.cover(require("comment.xml_comment"))
+cms.cover(require("comment.vue_comment"))
 
-    ["vim"] = '"',
+local function new_LOP(l1, l2)
+    local LOP = {
+        l1 = l1,
+        l2 = l2,
+        lines = vim.api.nvim_buf_get_lines(0, l1 - 1, l2, false),
+    }
 
-    ["python"] = "#",
-    ["sh"] = "#",
-    ["bash"] = "#",
-    ["zsh"] = "#",
-}
-
-local cmprefix_r = {
-    ["lua"] = "%-%-",
-
-    ["vim"] = '%"',
-
-    ["python"] = "#",
-    ["sh"] = "#",
-    ["bash"] = "#",
-    ["zsh"] = "#",
-}
-
-local function get_comment(t)
-    local filetype = vim.bo.filetype
-
-    if t[filetype] then
-        return t[filetype]
+    function LOP:apply()
+        vim.api.nvim_buf_set_lines(0, self.l1 - 1, self.l2, false, self.lines)
     end
-
-    return "//"
+    return LOP
 end
 
-local function trim_one(str)
-    if string.sub(str, 1, 1) == " " then
-        return string.sub(str, 2)
-    else
-        return str
-    end
-end
-
-function ToggleCommentNormal()
-    local comment = get_comment(cmprefix)
-    local comment_r = get_comment(cmprefix_r)
-
-    local current_line = vim.api.nvim_get_current_line()
-    local prefix = string.match(current_line, "^%s*")
-
-    if string.find(current_line, "^%s*" .. comment_r) then
-        local main_text = string.sub(current_line, #prefix + #comment + 1)
-        vim.api.nvim_set_current_line(prefix .. trim_one(main_text))
-    else
-        if #current_line == #prefix + #comment then
-            string.sub(current_line, #prefix + #comment + 1)
-        else
-            vim.api.nvim_set_current_line(prefix .. comment .. " " .. string.sub(current_line, #prefix + 1))
-        end
-    end
-end
-
-local function FindShortPrefix(lines, modes)
-    local min_p = math.huge
-    local min_prefix = ""
-
-    for i, line in ipairs(lines) do
-        if not modes or not modes[i].ignore then
-            local prefix = string.match(line, "^%s*")
-            if #prefix < min_p and #prefix >= 0 then
-                min_prefix = prefix
-                min_p = #min_prefix
-            end
-        end
-    end
-
-    return min_prefix
-end
-
-function ToggleCommentVisual()
-    local cm = get_comment(cmprefix)
-    local cmr = get_comment(cmprefix_r)
-
-    local line1 = vim.fn.line("'<")
-    local line2 = vim.fn.line("'>")
-    local lines = vim.api.nvim_buf_get_lines(0, line1 - 1, line2, false)
-
-    local modes = {}
-    for i, line in ipairs(lines) do
-        modes[i] = {}
-
-        if not string.match(line, "^%s*$") then
-            modes[i].ignore = false
-            modes[i].comment = not string.find(line, "^%s*" .. cmr)
-        else
-            modes[i].ignore = true
-        end
-    end
-    local mode_comment = modes[1].comment
-
-    local prefix = FindShortPrefix(lines, modes)
-
-    if mode_comment then
-        for i, line in ipairs(lines) do
-            if not modes[i].ignore then
-                local subline = string.sub(line, #prefix + 1)
-                lines[i] = prefix .. cm .. " " .. subline
-            end
-        end
-    else
-        for i, line in ipairs(lines) do
-            if not modes[i].ignore and not modes[i].comment then
-                local m_prefix = string.match(line, "^%s*")
-                local pmlen = #m_prefix + #cm
-                local main_text = string.sub(line, pmlen + 1)
-                if #line == pmlen then
-                    lines[i] = main_text
-                else
-                    lines[i] = prefix .. trim_one(main_text)
-                end
-            end
-        end
-    end
-
-    vim.api.nvim_buf_set_lines(0, line1 - 1, line2, false, lines)
-    vim.api.nvim_win_set_cursor(0, { line1, 0 })
-    vim.fn.setpos("'>", { 0, line2, 0, 0 })
-end
-
-local function CommentLine(cm, line, prefix)
-    prefix = prefix or string.match(line, "^%s*")
-    return prefix .. cm .. " " .. string.sub(line, #prefix + 1)
-end
-
-local function UnCommentLine(cm, cmr, line)
-    if string.find(line, "^%s*" .. cmr) then
-        local prefix = string.match(line, "^%s*")
-        local main_text = string.sub(line, #prefix + #cm + 1)
-        return prefix .. trim_one(main_text)
-    else
-        return line
-    end
+local function normal_ops()
+    local n = vim.v.count
+    local l1 = vim.fn.line(".")
+    local lop = new_LOP(l1, l1 + n)
+    return cms.get(), lop
 end
 
 function AddCommentNormal()
-    local line = vim.api.nvim_get_current_line()
-    vim.api.nvim_set_current_line(CommentLine(get_comment(cmprefix), line))
+    local u, lop = normal_ops()
+    local cmlines = u.check_cm_line(lop.lines)
+    u.cm_line(lop.lines, cmlines)
+    lop:apply()
 end
 
 function RmCommentNormal()
-    local cm = get_comment(cmprefix)
-    local cmr = get_comment(cmprefix_r)
-    local line = vim.api.nvim_get_current_line()
-    vim.api.nvim_set_current_line(UnCommentLine(cm, cmr, line))
+    local u, lop = normal_ops()
+    local cmlines = u.check_cm_line(lop.lines)
+    u.uncm_line(lop.lines, cmlines)
+    lop:apply()
+end
+
+function ToggleCommentNormal()
+    local u, lop = normal_ops()
+    local cmlines, mode = u.check_cm_line(lop.lines)
+    local mode_comment = cmlines[1].commented
+    if not mode_comment then
+        u.cm_line(lop.lines, cmlines)
+    else
+        u.uncm_line(lop.lines, cmlines)
+    end
+    lop:apply()
+end
+
+local function visual_ops()
+    local u = cms.get()
+    local mode = vim.fn.visualmode()
+
+    if mode == "v" then
+        local ps = vim.fn.getpos("'<")
+        local pe = vim.fn.getpos("'>")
+        local lines = vim.fn.getline(ps[2], pe[2])
+        return u,ps[2],pe[2],ps[3],pe[3],lines,#lines,mode
+    else
+        local r1 = vim.fn.line("'<")
+        local r2 = vim.fn.line("'>")
+        local lines = vim.api.nvim_buf_get_lines(0, r1 - 1, r2, false)
+        local ll = #lines
+        return u,r1,r2,1,#(lines[ll]),lines,ll,mode
+    end
+end
+
+function ToggleCommentVisual()
+    local u,r1,r2,c1,c2,lines,ll = visual_ops()
+    local is_cm = false
+    is_cm,c1,c2 = u.check_cm_block(lines[1],lines[ll],c1,c2)
+
+    if is_cm then
+        if ll == 1 then
+            lines[1] ,_,c1,c2= u.uncm_block(lines[1], nil, c1, c2)
+        else
+            lines[1], lines[ll],c1,c2 = u.uncm_block(lines[1], lines[ll], c1, c2)
+        end
+    else
+        if ll == 1 then
+            lines[1] ,_,c1,c2= u.cm_block(lines[1], nil, c1, c2)
+        else
+            lines[1], lines[ll],c1,c2 = u.cm_block(lines[1], lines[ll], c1, c2)
+        end
+    end
+
+    vim.fn.setline(r1, lines)
+
+    vim.fn.setpos("'<", { 0, r1, c1, 0 })
+    vim.fn.setpos("'>", { 0, r2, c2, 0 })
+    vim.cmd("normal! gv")
 end
 
 function AddCommentVisual()
-    local cm = get_comment(cmprefix)
+    local u,r1,r2,c1,c2,lines,ll = visual_ops()
 
-    local line1 = vim.fn.line("'<")
-    local line2 = vim.fn.line("'>")
-    local lines = vim.api.nvim_buf_get_lines(0, line1 - 1, line2, false)
-
-    local prefix = FindShortPrefix(lines)
-    for i, line in ipairs(lines) do
-        lines[i] = CommentLine(cm, line,prefix)
+    is_cm,c1,c2 = u.check_cm_block(lines[1],lines[ll],c1,c2)
+    if ll == 1 then
+        lines[1] ,_,c1,c2= u.cm_block(lines[1], nil, c1, c2)
+    else
+        lines[1], lines[ll],c1,c2 = u.cm_block(lines[1], lines[ll], c1, c2)
     end
 
-    vim.api.nvim_buf_set_lines(0, line1 - 1, line2, false, lines)
-    vim.api.nvim_win_set_cursor(0, { line1, 0 })
-    vim.fn.setpos("'>", { 0, line2, 0, 0 })
+    vim.fn.setline(r1, lines)
+
+    vim.fn.setpos("'<", { 0, r1, c1, 0 })
+    vim.fn.setpos("'>", { 0, r2, c2, 0 })
+    vim.cmd("normal! gv")
 end
 
 function RmCommentVisual()
-    local cm = get_comment(cmprefix)
-    local cmr = get_comment(cmprefix_r)
+    local u,r1,r2,c1,c2,lines,ll = visual_ops()
+    local is_cm = false
+    is_cm,c1,c2 = u.check_cm_block(lines[1],lines[ll],c1,c2)
 
-    local line1 = vim.fn.line("'<")
-    local line2 = vim.fn.line("'>")
-    local lines = vim.api.nvim_buf_get_lines(0, line1 - 1, line2, false)
-
-    for i, line in ipairs(lines) do
-        lines[i] = UnCommentLine(cm, cmr, line)
+    if is_cm then
+        if ll == 1 then
+            lines[1] ,_,c1,c2= u.uncm_block(lines[1], nil, c1, c2)
+        else
+            lines[1], lines[ll],c1,c2 = u.uncm_block(lines[1], lines[ll], c1, c2)
+        end
     end
 
-    vim.api.nvim_buf_set_lines(0, line1 - 1, line2, false, lines)
-    vim.api.nvim_win_set_cursor(0, { line1, 0 })
-    vim.fn.setpos("'>", { 0, line2, 0, 0 })
+    vim.fn.setline(r1, lines)
+
+    vim.fn.setpos("'<", { 0, r1, c1, 0 })
+    vim.fn.setpos("'>", { 0, r2, c2, 0 })
+    vim.cmd("normal! gv")
 end
 
 local opt = { noremap = true, silent = true }
-vim.keymap.set("n", "<C-_>", ":lua ToggleCommentNormal()<CR>", opt)
+vim.keymap.set("n", "<C-_>", ToggleCommentNormal, opt)
 vim.keymap.set("v", "<C-_>", ":lua ToggleCommentVisual()<CR>", opt)
-vim.keymap.set("n", "<C-/>", ":lua ToggleCommentNormal()<CR>", opt)
+vim.keymap.set("n", "<C-/>", ToggleCommentNormal, opt)
 vim.keymap.set("v", "<C-/>", ":lua ToggleCommentVisual()<CR>", opt)
 
-vim.keymap.set("n", "<leader>=", ":lua AddCommentNormal()<CR>", opt)
+vim.keymap.set("n", "<leader>=", AddCommentNormal, opt)
 vim.keymap.set("v", "<leader>=", ":lua AddCommentVisual()<CR>", opt)
-vim.keymap.set("n", "<leader>-", ":lua RmCommentNormal()<CR>", opt)
+vim.keymap.set("n", "<leader>-", RmCommentNormal, opt)
 vim.keymap.set("v", "<leader>-", ":lua RmCommentVisual()<CR>", opt)
