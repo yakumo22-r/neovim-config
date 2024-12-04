@@ -1,5 +1,8 @@
 -- vimrc ./base.vim
 vim.cmd("source " .. vim.fn.stdpath("config") .. "/base.vim") 
+
+-- vimrc ./base2.vim
+vim.cmd("source " .. vim.fn.stdpath("config") .. "/base2.vim") 
 vim.g.mapleader = " "
 
 

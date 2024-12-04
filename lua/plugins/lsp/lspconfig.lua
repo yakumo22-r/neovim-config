@@ -91,7 +91,7 @@ return {
                     },
                     diagnostics = {
                         globals = { "vim" },
-                        disable = { "lowercase-global" },
+                        disable = { "lowercase-global","trailing-space","empty-block" },
                     },
                     workspace = {
                         -- make language server aware of runtime files
