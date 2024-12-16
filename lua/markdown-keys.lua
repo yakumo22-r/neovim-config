@@ -117,24 +117,26 @@ local function set(...)
     vim.api.nvim_buf_set_keymap(0, ...)
 end
 
-set("n", "<leader>0", ":lua YKM.markdu.format_to(0)<CR>", opt)
-set("v", "<leader>0", ":lua YKM.markdu.formats_to(0)<CR>", opt)
+return function ()
+    set("n", "<leader>0", ":lua YKM.markdu.format_to(0)<CR>", opt)
+    set("v", "<leader>0", ":lua YKM.markdu.formats_to(0)<CR>", opt)
 
-set("n", "<leader>1", ":lua YKM.markdu.format_to(1)<CR>", opt)
-set("n", "<leader>2", ":lua YKM.markdu.format_to(2)<CR>", opt)
-set("n", "<leader>3", ":lua YKM.markdu.format_to(3)<CR>", opt)
-set("n", "<leader>4", ":lua YKM.markdu.format_to(4)<CR>", opt)
-set("n", "<leader>5", ":lua YKM.markdu.format_to(5)<CR>", opt)
-set("n", "<leader>6", ":lua YKM.markdu.format_to(6)<CR>", opt)
+    set("n", "<leader>1", ":lua YKM.markdu.format_to(1)<CR>", opt)
+    set("n", "<leader>2", ":lua YKM.markdu.format_to(2)<CR>", opt)
+    set("n", "<leader>3", ":lua YKM.markdu.format_to(3)<CR>", opt)
+    set("n", "<leader>4", ":lua YKM.markdu.format_to(4)<CR>", opt)
+    set("n", "<leader>5", ":lua YKM.markdu.format_to(5)<CR>", opt)
+    set("n", "<leader>6", ":lua YKM.markdu.format_to(6)<CR>", opt)
 
-set("n", "<leader>]", ":lua YKM.markdu.header_level(1)<CR>", opt)
-set("n", "<leader>[", ":lua YKM.markdu.header_level(-1)<CR>", opt)
+    set("n", "<leader>]", ":lua YKM.markdu.header_level(1)<CR>", opt)
+    set("n", "<leader>[", ":lua YKM.markdu.header_level(-1)<CR>", opt)
 
-set("n", "<leader>.", ":lua YKM.markdu.format_to(17)<CR>", opt)
-set("v", "<leader>.", ":lua YKM.markdu.formats_to(17)<CR>", opt)
+    set("n", "<leader>.", ":lua YKM.markdu.format_to(17)<CR>", opt)
+    set("v", "<leader>.", ":lua YKM.markdu.formats_to(17)<CR>", opt)
 
-set("v", "<leader>u", ":lua YKM.markdu.formats_to(18)<CR>", opt)
-set("n", "<leader>u", ":lua YKM.markdu.format_to(18)<CR>", opt)
+    set("v", "<leader>u", ":lua YKM.markdu.formats_to(18)<CR>", opt)
+    set("n", "<leader>u", ":lua YKM.markdu.format_to(18)<CR>", opt)
 
-set("v", "<leader>x", ":lua YKM.markdu.checkboxs_toggle()<CR>", opt)
-set("n", "<leader>x", ":lua YKM.markdu.checkbox_toggle()<CR>", opt)
+    set("v", "<leader>x", ":lua YKM.markdu.checkboxs_toggle()<CR>", opt)
+    set("n", "<leader>x", ":lua YKM.markdu.checkbox_toggle()<CR>", opt)
+end

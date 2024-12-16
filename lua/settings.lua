@@ -48,11 +48,10 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
 })
 
 -- markdown shortkeys
-vim.api.nvim_create_autocmd("FileType", {
-    pattern = "markdown",
-    callback = function ()
-        require('markdown-keys')
-    end,
+local bind_markdown = require('markdown-keys')
+vim.api.nvim_create_autocmd({"BufNewFile", "BufRead"}, {
+    pattern = "*.md",
+    callback = bind_markdown,
 })
 
 local opt = { noremap = true, silent = true }
