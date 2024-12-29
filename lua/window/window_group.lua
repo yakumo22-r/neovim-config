@@ -8,6 +8,12 @@ WG.Border = {
     [0]='•',[0011] = '─', [0111] = '┬', [1011] = '┴', [1100] = '│', [1111] = '┼', [1110] = '┤', [1101] = '├', [0101] = '╭', [1001] = '╰', [0110] = '╮', [1010] = '╯',
 }
 
+WG.BorderSize = {}
+
+for k,v in pairs(WG.Border) do
+    WG.BorderSize[k] = #v
+end
+
 ---@class WindowFrames
 ---@field from integer
 ---@field to integer
@@ -90,11 +96,15 @@ function ins:refresh(lines)
     wu.set_modifiable(self.bg.buf, true)
     local flines = {}
 
+    ---@type BufStyle[][]
+    local l_styles = {}
+
     
     local area = self.bg.rect   
     for i=1,area.h do
         local v = frames[i]
         local cs = {}
+        local byte_index = 1;
         for j=1,area.w do
             local id = 0
 
@@ -105,16 +115,22 @@ function ins:refresh(lines)
 
             if v[j] then
                 table.insert(cs, WG.Border[id])
+                byte_index = byte_index + WG.BorderSize[id]
             else
                 table.insert(cs, " ")
+                byte_index = byte_index + 1
             end
-
         end
 
+        table.insert(l_styles, {{
+            style = wu.StyleInfo,
+            _start = 1,
+            _end = byte_index,
+        }})
         table.insert(flines,table.concat(cs))
     end
 
-    self.bg:set_lines(1, area.h, flines)
+    self.bg:set_lines(1, 0, flines)
 
     wu.set_modifiable(self.bg.buf, false)
     -- for _,f in ipairs(self.frames) do

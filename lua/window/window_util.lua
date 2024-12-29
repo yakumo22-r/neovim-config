@@ -9,6 +9,39 @@ WU.StyleError = "DiagnosticError"
 WU.StyleWarn = "DiagnosticWarn"
 WU.StyleInfo = "DiagnosticInfo"
 
+---@class BufStyle
+---@field style string
+---@field _start integer
+---@field _end integer
+
+---@class StyleCell
+---@field text string
+---@field style? string
+
+---@param cells StyleCell[]
+---@return string line, BufStyle[] styles
+function WU.get_style_line(cells)
+    local texts = {}
+
+    ---@type BufStyle[]
+    local styles = {}
+
+    local ii = 1
+    for _, v in ipairs(cells) do
+
+        table.insert(texts, v.text)
+        local l = string.len(v.text)
+
+        if v.style then
+            table.insert(styles, {style=v.style, _start = ii, _end = ii+l-1})
+        end
+
+        ii = ii+l
+    end
+
+    return table.concat(texts),styles
+end
+
 ---@param buf integer
 ---@param open boolean
 function WU.set_modifiable(buf, open)

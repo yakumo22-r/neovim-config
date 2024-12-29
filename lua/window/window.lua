@@ -40,6 +40,15 @@ function ins:set_lines(_start,_end,lines)
     vim.api.nvim_buf_set_lines(self.buf, _start, _end, false, lines)
 end
 
+---@param line_id integer
+---@param buf_styles BufStyle[]
+function ins:set_styles(line_id, buf_styles)
+    for _,v in ipairs(buf_styles) do
+        vim.api.nvim_buf_add_highlight(self.buf,
+        -1, v.style, line_id-1, v._start-1, v._end)
+    end
+end
+
 function ins:hide()
     if not self.wnd then return end
     
