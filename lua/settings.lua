@@ -80,3 +80,12 @@ vim.api.nvim_create_user_command('OpenInSystem', function()
         print("Unsupported system")
     end
 end, {})
+
+-- vim.api.nvim_set_keymap("n", "<leader>t", ":lua require('filetree.filetree').toggle()<CR>", { noremap = true, silent = true })
+
+vim.keymap.set("n", "<leader>t", function ()
+    -- require("msgwindow").Tip("test")
+    require('filetree.filetree').toggle()
+    
+end, {noremap = true, silent = true})
+-- vim.api.nvim_set_keymap("n", "<leader>t", ":lua require('filetree.filetree').toggle()<CR>", { noremap = true, silent = true })
