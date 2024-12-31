@@ -25,7 +25,6 @@ WG.Border = {
 }
 
 WG.BorderSize = {}
-
 for k,v in pairs(WG.Border) do
     WG.BorderSize[k] = #v
 end
@@ -196,22 +195,17 @@ local empty = {}
 function ins:refresh(_start,_end)
     local frames = self.frames
 
+    local line_styles = {}
     local flines = {}
 
     local cover_lines = self.cover_lines or empty
 
-    ---@type BufStyle[][]
-    local l_styles = {}
-
-    
     local area = self.bg.rect   
     _start = _start or 1
     _end = _end or area.h
     for i=_start,_end do
         local v = frames[i]
         local strs = {}
-        local byte_index = 1;
-
 
         ---@type StyleCell[]
         local cov_line = cover_lines[i] or empty
@@ -220,13 +214,34 @@ function ins:refresh(_start,_end)
 
         local j = 1
 
+        local save_index = 1
+        local byte_index = 1
+
         local cover = cov_line[coverId]
         local indent =  cover and cover.indent or 0
 
+        local style = {}
         while j <= area.w do 
 
             if cover and indent == 0 then
                 table.insert(strs, cover.text)
+
+                if byte_index > save_index then
+                    table.insert(style,{
+                        _start = save_index,
+                        _end = byte_index,
+                    })
+                end
+
+                table.insert(style,{
+                    style = cover.style,
+                    _start = byte_index,
+                    _end =  byte_index+cover.byte_width
+                })
+
+                byte_index = byte_index+cover.byte_width+1
+                save_index = byte_index
+
                 j = j + cover.width
                 coverId = coverId+1
                 cover = cov_line[coverId]
@@ -251,16 +266,24 @@ function ins:refresh(_start,_end)
             end
         end
 
-        -- table.insert(l_styles, {{
-        --     style = wu.StyleInfo,
-        --     _start = 1,
-        --     _end = byte_index,
-        -- }})
+        if byte_index > save_index then
+            table.insert(style,{
+                _start = save_index,
+                _end = byte_index,
+            })
+        end
+        table.insert(line_styles, style)
         table.insert(flines,table.concat(strs))
     end
 
+    print(self.bg.buf)
+
     self.bg:set_modifiable(true)
     self.bg:set_lines(_start, _end, flines)
+
+    for l,v in ipairs(line_styles) do
+        self.bg:set_styles(l, v)
+    end
     self.bg:set_modifiable(false)
 
     -- for _,f in ipairs(self.frames) do

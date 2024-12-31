@@ -34,10 +34,10 @@ function ins:refresh()
 
     local wtree = self.windows[WTree]
     wu.set_modifiable(wtree.buf, true)
-    wtree:set_lines(1,#lines+1, lines)
+    wtree:set_lines(1,#lines, lines)
     wu.set_modifiable(wtree.buf, false)
 
-    wg.class.refresh(self,1,2)
+    wg.class.refresh(self,1,1)
 end
 
 ---@param node FT_Node
@@ -106,9 +106,10 @@ local function New__FT_View(ft_handler, w,h)
     wu.block_edit_keys(buf)
 
     build_lines(v.lines, ft_handler.datas)
-
+    local title = _cell(" File Tree ")
+    title.indent = math.floor((w-title.width)/2)
     v.cover_lines = {
-        [1] = {_cell("ss",1), _cell("我操你妈", 1)}
+        [1] = {title}
     }
 
     v:switch_focus(WTree)

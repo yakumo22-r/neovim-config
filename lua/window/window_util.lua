@@ -30,7 +30,7 @@ function WU.create_cell(text, indent, style)
     return {
         text = text,
         style = style,
-        indent = indent,
+        indent = indent or 0,
         width = vim.fn.strdisplaywidth(text),
         byte_width = #text,
     }

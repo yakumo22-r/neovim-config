@@ -58,9 +58,9 @@ end
 ---@param _end integer
 ---@param lines string[]
 function ins:set_lines(_start,_end,lines)
+    _end = _end or _start+#lines 
     _start = _start and _start -1 or 0
 
-    _end = _end or self.rect.h 
     vim.api.nvim_buf_set_lines(self.buf, _start, _end, false, lines)
 end
 
@@ -69,7 +69,7 @@ end
 function ins:set_styles(line_id, buf_styles)
     for _,v in ipairs(buf_styles) do
         vim.api.nvim_buf_add_highlight(self.buf,
-        -1, v.style, line_id-1, v._start-1, v._end)
+        -1, v.style or wu.StyleNormal, line_id-1, v._start-1, v._end-1)
     end
 end
 
