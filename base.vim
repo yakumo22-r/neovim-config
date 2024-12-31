@@ -18,6 +18,11 @@ set backspace=indent,eol,start
 set smartindent
 set nolist
 
+" blink cursor
+set guicursor=n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50
+  \,a:blinkwait100-blinkoff400-blinkon250-Cursor/lCursor
+  \,sm:block-blinkwait100-blinkoff150-blinkon175
+
 set fileencodings=utf-8
 set encoding=utf-8
 
