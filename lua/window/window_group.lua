@@ -1,11 +1,27 @@
-require("base_func")
-local wu = require "window.window_util"
+local util = require("base_func")
 local Window = require "window.window"
+local wu = require "window.window_util"
 
 local WG = {}
 
+WG.Top = 8
+WG.Bottom = 4
+WG.Left = 2
+WG.Right = 1
+
 WG.Border = {
-    [0]='•',[0011] = '─', [0111] = '┬', [1011] = '┴', [1100] = '│', [1111] = '┼', [1110] = '┤', [1101] = '├', [0101] = '╭', [1001] = '╰', [0110] = '╮', [1010] = '╯',
+    [0]='•',
+    [util.bit_or(WG.Left,WG.Right)] = '─', 
+    [util.bit_or(WG.Left,WG.Right,WG.Bottom)] = '┬', 
+    [util.bit_or(WG.Left,WG.Right,WG.Top)] = '┴', 
+    [util.bit_or(WG.Top,WG.Bottom)] = '│', 
+    [util.bit_or(WG.Top,WG.Bottom,WG.Left,WG.Right)] = '┼', 
+    [util.bit_or(WG.Top,WG.Bottom,WG.Left)] = '┤', 
+    [util.bit_or(WG.Top,WG.Bottom,WG.Right)] = '├', 
+    [util.bit_or(WG.Bottom,WG.Right)] = '╭', 
+    [util.bit_or(WG.Top,WG.Right)] = '╰', 
+    [util.bit_or(WG.Bottom,WG.Left)] = '╮', 
+    [util.bit_or(WG.Top,WG.Left)] = '╯',
 }
 
 WG.BorderSize = {}
@@ -19,124 +35,25 @@ end
 ---@field to integer
 
 ---@class WindowGroup
-local ins = {
+local ins = { }
 
-    ---@type  boolean[][]
-    frames = {},
+---@type  boolean[][]
+ins.frames = {}
 
-    ---@type StaticWindow
-    bg = {},
+---@type integer
+ins.curr_focus = 1 
 
-    ---@type StaticWindow[]
-    windows = {},
+---@type StaticWindow
+ins.bg = nil
 
-    ---@type integer
-    space = 1,
-}
+---@type StaticWindow[]
+ins.windows = {}
 
+---@type integer
+ins.space = 1
 
----@param x integer
----@param y integer 
----@param w integer
----@param h integer
----@return StaticWindow
-function ins:add_window(x,y,w,h)
-    local _x = x+self.bg.rect.x + self.space
-    local _y = y+self.bg.rect.y
-    local _w = w - self.space*2 - 2
-    local _h = h - 2
-    local win = Window(_x,_y,_w,_h)
-
-    table.insert(self.windows, win)
-
-    for i=x,w do
-        self.frames[y][i] = true
-        self.frames[h][i] = true
-    end
-
-    for i=y+1,h-1 do
-        self.frames[i][x] = true
-        self.frames[i][w] = true
-    end
-
-    return win
-end
-
-function ins:is_show()
-    return self.bg.wnd ~= nil
-end
-
-function ins:show()
-    self.bg:show()
-
-    for _,w in ipairs(self.windows) do
-        w:show()
-    end
-end
-
-function ins:hide()
-    self.bg:hide()
-    for _,w in ipairs(self.windows) do
-        w:hide()
-    end
-end
-
-function ins:destroy()
-    self.bg:destroy()
-    for _,w in ipairs(self.windows) do
-        w:hide()
-    end
-
-end
-
----@param lines? string[] cover_string
-function ins:refresh(lines)
-
-    local frames = self.frames
-    wu.set_modifiable(self.bg.buf, true)
-    local flines = {}
-
-    ---@type BufStyle[][]
-    local l_styles = {}
-
-    
-    local area = self.bg.rect   
-    for i=1,area.h do
-        local v = frames[i]
-        local cs = {}
-        local byte_index = 1;
-        for j=1,area.w do
-            local id = 0
-
-            if frames[i-1][j] then id = id + 1000 end
-            if frames[i+1][j] then id = id + 100 end
-            if v[j-1] then id = id + 10 end
-            if v[j+1] then id = id + 1 end
-
-            if v[j] then
-                table.insert(cs, WG.Border[id])
-                byte_index = byte_index + WG.BorderSize[id]
-            else
-                table.insert(cs, " ")
-                byte_index = byte_index + 1
-            end
-        end
-
-        table.insert(l_styles, {{
-            style = wu.StyleInfo,
-            _start = 1,
-            _end = byte_index,
-        }})
-        table.insert(flines,table.concat(cs))
-    end
-
-    self.bg:set_lines(1, 0, flines)
-
-    wu.set_modifiable(self.bg.buf, false)
-    -- for _,f in ipairs(self.frames) do
-    -- end
-
-end
+---@type table<integer, StyleCell[]>?
+ins.cover_lines = nil
 
 ---@param x integer
 ---@param y integer 
@@ -145,7 +62,7 @@ end
 ---@param space? integer horizontal space
 function WG.New__WindowGroup(x,y,w,h, space)
     ---@class WindowGroup
-    local wg = table.clone(ins)
+    local wg = util.table_clone(ins)
 
     x = x - 1
     y = y - 1
@@ -167,13 +84,15 @@ function WG.New__WindowGroup(x,y,w,h, space)
     end
 
 
-    table.insert(wg.frames, table.clone(full))
+    table.insert(wg.frames, util.table_clone(full))
 
     table.insert(wg.frames, {})
     wg.frames[0] = {}
 
 
     wg.bg = Window(x,y,w,h)
+    wg.bg.focusable = true
+
     local buf = wg.bg.buf
     wu.block_edit_keys(buf)
     wu.set_only_read(buf)
@@ -184,4 +103,169 @@ function WG.New__WindowGroup(x,y,w,h, space)
     return wg
 end
 
+
+---@param x integer
+---@param y integer 
+---@param w integer
+---@param h integer
+---@param frame_hide? integer 4bit top bottom left right
+---@return StaticWindow
+function ins:add_window(x,y,w,h, frame_hide)
+    local _x = x+self.bg.rect.x + self.space
+    local _y = y+self.bg.rect.y
+    local _w = w - self.space*2 - 2
+    local _h = h - 2
+    local win = Window(_x,_y,_w,_h)
+
+    frame_hide = frame_hide or 0
+
+    table.insert(self.windows, win)
+
+    local y2 = y+h-1
+    local x2 = x+w-1
+
+    if util.bit_and(frame_hide , WG.Top) == 0 then
+        for i=x,x2 do
+            self.frames[y][i] = true
+        end
+    end
+
+    if util.bit_and(frame_hide , WG.Bottom) == 0 then
+        for i=x,x2 do
+            self.frames[y2][i] = true
+        end
+    end
+
+    if util.bit_and(frame_hide , WG.Left) == 0 then
+        for i=y+1,y2-1 do
+            self.frames[i][x] = true
+        end
+    end
+
+    if util.bit_and(frame_hide , WG.Right) == 0 then
+        for i=y+1,y2-1 do
+            self.frames[i][x2] = true
+        end
+    end
+
+    return win
+end
+
+function ins:is_show()
+    return self.bg.wnd ~= nil
+end
+
+function ins:show()
+    self.bg:show()
+
+    for _,w in ipairs(self.windows) do
+        w:show()
+    end
+
+    self:switch_focus(self.curr_focus)
+end
+
+---@param index integer
+function ins:switch_focus(index)
+    local w = self.windows[index]
+    if w then
+        w:focus()
+        self.curr_focus = index
+    end
+end
+
+function ins:hide()
+    self.bg:hide()
+    for _,w in ipairs(self.windows) do
+        w:hide()
+    end
+end
+
+function ins:destroy()
+    self.bg:destroy()
+    for _,w in ipairs(self.windows) do
+        w:hide()
+    end
+
+end
+
+local empty = {}
+
+---@param _start? integer
+---@param _end? integer
+function ins:refresh(_start,_end)
+    local frames = self.frames
+
+    local flines = {}
+
+    local cover_lines = self.cover_lines or empty
+
+    ---@type BufStyle[][]
+    local l_styles = {}
+
+    
+    local area = self.bg.rect   
+    _start = _start or 1
+    _end = _end or area.h
+    for i=_start,_end do
+        local v = frames[i]
+        local strs = {}
+        local byte_index = 1;
+
+
+        ---@type StyleCell[]
+        local cov_line = cover_lines[i] or empty
+
+        local coverId = 1
+
+        local j = 1
+
+        local cover = cov_line[coverId]
+        local indent =  cover and cover.indent or 0
+
+        while j <= area.w do 
+
+            if cover and indent == 0 then
+                table.insert(strs, cover.text)
+                j = j + cover.width
+                coverId = coverId+1
+                cover = cov_line[coverId]
+                indent = cover and cover.indent or 0
+            else
+                local id = util.bit_or(
+                (frames[i-1][j] and WG.Top or 0) ,
+                (frames[i+1][j] and WG.Bottom or 0) ,
+                (v[j-1] and WG.Left or 0) ,
+                (v[j+1] and WG.Right or 0))
+
+                if v[j] then
+                    table.insert(strs, WG.Border[id])
+                    byte_index = byte_index + WG.BorderSize[id]
+                else
+                    table.insert(strs, " ")
+                    byte_index = byte_index + 1
+                end
+                j = j+1
+                
+                indent = indent - 1 
+            end
+        end
+
+        -- table.insert(l_styles, {{
+        --     style = wu.StyleInfo,
+        --     _start = 1,
+        --     _end = byte_index,
+        -- }})
+        table.insert(flines,table.concat(strs))
+    end
+
+    self.bg:set_modifiable(true)
+    self.bg:set_lines(_start, _end, flines)
+    self.bg:set_modifiable(false)
+
+    -- for _,f in ipairs(self.frames) do
+    -- end
+end
+
+WG.class = ins
 return WG

@@ -17,6 +17,24 @@ WU.StyleInfo = "DiagnosticInfo"
 ---@class StyleCell
 ---@field text string
 ---@field style? string
+---@field indent? integer char-width
+---@field width? integer char-width
+---@field byte_width? integer char-width
+
+
+---@param text string
+---@param indent? integer char-index
+---@param style? string
+---@return StyleCell
+function WU.create_cell(text, indent, style)
+    return {
+        text = text,
+        style = style,
+        indent = indent,
+        width = vim.fn.strdisplaywidth(text),
+        byte_width = #text,
+    }
+end
 
 ---@param cells StyleCell[]
 ---@return string line, BufStyle[] styles

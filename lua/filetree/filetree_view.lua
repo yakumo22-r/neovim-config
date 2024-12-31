@@ -1,21 +1,23 @@
-require("base_func")
+-- display tree node
+local util = require("base_func")
 local wu = require "window.window_util"
+local wg = require "window.window_group"
+
 local api = vim.api
 ---@class FT_TreeLines
 ---@field line string -- show
 ---@field node FT_Node
 ---@field list boolean -- direct list
 
+local WTree = 1
 
----@class FT_View
+local _cell = wu.create_cell
+
+
+---@class FT_View:WindowGroup
 local ins = {}
 
-
----@type integer
-ins.tree_wnd = 0
-
----@type integer
-ins.buf = 0
+ins.super = wg.class
 
 ---@type FT_Handler
 ins.ft_handler = nil
@@ -28,18 +30,23 @@ function ins:refresh()
     for _,v in ipairs(self.lines) do
         table.insert(lines, v.line)
     end
-    wu.set_modifiable(self.buf, true)
-    api.nvim_buf_set_lines(self.buf, 0,-1,false,lines)
-    wu.set_modifiable(self.buf, false)
+
+
+    local wtree = self.windows[WTree]
+    wu.set_modifiable(wtree.buf, true)
+    wtree:set_lines(1,#lines+1, lines)
+    wu.set_modifiable(wtree.buf, false)
+
+    wg.class.refresh(self,1,2)
 end
 
 ---@param node FT_Node
 local function filename_to_line(node)
     if node.type ~= "file" then
-        return node.name .. "/"
+        return " "..node.name .. "/"
     end
 
-    return node.name
+    return " "..node.name
 end
 
 ---@param lines FT_TreeLines[]
@@ -84,14 +91,27 @@ local function build_lines(lines,datas,id)
 end
 
 ---@param ft_handler FT_Handler
-local function New__FT_View(ft_handler)
+local function New__FT_View(ft_handler, w,h)
     ---@type FT_View
-    local v = table.clone(ins)
-    v.buf = api.nvim_create_buf(false, true)
-    wu.block_edit_keys(v.buf)
-    wu.set_only_read(v.buf)
-    api.nvim_set_option_value("buftype", "nofile", {buf=v.buf})
+    v = util.table_connect(wg.New__WindowGroup(1,1,w,h), ins)
+
+    local buf
+
+    local tree_wnd =v:add_window(1,2,w,h-1,wg.Top)
+    buf = tree_wnd.buf
+
+    tree_wnd:set_select_window()
+    wu.set_only_read(buf)
+    wu.set_modifiable(buf,false)
+    wu.block_edit_keys(buf)
+
     build_lines(v.lines, ft_handler.datas)
+
+    v.cover_lines = {
+        [1] = {_cell("ss",1), _cell("我操你妈", 1)}
+    }
+
+    v:switch_focus(WTree)
 
     v:refresh()
 

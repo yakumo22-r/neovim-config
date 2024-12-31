@@ -1,4 +1,4 @@
-require("base_func")
+local util = require("base_func")
 local uv = vim.loop
 
 ---@alias FT_id integer 
@@ -87,7 +87,7 @@ end
 ---@param root string 
 local function New__FT_Handler(root)
     ---@type FT_Handler
-    local h = table.clone(ins)
+    local h = util.table_clone(ins)
     local handle = uv.fs_scandir(root)
 
     if handle then
