@@ -18,10 +18,10 @@ set backspace=indent,eol,start
 set smartindent
 set nolist
 
-" blink cursor
-set guicursor=n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50
-  \,a:blinkwait100-blinkoff400-blinkon250-Cursor/lCursor
-  \,sm:block-blinkwait100-blinkoff150-blinkon175
+" " blink cursor
+" set guicursor=n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50
+"   \,a:blinkwait100-blinkoff400-blinkon250-Cursor/lCursor
+"   \
 
 set fileencodings=utf-8
 set encoding=utf-8
@@ -110,8 +110,6 @@ vnoremap <silent> P "_dP
 vnoremap <silent> q <Esc>
 
 nnoremap <C-\> :echo expand("%")<CR>
-
-xnoremap * :<C-u>let @/ = '\V' . escape(@*, '\/')<CR>//<CR>
 
 au BufRead,BufNewFile *.lua						set filetype=lua
 au BufRead,BufNewFile *.lua.txt					set filetype=lua
