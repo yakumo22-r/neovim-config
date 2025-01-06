@@ -276,18 +276,12 @@ function ins:refresh(_start,_end)
         table.insert(flines,table.concat(strs))
     end
 
-    print(self.bg.buf)
-
     self.bg:set_modifiable(true)
     self.bg:set_lines(_start, _end, flines)
-
     for l,v in ipairs(line_styles) do
-        self.bg:set_styles(l, v)
+        self.bg:set_styles(l+_start-1, v)
     end
     self.bg:set_modifiable(false)
-
-    -- for _,f in ipairs(self.frames) do
-    -- end
 end
 
 WG.class = ins

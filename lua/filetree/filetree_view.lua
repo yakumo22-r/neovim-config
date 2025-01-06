@@ -8,6 +8,7 @@ local api = vim.api
 ---@field line string -- show
 ---@field node FT_Node
 ---@field list boolean -- direct list
+---@field styles BufStyle[]
 
 local WTree = 1
 
@@ -27,33 +28,63 @@ ins.lines = {}
 
 function ins:refresh()
     local lines = {}
+    local styles = {}
     for _,v in ipairs(self.lines) do
         table.insert(lines, v.line)
+        table.insert(styles, v.styles)
     end
-
 
     local wtree = self.windows[WTree]
     wu.set_modifiable(wtree.buf, true)
     wtree:set_lines(1,#lines, lines)
+
+    for i,v in ipairs(styles) do
+        wtree:set_styles(i, v)
+    end
+
     wu.set_modifiable(wtree.buf, false)
 
     wg.class.refresh(self,1,1)
 end
 
+local icon_dir = ""
+local icon_dir_open = ""
+local icon_down = "↓"
+local icon_right = "→"
+
+
 ---@param node FT_Node
+---@return string,BufStyle[]
 local function filename_to_line(node)
     if node.type ~= "file" then
-        return " "..node.name .. "/"
+        
+        local name = string.format("%s %s %s", icon_right, icon_dir, node.name)
+        return name,{
+            {
+                style = "NavicIconsArray",
+                _start = 1,
+                _end = #name+2
+            }
+        }
     end
 
-    return " "..node.name
+    local icon,hl_group = wu.get_icon_style(node.name)
+
+    ---@type BufStyle[]
+    local styles = {
+        {
+            style = hl_group,
+            _start = 3,
+            _end = #icon+2,
+        }
+    }
+    return "  "..icon.." "..node.name, styles
 end
 
 ---@param lines FT_TreeLines[]
 ---@param datas FT_Node[]
-local function build_lines(lines,datas,id)
+local function build_lines(lines,datas)
     level = level or 0
-    local ca = {}
 
     local n_id = 1
     local l_id = 1
@@ -68,10 +99,12 @@ local function build_lines(lines,datas,id)
             -- insert new
             if node.line_id == -1 then
                 -- insert new
+                local l,styles = filename_to_line(node)
                 table.insert(lines,l_id,{
-                    line = filename_to_line(node),
+                    line = l,
                     node = node,
                     list = false,
+                    styles = styles,
                 })
                 l_id = l_id+1
             elseif node.line_id == -2 then
@@ -80,11 +113,12 @@ local function build_lines(lines,datas,id)
                     table.remove(line,l_id)
                 end
             else
-                line.line = filename_to_line(node)
+                local l,styles = filename_to_line(node)
+                line.line = l
                 line.node = node
+                line.styles = styles
                 l_id = l_id+1
             end
-
         end
         n_id = n_id+1
     end
