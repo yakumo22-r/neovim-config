@@ -153,7 +153,7 @@ end
 ---@return string icon,string hl_group
 function WU.get_icon_style(filename)
 
-    local filetype = vim.filetype.match({ filename = filename }) or "file"
+    local filetype = vim.filetype.match({ filename = filename }) or "txt"
     -- if not file_icons[filetype] then
         local web_devicons = require("nvim-web-devicons")
         local icon,color = web_devicons.get_icon_by_filetype(filetype)

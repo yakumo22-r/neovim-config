@@ -8,6 +8,7 @@ WG.Top = 8
 WG.Bottom = 4
 WG.Left = 2
 WG.Right = 1
+WG.NoBorder = 15
 
 WG.Border = {
     [0]='•',
@@ -15,6 +16,10 @@ WG.Border = {
     [util.bit_or(WG.Left,WG.Right,WG.Bottom)] = '┬', 
     [util.bit_or(WG.Left,WG.Right,WG.Top)] = '┴', 
     [util.bit_or(WG.Top,WG.Bottom)] = '│', 
+    [WG.Top] = '│', 
+    [WG.Bottom] = '│', 
+    [WG.Left] = '─', 
+    [WG.Right] = '─', 
     [util.bit_or(WG.Top,WG.Bottom,WG.Left,WG.Right)] = '┼', 
     [util.bit_or(WG.Top,WG.Bottom,WG.Left)] = '┤', 
     [util.bit_or(WG.Top,WG.Bottom,WG.Right)] = '├', 
@@ -254,6 +259,7 @@ function ins:refresh(_start,_end)
                 (v[j+1] and WG.Right or 0))
 
                 if v[j] then
+                    print(id)
                     table.insert(strs, WG.Border[id])
                     byte_index = byte_index + WG.BorderSize[id]
                 else

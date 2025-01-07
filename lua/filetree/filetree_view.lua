@@ -1,16 +1,20 @@
--- display tree node
+-- display tree nod
 local util = require("base_func")
 local wu = require "window.window_util"
 local wg = require "window.window_group"
+
+local FH = require 'filetree.filetree_handle'
+local FileTreeEvt = FH.FileTreeEvt
 
 local api = vim.api
 ---@class FT_TreeLines
 ---@field line string -- show
 ---@field node FT_Node
----@field list boolean -- direct list
 ---@field styles BufStyle[]
 
 local WTree = 1
+local WInput = 2
+
 
 local _cell = wu.create_cell
 
@@ -27,24 +31,7 @@ ins.ft_handler = nil
 ins.lines = {}
 
 function ins:refresh()
-    local lines = {}
-    local styles = {}
-    for _,v in ipairs(self.lines) do
-        table.insert(lines, v.line)
-        table.insert(styles, v.styles)
-    end
-
-    local wtree = self.windows[WTree]
-    wu.set_modifiable(wtree.buf, true)
-    wtree:set_lines(1,#lines, lines)
-
-    for i,v in ipairs(styles) do
-        wtree:set_styles(i, v)
-    end
-
-    wu.set_modifiable(wtree.buf, false)
-
-    wg.class.refresh(self,1,1)
+    wg.class.refresh(self,1)
 end
 
 local icon_dir = ""
@@ -56,14 +43,18 @@ local icon_right = "→"
 ---@param node FT_Node
 ---@return string,BufStyle[]
 local function filename_to_line(node)
-    if node.type ~= "file" then
-        
-        local name = string.format("%s %s %s", icon_right, icon_dir, node.name)
+    local fill = string.rep("  ", node.level)
+    local fill_len = #fill
+
+    if node.is_dir then
+        local icon1 = node.dir_open and icon_down or icon_right
+        local icon2 = node.dir_open and icon_dir_open or icon_dir
+        local name = string.format("%s%s %s %s", fill, icon1, icon2, node.name)
         return name,{
             {
                 style = "NavicIconsArray",
                 _start = 1,
-                _end = #name+2
+                _end = #name+1,
             }
         }
     end
@@ -74,54 +65,163 @@ local function filename_to_line(node)
     local styles = {
         {
             style = hl_group,
-            _start = 3,
-            _end = #icon+2,
+            _start = fill_len+2,
+            _end = fill_len+2+#icon,
         }
     }
-    return "  "..icon.." "..node.name, styles
+    local name = string.format("%s  %s %s", fill, icon,node.name)
+    return name, styles
 end
 
----@param lines FT_TreeLines[]
 ---@param datas FT_Node[]
-local function build_lines(lines,datas)
-    level = level or 0
+---@param _start integer
+---@param _end integer
+function ins:refresh_nodes(datas, _start,_end)
+    local tree = self.windows[WTree]
 
-    local n_id = 1
-    local l_id = 1
+    local lines = {}
+    local styles = {}
 
-    local node_num = #datas
-
-    while n_id < node_num do
-        local node = datas[n_id]
-        local line = lines[l_id]
+    for i=_start,_end do
+        local node = datas[i-_start+1]
+        local line = self.lines[i]
 
         if node then
-            -- insert new
-            if node.line_id == -1 then
-                -- insert new
-                local l,styles = filename_to_line(node)
-                table.insert(lines,l_id,{
-                    line = l,
-                    node = node,
-                    list = false,
-                    styles = styles,
-                })
-                l_id = l_id+1
-            elseif node.line_id == -2 then
-                if line and line.node == node then
-                    -- remove one
-                    table.remove(line,l_id)
-                end
+            local l,style = filename_to_line(node)
+            line.node = node
+            line.line = l
+            line.styles = styles
+            table.insert(lines,l)
+            table.insert(styles,style)
+        else
+            break
+        end
+    end
+
+    tree:set_modifiable(true)
+    tree:set_lines(_start,#lines, lines)
+    for i,v in ipairs(styles) do
+        tree:set_styles(_start+i-1, v)
+    end
+    tree:set_modifiable(false)
+end
+
+---@param datas FT_Node[]
+---@param _start integer
+---@param first? boolean
+---@param sub? boolean
+---@param lines? string[]
+---@param styles? BufStyle[][]
+function ins:insert_nodes(datas, _start, first, sub, lines, styles)
+    local tree = self.windows[WTree]
+    lines = lines or {}
+    styles = styles or {}
+
+    local line_id = _start
+
+    local i = 1
+    while true do
+        local node = datas[i]
+        if node then
+            local l,style = filename_to_line(node)
+            ---@type FT_TreeLines
+            local tline = {
+                line = l,
+                node = node,
+                styles = style,
+            }
+            table.insert(self.lines,line_id, tline)
+            table.insert(lines, l)
+            table.insert(styles, style)
+
+            if node.dir_open then
+                line_id = self:insert_nodes(node.children, line_id, false, true, lines, styles)
             else
-                local l,styles = filename_to_line(node)
-                line.line = l
-                line.node = node
-                line.styles = styles
-                l_id = l_id+1
+                line_id=line_id+1
+            end
+        else
+            break
+        end
+
+        i=i+1
+    end
+
+    if not sub then
+        tree:set_modifiable(true)
+        if first then
+            tree:set_lines(_start,_start, lines)
+        else
+            tree:set_lines(_start,_start-1, lines)
+        end
+        for j,v in ipairs(styles) do
+            tree:set_styles(_start+j-1, v)
+        end
+        tree:set_modifiable(false)
+    end
+
+    return line_id
+end
+
+---@param _start integer
+---@param _end integer
+function ins:remove_nodes(_start,_end)
+    for i=_start,_end do
+        table.remove(self.lines, i)
+    end
+
+    local tree = self.windows[WTree]
+    tree:set_modifiable(true)
+    tree:set_lines(_start,_end+1,{})
+    tree:set_modifiable(false)
+end
+
+-- file tree operation keys
+---@param view FT_View  
+local function bind_keys(view)
+
+    local buf = view.windows[WTree].buf
+    wu.bind_key(buf, '<CR>', '<Nop>', 'n')
+    wu.bind_key(buf, '<CR>', '<Nop>', 'v')
+
+    -- open file/dir
+    wu.bind_key(buf, 'o', function ()
+        local cursor = api.nvim_win_get_cursor(view.windows[WTree].wnd)
+        local line_id = cursor[1]
+        local node = view.lines[line_id].node
+        v.ft_handler:entry_event(FileTreeEvt.OpenClose, node)
+        if node.is_dir then
+            if node.dir_open then
+                view:refresh_nodes({node}, line_id, line_id)
+                view:insert_nodes(node.children, line_id+1)
+            else
+                view:refresh_nodes({node}, line_id, line_id)
+                view:remove_nodes(line_id+1, line_id+#node.children-1)
             end
         end
-        n_id = n_id+1
-    end
+    end, 'n')
+
+    -- rename file/dir
+    wu.bind_key(buf, 'r', function ()
+        local cursor = api.nvim_win_get_cursor(view.windows[WTree].wnd)
+        local line_id = cursor[1]
+        local node = view.lines[line_id].node
+        v.ft_handler:entry_event(FileTreeEvt.Rename, node)
+        if not node.is_dir then
+            v:refresh_nodes({node}, line_id, line_id)
+        end
+    end, 'n')
+
+    -- delete file/dir
+
+end
+
+function ins:show()
+    self.bg:show()
+
+    local wtree = self.windows[WTree]
+    wtree:show()
+
+    self:switch_focus(WTree)
 end
 
 ---@param ft_handler FT_Handler
@@ -131,15 +231,20 @@ local function New__FT_View(ft_handler, w,h)
 
     local buf
 
-    local tree_wnd =v:add_window(1,2,w,h-1,wg.Top)
+    local tree_wnd =v:add_window(1,2,w,h-1,wg.NoBorder)
     buf = tree_wnd.buf
+
+    v.ft_handler = ft_handler
 
     tree_wnd:set_select_window()
     wu.set_only_read(buf)
     wu.set_modifiable(buf,false)
     wu.block_edit_keys(buf)
 
-    build_lines(v.lines, ft_handler.datas)
+    bind_keys(v)
+
+    v:insert_nodes(ft_handler.root.children, 1, true)
+
     local title = _cell(" File Tree ")
     title.indent = math.floor((w-title.width)/2)
     v.cover_lines = {
