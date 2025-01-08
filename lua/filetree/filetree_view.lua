@@ -34,11 +34,17 @@ function ins:refresh()
     wg.class.refresh(self,1)
 end
 
-local icon_dir = ""
-local icon_dir_open = ""
-local icon_down = "↓"
-local icon_right = "→"
-
+---@param nodes FT_Node[]
+local function count_children_display(nodes)
+    local count = 0
+    for _,v in ipairs(nodes) do
+        if v.is_dir and v.dir_open then
+            count = count + count_children_display(v.children)
+        end
+        count = count+1
+    end
+    return count
+end
 
 ---@param node FT_Node
 ---@return string,BufStyle[]
@@ -47,8 +53,8 @@ local function filename_to_line(node)
     local fill_len = #fill
 
     if node.is_dir then
-        local icon1 = node.dir_open and icon_down or icon_right
-        local icon2 = node.dir_open and icon_dir_open or icon_dir
+        local icon1 = node.dir_open and "↓" or"→" 
+        local icon2 = node.dir_open and "" or"" 
         local name = string.format("%s%s %s %s", fill, icon1, icon2, node.name)
         return name,{
             {
@@ -99,7 +105,7 @@ function ins:refresh_nodes(datas, _start,_end)
     end
 
     tree:set_modifiable(true)
-    tree:set_lines(_start,#lines, lines)
+    tree:set_lines(_start,_start+#lines-1, lines)
     for i,v in ipairs(styles) do
         tree:set_styles(_start+i-1, v)
     end
@@ -135,7 +141,7 @@ function ins:insert_nodes(datas, _start, first, sub, lines, styles)
             table.insert(styles, style)
 
             if node.dir_open then
-                line_id = self:insert_nodes(node.children, line_id, false, true, lines, styles)
+                line_id = self:insert_nodes(node.children, line_id+1, false, true, lines, styles)
             else
                 line_id=line_id+1
             end
@@ -165,13 +171,13 @@ end
 ---@param _start integer
 ---@param _end integer
 function ins:remove_nodes(_start,_end)
-    for i=_start,_end do
+    for i=_end,_start,-1 do
         table.remove(self.lines, i)
     end
 
     local tree = self.windows[WTree]
     tree:set_modifiable(true)
-    tree:set_lines(_start,_end+1,{})
+    tree:set_lines(_start,_end,{})
     tree:set_modifiable(false)
 end
 
@@ -195,7 +201,7 @@ local function bind_keys(view)
                 view:insert_nodes(node.children, line_id+1)
             else
                 view:refresh_nodes({node}, line_id, line_id)
-                view:remove_nodes(line_id+1, line_id+#node.children-1)
+                view:remove_nodes(line_id+1, line_id+count_children_display(node.children))
             end
         end
     end, 'n')
@@ -205,10 +211,11 @@ local function bind_keys(view)
         local cursor = api.nvim_win_get_cursor(view.windows[WTree].wnd)
         local line_id = cursor[1]
         local node = view.lines[line_id].node
-        v.ft_handler:entry_event(FileTreeEvt.Rename, node)
-        if not node.is_dir then
-            v:refresh_nodes({node}, line_id, line_id)
-        end
+        print(node.name)
+        -- v.ft_handler:entry_event(FileTreeEvt.Rename, node)
+        -- if not node.is_dir then
+        --     v:refresh_nodes({node}, line_id, line_id)
+        -- end
     end, 'n')
 
     -- delete file/dir

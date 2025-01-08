@@ -259,7 +259,6 @@ function ins:refresh(_start,_end)
                 (v[j+1] and WG.Right or 0))
 
                 if v[j] then
-                    print(id)
                     table.insert(strs, WG.Border[id])
                     byte_index = byte_index + WG.BorderSize[id]
                 else
@@ -288,6 +287,7 @@ function ins:refresh(_start,_end)
         self.bg:set_styles(l+_start-1, v)
     end
     self.bg:set_modifiable(false)
+    self.bg.focusable = false
 end
 
 WG.class = ins
