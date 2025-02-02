@@ -18,7 +18,7 @@ local default_formatrc_path = vim.fn.stdpath('config')..'/formatrc/'
 return {
     plugins = {
         { import = "plugins" },
-        import = "plugins.lsp" },
+        { import = "plugins.lsp" },
     },
 
     formatrc = {
