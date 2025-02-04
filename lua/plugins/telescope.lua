@@ -125,7 +125,10 @@ function Custom.make_entry_text(entry)
     entry = entry or {}
     local show_line = vim.F.if_nil(entry.show_line, true)
 
-    local filename = vim.uri_to_fname(entry.filename)
+    local filename = entry.filename
+    if string.match(filename, "^[a-zA-Z][a-zA-Z0-9+.-]*://") ~= nil then
+        filename = vim.uri_to_fname(filename)
+    end
     local relpath = vim.fn.fnamemodify(filename, ":.")
     entry.filename = relpath
 

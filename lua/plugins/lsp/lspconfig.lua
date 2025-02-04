@@ -1,3 +1,5 @@
+require("plugins.lsp.specs.lua_ls")()
+
 return {
     "neovim/nvim-lspconfig",
     -- event = { "VeryLazy" },
@@ -60,49 +62,7 @@ return {
             end
         end
 
-        -- 自定义 LSP 引用处理函数，将路径转换为相对路径
-        -- local base_handler = vim.lsp.handlers["textDocument/references"]
-        -- vim.lsp.handlers["textDocument/references"] = function(err, result, ctx, config)
-        --     if result then
-        --         for _, res in ipairs(result) do
-        --             res.uri = make_paths_relative(res.uri)
-        --         end
-        --     end
-        --     print(result)
-        --     base_handler(err, result, ctx, config)
-        -- end
-
-        -- configure lua server (with special settings)
-        lspconfig["lua_ls"].setup({
-            root_dir = lua_ignores,
-            capabilities = capabilities,
-            on_attach = keybindings,
-            single_file_support = true,
-            filetypes = { "lua", "lua.txt" },
-            settings = { -- custom settings for lua
-                Lua = {
-                    runtime = {
-                        path = {
-                            "?.lua",
-                            "?.lua.txt",
-                            "?/init.lua",
-                            "?/init.lua.txt",
-                        },
-                    },
-                    diagnostics = {
-                        globals = { "vim" },
-                        disable = { "lowercase-global","trailing-space","empty-block" },
-                    },
-                    workspace = {
-                        -- make language server aware of runtime files
-                        library = {
-                            [vim.fn.expand("$VIMRUNTIME/lua")] = true,
-                            [vim.fn.stdpath("config") .. "/lua"] = true,
-                        },
-                    },
-                },
-            },
-        })
+        require("plugins.lsp.specs.lua_ls")(lspconfig,capabilities,keybindings)
 
         lspconfig["clangd"].setup({
             capabilities = capabilities,
