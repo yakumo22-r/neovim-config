@@ -25,6 +25,7 @@ cmstrs.bash = cmstrs.sh
 cmstrs.zsh = cmstrs.sh
 cmstrs.conf = cmstrs.sh
 cmstrs.xml = cmstrs.html
+cmstrs.nginx = cmstrs.sh
 
 function cmstrs.can_cm_line(ft)
     ft = ft or vim.bo.filetype

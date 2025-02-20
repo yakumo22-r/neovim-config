@@ -1,10 +1,9 @@
 -- vimrc ./base.vim
-vim.cmd("source " .. vim.fn.stdpath("config") .. "/base.vim") 
+vim.cmd("source " .. vim.fn.stdpath("config") .. "/base.vim")
 
 -- vimrc ./base2.vim
-vim.cmd("source " .. vim.fn.stdpath("config") .. "/base2.vim") 
+vim.cmd("source " .. vim.fn.stdpath("config") .. "/base2.vim")
 vim.g.mapleader = " "
-
 
 -- tool
 require("base_func")
@@ -24,6 +23,18 @@ require("user")
 require("settings")
 require("lazy-setup")
 
+-- ensure env path
+local function ensure_env_path(path)
+    path = ":"..path
+    if not string.find(vim.env.PATH, path, 1, true) then
+        vim.env.PATH = vim.env.PATH .. path
+    end
+end
+
+ensure_env_path("/usr/local/bin")
+if vim.fn.has("macunix") == 1 then
+    ensure_env_path("/opt/homebrew/bin")
+end
 
 -- c-api lib
 local script_dir = vim.fn.expand("<sfile>:p:h")
