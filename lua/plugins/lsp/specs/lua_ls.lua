@@ -1,4 +1,5 @@
 local config_dir = vim.fn.stdpath('config')
+local lsp_base = require 'plugins.lsp.tools.lsp_base'
 
 local lua_clients = {
     default = nil,
@@ -58,7 +59,7 @@ local function attach_client(bufnr)
     if not lua_clients[t] then
         lua_clients[t] = vim.lsp.start({
             name = "lua_" .. t,
-            cmd = { "lua-language-server" },
+            cmd = { lsp_base.cmd("lua-language-server") },
             capabilities = vim.tbl_deep_extend("keep", _capabilities, {
                 workspace = {
                     configuration = true,
@@ -97,7 +98,7 @@ return function(lspconfig, capabilities, keybindings)
         table.insert(wait_bufs, vim.api.nvim_get_current_buf())
     end
     vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-        pattern = "*.lua",
+        pattern = {"*.lua", "*.lua.txt"},
         callback = function(args)
             if not _lspconfig then
                 if vim.bo.filetype == "lua" then
