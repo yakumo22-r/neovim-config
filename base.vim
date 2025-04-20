@@ -25,6 +25,7 @@ set nolist
 
 set fileencodings=utf-8
 set encoding=utf-8
+set fileformat=unix
 
 set scrolloff=2
 set iskeyword+=-
@@ -34,7 +35,8 @@ set undofile
 let mapleader = " "
 
 nnoremap <silent> <A-b> ge
-nnoremap <silent> <C-b> gE
+nnoremap <silent> <C-b> ge
+nnoremap <silent> <C-B> gE
 " nnoremap <silent> q <Nop>
 
 " Window navigation
@@ -97,6 +99,11 @@ nnoremap <silent> <A-k> :m .-2<CR>==
 vnoremap <silent> <A-j> :m '>+1<CR>gv=gv
 vnoremap <silent> <A-k> :m '<-2<CR>gv=gv
 
+nnoremap <silent> <C-n> :m .+1<CR>==
+nnoremap <silent> <C-m> :m .-2<CR>==
+vnoremap <silent> <C-n> :m '>+1<CR>gv=gv
+vnoremap <silent> <C-m> :m '<-2<CR>gv=gv
+
 " Copy
 nnoremap <silent> d "_d
 vnoremap <silent> d "_d
@@ -117,48 +124,6 @@ au BufRead,BufNewFile *.zsh					    set filetype=sh
 au BufRead,BufNewFile .zshrc					set filetype=sh
 
 highlight Visual ctermfg=NONE ctermbg=darkgray
-
-function! Terminal_MetaMode(mode)
-    set ttimeout
-    if $TMUX != ''
-        set ttimeoutlen=30
-    elseif &ttimeoutlen > 80 || &ttimeoutlen <= 0
-        set ttimeoutlen=80
-    endif
-    if has('nvim') || has('gui_running')
-        return
-    endif
-    function! s:metacode(mode, key)
-        if a:mode == 0
-            exec "set <M-".a:key.">=\e".a:key
-        else
-            exec "set <M-".a:key.">=\e]{0}".a:key."~"
-        endif
-    endfunc
-    for i in range(10)
-        call s:metacode(a:mode, nr2char(char2nr('0') + i))
-    endfor
-    for i in range(26)
-        call s:metacode(a:mode, nr2char(char2nr('a') + i))
-        call s:metacode(a:mode, nr2char(char2nr('A') + i))
-    endfor
-    if a:mode != 0
-        for c in [',', '.', '/', ';', '[', ']', '{', '}']
-            call s:metacode(a:mode, c)
-        endfor
-        for c in ['?', ':', '-', '_']
-            call s:metacode(a:mode, c)
-        endfor
-    else
-        for c in [',', '.', '/', ';', '{', '}']
-            call s:metacode(a:mode, c)
-        endfor
-        for c in ['?', ':', '-', '_']
-            call s:metacode(a:mode, c)
-        endfor
-    endif
-endfunc
-
 
 if has('win32')
     set clipboard=unnamed
@@ -186,5 +151,3 @@ else
     autocmd TextYankPost * call s:OSC52()
 endif
 
-
-call Terminal_MetaMode(0)

@@ -19,6 +19,7 @@ return {
             },
         })
 
+        -- Set up formatters
         if User.formatrc.prettier then
             conform.formatters.prettierd = {
                 env = {
