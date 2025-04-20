@@ -54,6 +54,17 @@ function ins:show()
     })
 end
 
+function ins:resize(w,h)
+    self.rect.w = w
+    self.rect.h = h
+    if self.wnd then
+        vim.api.nvim_win_set_config(self.wnd, {
+            width = w,
+            height = h,
+        })
+    end
+end
+
 ---@param _start integer
 ---@param _end integer
 ---@param lines string[]

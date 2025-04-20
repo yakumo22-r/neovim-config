@@ -59,6 +59,29 @@ ins.space = 1
 ---@type table<integer, StyleCell[]>?
 ins.cover_lines = nil
 
+local function init_frames(w,h)
+    local frames = {}
+    ---@type boolean[]
+    local full = {}
+    for _ = 1,w do
+        table.insert(full, true)
+    end
+    table.insert(frames, full)
+
+    for _=2,h-1 do
+        ---@type boolean[]
+        local t = { [1] = true, [w] = true, }
+        table.insert(frames, t)
+    end
+
+
+    table.insert(frames, util.table_clone(full))
+
+    table.insert(frames, {})
+    frames[0] = {}
+    return frames
+end
+
 ---@param x integer
 ---@param y integer 
 ---@param w integer
@@ -74,25 +97,7 @@ function WG.New__WindowGroup(x,y,w,h, space)
     wg.space = space or 1
     space = wg.space
 
-    ---@type boolean[]
-    local full = {}
-    for _ = 1,w do
-        table.insert(full, true)
-    end
-    table.insert(wg.frames, full)
-
-    for _=2,h-1 do
-        ---@type boolean[]
-        local t = { [1] = true, [w] = true, }
-        table.insert(wg.frames, t)
-    end
-
-
-    table.insert(wg.frames, util.table_clone(full))
-
-    table.insert(wg.frames, {})
-    wg.frames[0] = {}
-
+    wg.frames = init_frames(w,h)
 
     wg.bg = Window(x,y,w,h)
     wg.bg.focusable = true
@@ -152,6 +157,20 @@ function ins:add_window(x,y,w,h, frame_hide)
         end
     end
 
+
+    vim.api.nvim_create_autocmd("WinLeave", {
+        buffer = win.wnd,
+        callback = function ()
+            if not self:is_show() or not win.wnd then return end
+            local curr_win = vim.api.nvim_get_current_win()
+            for _,window in ipairs(self.windows) do
+                if win.wnd ~= window.wnd and curr_win == window.wnd  then
+                    return
+                end
+            end
+            self:hide()
+        end
+    })
     return win
 end
 
@@ -167,6 +186,12 @@ function ins:show()
     end
 
     self:switch_focus(self.curr_focus)
+end
+
+function ins:resize(w,h)
+    self.bg:resize(w,h)
+    self.frames = init_frames(w,h)
+    self:refresh()
 end
 
 ---@param index integer

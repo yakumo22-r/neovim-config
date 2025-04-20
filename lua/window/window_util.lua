@@ -1,7 +1,6 @@
 local opts = { noremap = true, silent = true }
 local api = vim.api
 
-
 local WU = {}
 
 WU.StyleNormal = "Normal"
@@ -20,7 +19,6 @@ WU.StyleInfo = "DiagnosticInfo"
 ---@field indent? integer char-width
 ---@field width? integer char-width
 ---@field byte_width? integer char-width
-
 
 ---@param text string
 ---@param indent? integer char-index
@@ -46,24 +44,23 @@ function WU.get_style_line(cells)
 
     local ii = 1
     for _, v in ipairs(cells) do
-
         table.insert(texts, v.text)
         local l = string.len(v.text)
 
         if v.style then
-            table.insert(styles, {style=v.style, _start = ii, _end = ii+l-1})
+            table.insert(styles, { style = v.style, _start = ii, _end = ii + l - 1 })
         end
 
-        ii = ii+l
+        ii = ii + l
     end
 
-    return table.concat(texts),styles
+    return table.concat(texts), styles
 end
 
 ---@param buf integer
 ---@param open boolean
 function WU.set_modifiable(buf, open)
-    api.nvim_set_option_value("modifiable", open,{buf=buf})
+    api.nvim_set_option_value("modifiable", open, { buf = buf })
 end
 
 ---@param buf integer
@@ -71,20 +68,18 @@ end
 ---@param line string
 function WU.set_line(buf, index, line)
     local i = index - 1
-    vim.api.nvim_buf_set_lines(buf, i, i, false, {line})
+    vim.api.nvim_buf_set_lines(buf, i, i, false, { line })
 end
-
 
 ---@param buf integer
 function WU.set_only_read(buf)
-    api.nvim_set_option_value("modifiable", false, {buf=buf})
+    api.nvim_set_option_value("modifiable", false, { buf = buf })
 end
 
 ---@param buf integer
 function WU.set_buf_auto_close(buf)
-    api.nvim_set_option_value("bufhidden", "wipe", {buf=buf})
+    api.nvim_set_option_value("bufhidden", "wipe", { buf = buf })
 end
-
 
 ---@param text string
 ---@param width integer
@@ -92,20 +87,20 @@ end
 function WU.center_text(text, width)
     fill = fill or " "
     local txt_w = vim.fn.strdisplaywidth(text)
-    local padding = string.rep(fill,math.floor((width - txt_w)/2))
+    local padding = string.rep(fill, math.floor((width - txt_w) / 2))
 
     if txt_w >= width then
-        return text, math.ceil(txt_w / width)-1
+        return text, math.ceil(txt_w / width) - 1
     end
-    return padding..text..padding, 0
+    return padding .. text .. padding, 0
 end
 
-local edit_keys = { "i","I", "a", "A","o","O", "c", "C", "d", "D", "p", "P", "u", "U", "r", "R", "x", "X", "s", "S"}
+local edit_keys = { "i", "I", "a", "A", "o", "O", "c", "C", "d", "D", "p", "P", "u", "U", "r", "R", "x", "X", "s", "S" }
 ---@param buf integer
 function WU.block_edit_keys(buf)
-    for _,k in ipairs(edit_keys) do
-        api.nvim_buf_set_keymap(buf, 'v', k, '<Nop>', opts)
-        api.nvim_buf_set_keymap(buf, 'n', k, '<Nop>', opts)
+    for _, k in ipairs(edit_keys) do
+        api.nvim_buf_set_keymap(buf, "v", k, "<Nop>", opts)
+        api.nvim_buf_set_keymap(buf, "n", k, "<Nop>", opts)
     end
 end
 
@@ -118,13 +113,12 @@ function WU.bind_key(buf, key, f, mode)
     vim.keymap.set(mode, key, f, { buffer = buf, noremap = true, silent = true })
 end
 
-
 ---@param width integer
 ---@param height integer
 ---@param borderStyle string
 ---@param x? integer offset
 ---@param y? integer offset
-function WU.layout_middle(width, height, borderStyle,x,y)
+function WU.layout_middle(width, height, borderStyle, x, y)
     borderStyle = borderStyle or WU.StyleInfo
     local ui = vim.api.nvim_list_uis()[1]
     local row = math.floor((ui.height - height) / 2) + (x or 0)
@@ -136,9 +130,16 @@ function WU.layout_middle(width, height, borderStyle,x,y)
         row = row,
         col = col,
         style = "minimal",
-        border = { { "╭", borderStyle }, { "─", borderStyle }, { "╮", borderStyle },
-             { "│", borderStyle }, { "╯", borderStyle }, { "─", borderStyle },
-             { "╰", borderStyle }, { "│", borderStyle } },
+        border = {
+            { "╭", borderStyle },
+            { "─", borderStyle },
+            { "╮", borderStyle },
+            { "│", borderStyle },
+            { "╯", borderStyle },
+            { "─", borderStyle },
+            { "╰", borderStyle },
+            { "│", borderStyle },
+        },
     }
 end
 
@@ -152,18 +153,27 @@ end
 ---@param filename string
 ---@return string icon,string hl_group
 function WU.get_icon_style(filename)
-
     local filetype = vim.filetype.match({ filename = filename }) or "txt"
     -- if not file_icons[filetype] then
-        local web_devicons = require("nvim-web-devicons")
-        local icon,color = web_devicons.get_icon_by_filetype(filetype)
-        return icon,color
---     end
+    local web_devicons = require("nvim-web-devicons")
+    local icon, color = web_devicons.get_icon_by_filetype(filetype)
+    return icon, color
+    --     end
 
---     local item = file_icons[filetype]
+    --     local item = file_icons[filetype]
 
---     return item.icon, item.hl_group
+    --     return item.icon, item.hl_group
+end
+
+---@param window StaticWindow
+---@return boolean
+function WU.is_focus(window)
+    local wnd = window.wnd
+    if wnd then
+        local current_win = api.nvim_get_current_win()
+        return api.nvim_win_is_valid(wnd) and current_win == wnd
+    end
+    return false
 end
 
 return WU
-
