@@ -7,7 +7,8 @@ return {
         vim.g.copilot_enabled = false
 
         -- open/close copilot by <C-Insert>
-        vim.keymap.set('n', '<C-Insert>', function()
+        
+        vim.keymap.set('n', '<leader>co', function()
             vim.g.copilot_enabled = not vim.g.copilot_enabled
             if vim.g.copilot_enabled then
                 print("Copilot ON")
@@ -16,7 +17,7 @@ return {
             end
         end)
 
-        vim.keymap.set('n', '<C-U>', function()
+        vim.keymap.set('n', '<leader>un', function()
             vim.cmd [[
                 setlocal fileformat=unix
             ]]
@@ -25,17 +26,17 @@ return {
         -- copilot keymaps
         vim.g.copilot_no_tab_map = true
 
-        vim.keymap.set('i', '<C-Insert>', 'copilot#Accept("\\<CR>")', {
+        vim.keymap.set('i', '<C-i>', 'copilot#Accept("\\<CR>")', {
           expr = true,
           replace_keycodes = false
         })
 
-        vim.keymap.set('i', '<C-PageDown>', 'copilot#Next()', {
+        vim.keymap.set('i', '<C-d>', 'copilot#Next()', {
           expr = true,
           replace_keycodes = false
         })
 
-        vim.keymap.set('i', '<C-PageUp>', 'copilot#Previous()', {
+        vim.keymap.set('i', '<C-u>', 'copilot#Previous()', {
           expr = true,
           replace_keycodes = false
         })
