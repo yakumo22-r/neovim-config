@@ -36,6 +36,10 @@ if vim.fn.has("macunix") == 1 then
     ensure_env_path("/opt/homebrew/bin")
 end
 
+local PF = require("project.project_file")
+-- if dir .nvim under cwd exists, set undodir as .nvim/undo/. else do nothing
+PF:check_use_undo_dir()
+
 -- c-api lib
 local script_dir = vim.fn.expand("<sfile>:p:h")
 package.path = package.path .. ";" .. script_dir .. "/" .. "lib/?.lua"
