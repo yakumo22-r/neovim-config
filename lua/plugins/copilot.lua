@@ -1,7 +1,20 @@
+local EVENT = false
+
+local function is_dos_text_file_buf()
+    local fmt = vim.bo.fileformat ~= "unix"
+    local isfile = vim.bo.buftype ~= "nofile"
+    if fmt and isfile then
+        if vim.bo.filetype ~= '' then
+            return true
+        end
+    end
+
+    return false
+end
+
 return {
     "github/copilot.vim",
     event = "BufEnter",
-
     config = function()
         -- disable copilot by default
         vim.g.copilot_enabled = false
@@ -12,6 +25,24 @@ return {
             vim.g.copilot_enabled = not vim.g.copilot_enabled
             if vim.g.copilot_enabled then
                 print("Copilot ON")
+                if not EVENT then
+                    -- set fileformat to unix
+                    if vim.fn.has("win32") == 1 then
+                        if is_dos_text_file_buf() then
+                            vim.opt.fileformat = "unix"
+                            vim.opt.fileformats = { "unix" }
+                        end
+
+                        vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
+                            pattern = "*",
+                            callback = function()
+                                if is_dos_text_file_buf() then
+                                    vim.opt.fileformat = "unix"
+                                end
+                            end,
+                        })
+                    end
+                end
             else
                 print("Copilot OFF")
             end
