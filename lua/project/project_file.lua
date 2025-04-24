@@ -59,7 +59,6 @@ function M:get_root()
         if not find then
             root = vim.fn.getcwd() .. "/" .. M:root_name()
         end
-        print(root)
     end
     return root
 end
@@ -120,5 +119,8 @@ function M:get_table(name, default)
     end
     return {}
 end
+
+
+vim.cmd('command! -nargs=* InitProjectFile lua require("project.project_file"):azure_root()')
 
 return M
