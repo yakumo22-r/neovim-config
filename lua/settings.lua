@@ -80,3 +80,44 @@ vim.api.nvim_create_user_command('OpenInSystem', function()
         print("Unsupported system")
     end
 end, {})
+
+vim.api.nvim_create_user_command('ClearShada', function ()
+    local is_windows = vim.fn.has('win32') == 1 or vim.fn.has('win64') == 1
+    -- 设置 ShaDa 文件目录
+    local shada_dir
+    if is_windows then
+        shada_dir = vim.fn.expand('$LOCALAPPDATA/nvim-data/shada')
+    else
+        shada_dir = vim.fn.expand('~/.local/state/nvim/shada')
+    end
+
+    -- 检查目录是否存在
+    if vim.fn.isdirectory(shada_dir) == 0 then
+        vim.api.nvim_echo({{ 'ShaDa directory does not exist: ' .. shada_dir, 'WarningMsg' }}, false, {})
+        return
+    end
+
+    -- 获取所有 .shada 文件
+    local shada_files = vim.fn.glob(shada_dir .. '/main.shada*', false, true)
+
+    if #shada_files == 0 then
+        vim.api.nvim_echo({{ 'No ShaDa files found in: ' .. shada_dir, 'WarningMsg' }}, false, {})
+        return
+    end
+
+    -- 删除每个 ShaDa 文件
+    for _, file in ipairs(shada_files) do
+        if vim.fn.delete(file) == 0 then
+            vim.api.nvim_echo({{ 'Deleted: ' .. file, 'None' }}, false, {})
+        else
+            vim.api.nvim_echo({{ 'Failed to delete: ' .. file, 'ErrorMsg' }}, false, {})
+        end
+    end
+end, {desc = 'Clear all ShaDa files'})
+
+vim.api.nvim_create_user_command('ClearCRLF', function ()
+    vim.api.nvim_buf_call(0, function()
+        vim.cmd('%s/\\r//g')
+    end)
+    vim.api.nvim_echo({{ 'Removed ^M from current buffer', 'None' }}, false, {})
+end, {desc = 'Clear \r\n'})

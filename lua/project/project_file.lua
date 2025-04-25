@@ -21,7 +21,7 @@ function M:check_use_undo_dir()
     vim.defer_fn(function()
         root = M:get_root()
         if vim.fn.isdirectory(root) == 1 then
-            vim.opt.undodir = root.. "/.undo/"
+            vim.opt.undodir = root .. "/.undo/"
         else
             wait_use_undo = true
         end
@@ -62,7 +62,6 @@ function M:get_root()
     end
     return root
 end
-    
 
 function M:azure_root()
     root = M:get_root()
@@ -72,14 +71,14 @@ function M:azure_root()
         end
 
         if wait_use_undo then
-            vim.opt.undodir = root .. "/.undo/" 
+            vim.opt.undodir = root .. "/.undo/"
         end
     end
 
     return root
 end
 
-function M:get_file(name,default)
+function M:get_file(name, default)
     -- read file name from cwd/.nvim, if not, write default
     local file = self:azure_root() .. "/" .. name
     if vim.fn.filereadable(file) == 0 then
@@ -120,7 +119,8 @@ function M:get_table(name, default)
     return {}
 end
 
-
-vim.cmd('command! -nargs=* InitProjectFile lua require("project.project_file"):azure_root()')
+vim.api.nvim_create_user_command("InitProjectFile", function()
+    M:azure_root()
+end, {})
 
 return M

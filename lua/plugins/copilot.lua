@@ -1,15 +1,30 @@
 local EVENT = false
 
 local function is_dos_text_file_buf()
-    local fmt = vim.bo.fileformat ~= "unix"
-    local isfile = vim.bo.buftype ~= "nofile"
-    if fmt and isfile then
-        if vim.bo.filetype ~= '' then
-            return true
+    return vim.bo.fileformat ~= "unix" 
+        and vim.bo.buftype ~= "nofile" 
+        and vim.bo.filetype ~= ''
+end
+
+local function copilot_event()
+    if not EVENT then
+        EVENT = true
+        -- set fileformat to unix
+        if vim.fn.has("win32") == 1 then
+            if is_dos_text_file_buf() then
+                vim.bo.fileformat = "unix"
+            end
+
+            vim.api.nvim_create_autocmd({"FileType"}, {
+                pattern = "*",
+                callback = function(args)
+                    if is_dos_text_file_buf() then
+                        vim.bo.fileformat = "unix"
+                    end
+                end,
+            })
         end
     end
-
-    return false
 end
 
 return {
@@ -25,34 +40,17 @@ return {
             vim.g.copilot_enabled = not vim.g.copilot_enabled
             if vim.g.copilot_enabled then
                 print("Copilot ON")
-                if not EVENT then
-                    -- set fileformat to unix
-                    if vim.fn.has("win32") == 1 then
-                        if is_dos_text_file_buf() then
-                            vim.opt.fileformat = "unix"
-                            vim.opt.fileformats = { "unix" }
-                        end
-
-                        vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
-                            pattern = "*",
-                            callback = function()
-                                if is_dos_text_file_buf() then
-                                    vim.opt.fileformat = "unix"
-                                end
-                            end,
-                        })
-                    end
-                end
+                copilot_event()
             else
                 print("Copilot OFF")
             end
         end)
 
-        vim.keymap.set('n', '<leader>un', function()
-            vim.cmd [[
-                setlocal fileformat=unix
-            ]]
-        end)
+        --   if vim.bo.fileformat == "dos" then
+        --     completion = string.gsub(completion, "\r", "")
+        --   end
+        --   return completion
+        -- end
 
         -- copilot keymaps
         vim.g.copilot_no_tab_map = true
