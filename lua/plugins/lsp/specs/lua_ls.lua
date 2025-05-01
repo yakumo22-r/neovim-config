@@ -48,6 +48,7 @@ settings.xmake = vim.tbl_deep_extend("keep", settings.default, {
     },
     workspace = {
         library = {
+            -- ../xmake_docs
             [vim.fn.expand(vim.fn.fnamemodify(config_dir, ":h") .. "/xmake_docs")] = true,
         },
     },

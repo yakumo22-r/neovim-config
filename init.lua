@@ -5,6 +5,8 @@ vim.cmd("source " .. vim.fn.stdpath("config") .. "/base.vim")
 vim.cmd("source " .. vim.fn.stdpath("config") .. "/base2.vim")
 vim.g.mapleader = " "
 
+vim.opt.clipboard = ""
+
 -- tool
 require("base_func")
 require("tools")
@@ -35,6 +37,10 @@ ensure_env_path("/usr/local/bin")
 if vim.fn.has("macunix") == 1 then
     ensure_env_path("/opt/homebrew/bin")
 end
+
+local PF = require("project.project_file")
+-- if dir .nvim under cwd exists, set undodir as .nvim/undo/. else do nothing
+PF:check_use_undo_dir()
 
 -- c-api lib
 local script_dir = vim.fn.expand("<sfile>:p:h")

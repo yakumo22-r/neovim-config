@@ -25,7 +25,6 @@ set nolist
 
 set fileencodings=utf-8
 set encoding=utf-8
-set fileformat=unix
 
 set scrolloff=2
 set iskeyword+=-
@@ -125,8 +124,9 @@ au BufRead,BufNewFile .zshrc					set filetype=sh
 
 highlight Visual ctermfg=NONE ctermbg=darkgray
 
+
 if has('win32')
-    set clipboard=unnamed
+    set clipboard=unnamedplus
 else
     function! s:raw_echo(str)
         if has('win32') && has('nvim')
