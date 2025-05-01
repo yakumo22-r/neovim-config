@@ -5,6 +5,8 @@ vim.cmd("source " .. vim.fn.stdpath("config") .. "/base.vim")
 vim.cmd("source " .. vim.fn.stdpath("config") .. "/base2.vim")
 vim.g.mapleader = " "
 
+vim.opt.clipboard = ""
+
 -- tool
 require("base_func")
 require("tools")
