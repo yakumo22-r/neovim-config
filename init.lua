@@ -1,3 +1,5 @@
+YKM22 = {}
+
 -- vimrc ./base.vim
 vim.cmd("source " .. vim.fn.stdpath("config") .. "/base.vim")
 
@@ -19,6 +21,7 @@ require("xmake_conf") -- in develop
 -- custom theme
 _G.ykm22_cols = require("ykm22_colors")
 require("ykm22_theme")
+
 
 -- plugins & settings
 require("user")

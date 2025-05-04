@@ -15,10 +15,10 @@ local md_prefix = {
     [20] = { c = "- [x] ", r = "^%- %[x%]%s" },
     [21] = { c = "- [x] ", r = "%-%s%[[%sx]%]%s" },
 }
-YKM.md_prefix = md_prefix
+YKM22.md_prefix = md_prefix
 
 local markdu = {}
-YKM.markdu = markdu
+YKM22.markdu = markdu
 
 local function ClearPrefix(line)
     line = bufu.RmLinePrefix(line,md_prefix[1].r)

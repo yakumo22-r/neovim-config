@@ -4,4 +4,4 @@ function close_curr_buffer()
     vim.cmd("bdelete "..curr_buf)
 end
 
-YKM = {}
+return util

@@ -22,21 +22,21 @@ local function normal_ops()
     return cms.get(), lop
 end
 
-function AddCommentNormal()
+local function AddCommentNormal()
     local u, lop = normal_ops()
     local cmlines = u.check_cm_line(lop.lines)
     u.cm_line(lop.lines, cmlines)
     lop:apply()
 end
 
-function RmCommentNormal()
+local function RmCommentNormal()
     local u, lop = normal_ops()
     local cmlines = u.check_cm_line(lop.lines)
     u.uncm_line(lop.lines, cmlines)
     lop:apply()
 end
 
-function ToggleCommentNormal()
+local function ToggleCommentNormal()
     local u, lop = normal_ops()
     local cmlines, mode = u.check_cm_line(lop.lines)
     local mode_comment = cmlines[1].commented
@@ -61,12 +61,13 @@ local function visual_ops()
         local r1 = vim.fn.line("'<")
         local r2 = vim.fn.line("'>")
         local lines = vim.api.nvim_buf_get_lines(0, r1 - 1, r2, false)
+        print(r1,r2)
         local ll = #lines
         return u,r1,r2,1,#(lines[ll]),lines,ll,mode
     end
 end
 
-function ToggleCommentVisual()
+local function ToggleCommentVisual()
     local u,r1,r2,c1,c2,lines,ll = visual_ops()
     local is_cm = false
     is_cm,c1,c2 = u.check_cm_block(lines[1],lines[ll],c1,c2)
@@ -92,7 +93,7 @@ function ToggleCommentVisual()
     vim.cmd("normal! gv")
 end
 
-function AddCommentVisual()
+local function AddCommentVisual()
     local u,r1,r2,c1,c2,lines,ll = visual_ops()
 
     is_cm,c1,c2 = u.check_cm_block(lines[1],lines[ll],c1,c2)
@@ -109,7 +110,15 @@ function AddCommentVisual()
     vim.cmd("normal! gv")
 end
 
-function RmCommentVisual()
+local function AddCommentVisual2()
+    local u,r1,r2,c1,c2,lines,ll = visual_ops()
+    local lop = new_LOP(r1, r2)
+    local cmlines = u.check_cm_line(lop.lines)
+    u.cm_line(lop.lines, cmlines)
+    lop:apply()
+end
+
+local function RmCommentVisual()
     local u,r1,r2,c1,c2,lines,ll = visual_ops()
     local is_cm = false
     is_cm,c1,c2 = u.check_cm_block(lines[1],lines[ll],c1,c2)
@@ -129,13 +138,35 @@ function RmCommentVisual()
     vim.cmd("normal! gv")
 end
 
+local function RmCommentVisual2()
+    local u,r1,r2,c1,c2,lines,ll = visual_ops()
+    local lop = new_LOP(r1, r2)
+    local cmlines = u.check_cm_line(lop.lines)
+    u.uncm_line(lop.lines, cmlines)
+    lop:apply()
+end
+
+YKM22.CMD_Comment = {index = 0}
+local function cmd(f)
+    local m = YKM22.CMD_Comment
+    m.index = m.index + 1
+    m[m.index] = f
+    return ":lua YKM22.CMD_Comment["..m.index.."]()<CR>"
+end
+
 local opt = { noremap = true, silent = true }
 vim.keymap.set("n", "<C-_>", ToggleCommentNormal, opt)
-vim.keymap.set("v", "<C-_>", ":lua ToggleCommentVisual()<CR>", opt)
+vim.keymap.set("v", "<C-_>", cmd(ToggleCommentVisual), opt)
 vim.keymap.set("n", "<C-/>", ToggleCommentNormal, opt)
-vim.keymap.set("v", "<C-/>", ":lua ToggleCommentVisual()<CR>", opt)
+vim.keymap.set("v", "<C-/>", cmd(ToggleCommentVisual), opt)
+
+vim.keymap.set("v", "<leader>=", cmd(AddCommentVisual2), opt)
+vim.keymap.set("v", "<leader>-", cmd(RmCommentVisual2), opt)
 
 vim.keymap.set("n", "<leader>=", AddCommentNormal, opt)
-vim.keymap.set("v", "<leader>=", ":lua AddCommentVisual()<CR>", opt)
 vim.keymap.set("n", "<leader>-", RmCommentNormal, opt)
-vim.keymap.set("v", "<leader>-", ":lua RmCommentVisual()<CR>", opt)
+
+vim.keymap.set("v", "=", cmd(AddCommentVisual), opt)
+vim.keymap.set("v", "-", cmd(RmCommentVisual), opt)
+
+return M

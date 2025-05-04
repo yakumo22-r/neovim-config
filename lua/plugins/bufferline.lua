@@ -32,6 +32,20 @@ vim.cmd([[
   cnoreabbrev xx WriteQuitBuffer
 ]])
 
+local function next_cycle()
+    local n = math.max(vim.v.count, 1)
+    for i=1,n do
+        vim.cmd("BufferLineCycleNext")
+    end
+end
+
+local function prev_cycle()
+    local n = math.max(vim.v.count, 1)
+    for i=1,n do
+        vim.cmd("BufferLineCyclePrev")
+    end
+end
+
 
 return {
     "akinsho/bufferline.nvim",
@@ -45,10 +59,8 @@ return {
             },
         })
         local opt = { noremap = true, silent = true }
-        vim.keymap.set("n", "gt", ":BufferLineCycleNext<CR>", opt)
-        vim.keymap.set("n", "gT", ":BufferLineCyclePrev<CR>", opt)
-        vim.keymap.set("n", "g,", ":BufferLineCyclePrev<CR>", opt)
-        vim.keymap.set("n", "g.", ":BufferLineCycleNext<CR>", opt)
+        vim.keymap.set("n", "H", prev_cycle, opt)
+        vim.keymap.set("n", "L", next_cycle, opt)
         vim.keymap.set("n", "<bs>c", close_curr_buffer, opt)
         vim.keymap.set("n", "<bs>o", ":BufferLineCloseOthers<CR>", opt)
         vim.keymap.set("n", "<bs>r", ":BufferLineCloseRight<CR>", opt)
