@@ -55,12 +55,15 @@ vim.api.nvim_create_autocmd({"BufNewFile", "BufRead"}, {
 })
 
 local opt = { noremap = true, silent = true }
-require('bufutils')
-vim.api.nvim_set_keymap("v", "<leader>\"", ":lua YKM.bufu.SurroundSymbols('\\\"')<CR>", opt)
-vim.api.nvim_set_keymap("v", "<leader>\'", ":lua YKM.bufu.SurroundSymbols('\\\'')<CR>", opt)
-vim.api.nvim_set_keymap("v", "<leader>(", ":lua YKM.bufu.SurroundSymbols('(',')')<CR>", opt)
-vim.api.nvim_set_keymap("v", "<leader>{", ":lua YKM.bufu.SurroundSymbols('{','}')<CR>", opt)
-vim.api.nvim_set_keymap("v", "<leader>`", ":lua YKM.bufu.SurroundSymbols('`')<CR>", opt)
+local bufu = require('bufutils')
+
+vim.api.nvim_set_keymap("v", "<leader>\"", bufu.SurroundSymbolsCMD('\\\"'), opt)
+vim.api.nvim_set_keymap("v", "<leader>\'", bufu.SurroundSymbolsCMD('\\\''), opt)
+vim.api.nvim_set_keymap("v", "<leader>(", bufu.SurroundSymbolsCMD('(',')',true), opt)
+vim.api.nvim_set_keymap("v", "<leader>)", bufu.SurroundSymbolsCMD('(',')',false), opt)
+vim.api.nvim_set_keymap("v", "<leader>{", bufu.SurroundSymbolsCMD('{','}',true), opt)
+vim.api.nvim_set_keymap("v", "<leader>}", bufu.SurroundSymbolsCMD('{','}',false), opt)
+vim.api.nvim_set_keymap("v", "<leader>`", bufu.SurroundSymbolsCMD('`'), opt)
 
 vim.api.nvim_create_user_command('OpenInSystem', function()
     local filepath = vim.api.nvim_buf_get_name(0)
@@ -83,7 +86,6 @@ end, {})
 
 vim.api.nvim_create_user_command('ClearShada', function ()
     local is_windows = vim.fn.has('win32') == 1 or vim.fn.has('win64') == 1
-    -- 设置 ShaDa 文件目录
     local shada_dir
     if is_windows then
         shada_dir = vim.fn.expand('$LOCALAPPDATA/nvim-data/shada')
@@ -91,13 +93,11 @@ vim.api.nvim_create_user_command('ClearShada', function ()
         shada_dir = vim.fn.expand('~/.local/state/nvim/shada')
     end
 
-    -- 检查目录是否存在
     if vim.fn.isdirectory(shada_dir) == 0 then
         vim.api.nvim_echo({{ 'ShaDa directory does not exist: ' .. shada_dir, 'WarningMsg' }}, false, {})
         return
     end
 
-    -- 获取所有 .shada 文件
     local shada_files = vim.fn.glob(shada_dir .. '/main.shada*', false, true)
 
     if #shada_files == 0 then
@@ -105,7 +105,6 @@ vim.api.nvim_create_user_command('ClearShada', function ()
         return
     end
 
-    -- 删除每个 ShaDa 文件
     for _, file in ipairs(shada_files) do
         if vim.fn.delete(file) == 0 then
             vim.api.nvim_echo({{ 'Deleted: ' .. file, 'None' }}, false, {})

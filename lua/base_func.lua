@@ -53,6 +53,4 @@ function util.table_connect(s, n)
     return tbl
 end
 
-YKM = {}
-
 return util
