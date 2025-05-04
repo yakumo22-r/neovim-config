@@ -19,6 +19,13 @@ local ins ={
     rect = nil,
 
     style = "minimal",
+
+    z = 1,
+
+    ---@type function
+    on_winleave = nil,
+    ---@type function
+    on_q = nil,
 }
 
 ---@type boolean
@@ -34,6 +41,24 @@ local function New_StaticWindow(x,y,w,h)
 
     sw.rect = {x=x,y=y,w=w,h=h}
     sw.buf = vim.api.nvim_create_buf(false, true)
+
+    vim.api.nvim_create_autocmd("WinLeave", {
+        buffer = sw.buf,
+        callback = function()
+            if sw.on_winleave then
+                sw.on_winleave()
+            end
+        end,
+    })
+
+    vim.api.nvim_create_autocmd("QuitPre", {
+        buffer = sw.buf,
+        callback = function()
+            if sw.on_q then
+                sw.on_q()
+            end
+        end
+    })
 
     return sw
 end
@@ -51,6 +76,7 @@ function ins:show()
         row = area.y,
         focusable = self.focusable,
         style = self.style,
+        zindex = self.z,
     })
 end
 
@@ -65,8 +91,8 @@ function ins:resize(w,h)
     end
 end
 
----@param _start integer
----@param _end integer
+---@param _start? integer start_index:1
+---@param _end? integer
 ---@param lines string[]
 function ins:set_lines(_start,_end,lines)
     _end = _end or _start+#lines 
@@ -86,7 +112,6 @@ end
 
 function ins:set_select_window()
     self.style = nil
-
 end
 
 ---@param open boolean
@@ -96,7 +121,9 @@ end
 
 function ins:focus()
     if self.wnd and self.wnd > 0 then
-        vim.api.nvim_set_current_win(self.wnd)
+        if vim.api.nvim_get_current_win() ~= self.wnd then
+            vim.api.nvim_set_current_win(self.wnd)
+        end
     end
 end
 

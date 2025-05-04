@@ -3,10 +3,10 @@ filetree_view
 
 use multiple windows to show file tree and operations window
 [x]fletree
-[ ]filepath
+[x]filepath
 
 [ ]type text operation
-    [ ]rename
+    [x]rename
     [ ]newfile
 
 [ ]move
@@ -28,13 +28,12 @@ use multiple windows to show file tree and operations window
 [ ] sftp interface
 ]]
 
-
 --]]
 
--- display tree nod
+-- display tree node
 local util = require("base_func")
-local wu = require("window.window_util")
-local wg = require("window.window_group")
+local WU = require("window.window_util")
+local WG = require("window.window_group")
 
 local FH = require("filetree.filetree_handle")
 local FileTreeEvt = FH.FileTreeEvt
@@ -46,14 +45,14 @@ local api = vim.api
 ---@field styles BufStyle[]
 
 local WTree = 1
-local WInput = 2
+local WTreePath = 2
+local WInput = 3
 
-local _cell = wu.create_cell
-
+-- filetree view
 ---@class FT_View:WindowGroup
 local ins = {}
 
-ins.super = wg.class
+ins.super = WG.class
 
 ---@type FT_Handler
 ins.ft_handler = nil
@@ -61,8 +60,11 @@ ins.ft_handler = nil
 ---@type FT_TreeLines[]
 ins.lines = {}
 
+---@type TextInput
+ins.textInput = nil
+
 function ins:refresh()
-    wg.class.refresh(self, 1)
+    WG.class.refresh(self, 1)
 end
 
 ---@param nodes FT_Node[]
@@ -75,6 +77,18 @@ local function count_children_display(nodes)
         count = count + 1
     end
     return count
+end
+
+---@param view FT_View
+---@param currline integer
+---@param node FT_Node
+local function find_node_line(view,currline, node)
+    for i=currline,1,-1 do
+        local line = view.lines[i]
+        if line.node == node then
+            return i
+        end
+    end
 end
 
 ---@param node FT_Node
@@ -97,7 +111,7 @@ local function filename_to_line(node)
             }
     end
 
-    local icon, hl_group = wu.get_icon_style(node.name)
+    local icon, hl_group = WU.get_icon_style(node.name)
 
     ---@type BufStyle[]
     local styles = {
@@ -213,41 +227,156 @@ function ins:remove_nodes(_start, _end)
     tree:set_modifiable(false)
 end
 
+---@param x integer
+---@param y integer
+---@param w integer
+---@param h integer
+---@param frame_hide? integer 4bit top bottom left right
+---@return StaticWindow
+function ins:add_window(x, y, w, h, frame_hide)
+    local win = self.super.add_window(self, x, y, w, h, frame_hide)
+
+    win.on_winleave = function()
+        vim.schedule(function()
+            if not self:is_show() or not win.wnd or self.textInput:is_show() then
+                return
+            end
+            local curr_win = vim.api.nvim_get_current_win()
+            for _, window in ipairs(self.windows) do
+                print(string.format("WinLeave leave(%s) curr(%s) for(%s)", tostring(win.wnd), tostring(curr_win), tostring(window.wnd)))
+                if curr_win == window.wnd then
+                    print("WinLeave group stay")
+                    return
+                end
+            end
+            self:hide()
+        end)
+    end
+
+    return win
+end
+
+---@param view FT_View
+---@param hide? boolean
+local function open_dir(view, hide)
+    local cursor = api.nvim_win_get_cursor(view.windows[WTree].wnd)
+    local line_id = cursor[1]
+    local node = view.lines[line_id].node
+    view.ft_handler:entry_event(FileTreeEvt.OpenClose, node)
+    if node.is_dir then
+        if node.dir_open then
+            view:refresh_nodes({ node }, line_id, line_id)
+            view:insert_nodes(node.children, line_id + 1)
+        else
+            view:refresh_nodes({ node }, line_id, line_id)
+            view:remove_nodes(line_id + 1, line_id + count_children_display(node.children))
+        end
+    else
+        if hide then
+            view:hide()
+        end
+    end
+end
+
 -- file tree operation keys
 ---@param view FT_View
 local function bind_keys(view)
     local buf = view.windows[WTree].buf
-    wu.bind_key(buf, "<CR>", "<Nop>", "n")
-    wu.bind_key(buf, "<CR>", "<Nop>", "v")
+    WU.bind_key(buf, "<CR>", "<Nop>", "n")
+    WU.bind_key(buf, "<CR>", "<Nop>", "v")
 
     -- open file/dir
-    wu.bind_key(buf, "o", function()
+    WU.bind_key(buf, "o", function()
+        open_dir(view)
+    end, "n")
+
+    WU.bind_key(buf, "<CR>", function()
+        open_dir(view, true)
+    end)
+
+    -- rename file/dir
+    WU.bind_key(buf, "r", function()
         local cursor = api.nvim_win_get_cursor(view.windows[WTree].wnd)
         local line_id = cursor[1]
         local node = view.lines[line_id].node
-        v.ft_handler:entry_event(FileTreeEvt.OpenClose, node)
-        if node.is_dir then
-            if node.dir_open then
-                view:refresh_nodes({ node }, line_id, line_id)
-                view:insert_nodes(node.children, line_id + 1)
-            else
-                view:refresh_nodes({ node }, line_id, line_id)
-                view:remove_nodes(line_id + 1, line_id + count_children_display(node.children))
+
+        local callback = function(str)
+            view:switch_focus(WTree)
+            if not str then
+                return
             end
+
+            local err = view.ft_handler:entry_event(FileTreeEvt.Rename, node, str)
+            if not err then
+                view:refresh_nodes({ node }, line_id, line_id)
+            end
+        end
+
+        local path
+        if node.is_dir then
+            -- path = vim.fs.joinpath(node.path)
+            -- view.textInput:init(" Rename Path ", callback, node.name)
+            vim.notify("can't not rename path", vim.log.levels.WARN)
+        else
+            path = vim.fs.joinpath(node.parent.path, node.name)
+            view.textInput:init(" Rename File ", callback, node.name)
         end
     end, "n")
 
-    -- rename file/dir
-    wu.bind_key(buf, "r", function()
+    WU.bind_key(buf, "a", function ()
         local cursor = api.nvim_win_get_cursor(view.windows[WTree].wnd)
         local line_id = cursor[1]
         local node = view.lines[line_id].node
-        print(node.name)
-        -- v.ft_handler:entry_event(FileTreeEvt.Rename, node)
-        -- if not node.is_dir then
-        --     v:refresh_nodes({node}, line_id, line_id)
-        -- end
-    end, "n")
+
+        local callback = function (text)
+            view:switch_focus(WTree)
+            if not text then
+                return
+            end
+
+            local args = {
+                name = text,
+
+                ---@type function
+                f = nil
+            }
+
+            ---@type any
+            local rnode = view.ft_handler:newfile(node, args)
+
+            -- refresh node display
+            if rnode then
+                if rnode.parent then
+                    print("currline:", line_id)
+                    line_id = find_node_line(view, line_id, rnode)
+                    print("findline:", line_id)
+                else
+                    line_id = 0
+                end
+
+                if rnode.dir_open then
+                    view:remove_nodes(line_id+1, line_id + count_children_display(rnode.children))
+                end
+
+                local ok, err = pcall(args.f)
+
+                if not ok then
+                    vim.notify(err, vim.log.levels.ERROR)
+                end
+
+                rnode.dir_open = true
+
+                view:refresh_nodes({ rnode }, line_id, line_id)
+                view:insert_nodes(rnode.children, line_id + 1)
+            end
+        end
+
+        if node.is_dir then
+            view.textInput:init(" Create File ", callback, node.path.."/")
+        else
+            view.textInput:init(" Create File ", callback, node.parent.path.."/")
+        end
+    end)
 
     -- delete file/dir
 end
@@ -255,54 +384,72 @@ end
 function ins:show()
     self.bg:show()
 
-    local wtree = self.windows[WTree]
-    wtree:show()
+    self.windows[WTreePath]:show()
+    self.windows[WTree]:show()
 
     self:switch_focus(WTree)
 end
 
-local function get_ft_wh(self, w,h)
-    w = w - self.space*2 - 2
-    h = h-3
-    return {w,h}
+local function get_ft_wh(self, w, h)
+    w = w - self.space * 2 - 2
+    h = h - 3
+    return { w, h }
 end
 
 function ins:on_vim_resize(wh)
     local w = wh.w
     local h = wh.h
     self:resize(w, h)
-    local ftwh = get_ft_wh(self, w,h)
-    self.windows[ftwh]:resize(ftwh[0],ftwh[1])
+    local ftwh = get_ft_wh(self, w, h)
+    self.windows[ftwh]:resize(ftwh[0], ftwh[1])
+end
+
+local function set_buf_only_view(bufs)
+    if type(bufs) ~= "table" then
+        bufs = { bufs }
+    end
+    for _, buf in ipairs(bufs) do
+        WU.set_only_read(buf)
+        WU.set_modifiable(buf, false)
+        WU.block_edit_keys(buf)
+    end
 end
 
 ---@param ft_handler FT_Handler
 local function New__FT_View(ft_handler, w, h)
     ---@type FT_View
-    v = util.table_connect(wg.New__WindowGroup(1, 1, w, h), ins)
+    local v = util.table_connect(WG.New__WindowGroup(vim.o.columns - w + 1, 1, w, h), ins)
 
-    local buf
-
-    local tree_wnd = v:add_window(1, 2, w, h - 1, wg.NoBorder)
-    buf = tree_wnd.buf
+    -- file tree
+    local tree_wnd = v:add_window(1, 2, w, h - 1, WG.NoBorder)
 
     v.ft_handler = ft_handler
 
+    v.textInput = require("filetree.text_input")()
+
+    -- root path show
+    local tree_path = v:add_window(1, 1, w, 3, WG.NoBorder)
+    local pathText, pathStyle = WU.short_text(v.ft_handler:root_path(), tree_path.rect.w, WU.StyleVar)
+    tree_path:set_lines(1, nil, { pathText })
+    tree_path:set_styles(1, { pathStyle })
+
     tree_wnd:set_select_window()
-    wu.set_only_read(buf)
-    wu.set_modifiable(buf, false)
-    wu.block_edit_keys(buf)
+    set_buf_only_view({
+        tree_wnd.buf,
+        tree_path.buf,
+    })
 
     bind_keys(v)
 
     v:insert_nodes(ft_handler.root.children, 1, true)
 
-    local title = _cell(" File Tree ")
+    local title = WU._cell(" File Tree ")
     title.indent = math.floor((w - title.width) / 2)
     v.cover_lines = {
         [1] = { title },
     }
 
-    v:switch_focus(WTree)
+    -- v:switch_focus(WTree)
 
     v:refresh()
 

@@ -7,6 +7,7 @@ WU.StyleNormal = "Normal"
 WU.StyleError = "DiagnosticError"
 WU.StyleWarn = "DiagnosticWarn"
 WU.StyleInfo = "DiagnosticInfo"
+WU.StyleVar = "NavicIconsVariable"
 
 ---@class BufStyle
 ---@field style string
@@ -24,7 +25,7 @@ WU.StyleInfo = "DiagnosticInfo"
 ---@param indent? integer char-index
 ---@param style? string
 ---@return StyleCell
-function WU.create_cell(text, indent, style)
+function WU._cell(text, indent, style)
     return {
         text = text,
         style = style,
@@ -93,6 +94,25 @@ function WU.center_text(text, width)
         return text, math.ceil(txt_w / width) - 1
     end
     return padding .. text .. padding, 0
+end
+
+---@param text string
+---@param width integer
+---@param style? string
+---@return string, BufStyle
+function WU.short_text(text, width, style)
+    local textw = vim.fn.strdisplaywidth(text)
+    local exceed = textw - width 
+    while exceed > 0 do
+        text = text:sub(1, #text-exceed-3).."..."
+        textw = vim.fn.strdisplaywidth(text)
+        exceed = textw - width
+    end
+    return text, {
+        style = style,
+        _start = 1,
+        _end = #text + 1,
+    }
 end
 
 local edit_keys = { "i", "I", "a", "A", "o", "O", "c", "C", "d", "D", "p", "P", "u", "U", "r", "R", "x", "X", "s", "S" }

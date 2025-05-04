@@ -125,6 +125,7 @@ function ins:add_window(x,y,w,h, frame_hide)
     local _w = w - self.space*2 - 2
     local _h = h - 2
     local win = Window(_x,_y,_w,_h)
+    win.z = 2
 
     frame_hide = frame_hide or 0
 
@@ -157,20 +158,10 @@ function ins:add_window(x,y,w,h, frame_hide)
         end
     end
 
+    win.on_q = function ()
+        self:hide()
+    end
 
-    vim.api.nvim_create_autocmd("WinLeave", {
-        buffer = win.wnd,
-        callback = function ()
-            if not self:is_show() or not win.wnd then return end
-            local curr_win = vim.api.nvim_get_current_win()
-            for _,window in ipairs(self.windows) do
-                if win.wnd ~= window.wnd and curr_win == window.wnd  then
-                    return
-                end
-            end
-            self:hide()
-        end
-    })
     return win
 end
 
@@ -205,7 +196,8 @@ end
 
 function ins:hide()
     self.bg:hide()
-    for _,w in ipairs(self.windows) do
+    for i,w in ipairs(self.windows) do
+        -- print("hide", i)
         w:hide()
     end
 end
