@@ -21,12 +21,6 @@ util.bit_ls = bit.lshift
 util.bit_rs = bit.rshift
 
 
-function close_curr_buffer()
-    local curr_buf = vim.api.nvim_get_current_buf()
-    vim.cmd("BufferLineCyclePrev")
-    vim.cmd("bdelete " .. curr_buf)
-end
-
 function util.table_clone(tbl)
     local copy = {}
     for k, v in pairs(tbl) do
@@ -37,6 +31,24 @@ function util.table_clone(tbl)
         end
     end
     return copy
+end
+
+function util.tbl2str(tbl)
+    local str = ""
+    local t = type(tbl)
+    if t == "table" then
+        for k, v in pairs(tbl) do
+            if type(v) == "table" then
+                str = str .. k .. " = " .. util.tbl2str(v) .. "\n"
+            else
+                str = str .. k .. " = " .. tostring(v) .. "\n"
+            end
+        end
+    else
+        str = tostring(tbl)
+    end
+
+    return str
 end
 
 function util.table_connect(s, n)

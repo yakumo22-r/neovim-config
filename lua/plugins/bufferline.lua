@@ -1,4 +1,5 @@
 local bufferline = {}
+local bufu = require('bufutils')
 
 -- Function to delete the current buffer
 local function delete_current_buffer(force)
@@ -9,7 +10,7 @@ local function delete_current_buffer(force)
         return
     end
 
-    close_curr_buffer()
+    bufu.close_curr_buffer()
 end
 
 -- Function to save and delete the current buffer
@@ -61,7 +62,7 @@ return {
         local opt = { noremap = true, silent = true }
         vim.keymap.set("n", "H", prev_cycle, opt)
         vim.keymap.set("n", "L", next_cycle, opt)
-        vim.keymap.set("n", "<bs>c", close_curr_buffer, opt)
+        vim.keymap.set("n", "<bs>c", bufu.close_curr_buffer, opt)
         vim.keymap.set("n", "<bs>o", ":BufferLineCloseOthers<CR>", opt)
         vim.keymap.set("n", "<bs>r", ":BufferLineCloseRight<CR>", opt)
         vim.keymap.set("n", "<bs>l", ":BufferLineCloseLeft<CR>", opt)

@@ -4,6 +4,12 @@ local stru = require('strutils')
 ---@class BUFU
 local bufu = {}
 
+function bufu.close_curr_buffer(buf)
+    local curr_buf = vim.api.nvim_get_current_buf()
+    vim.cmd("BufferLineCyclePrev")
+    vim.cmd("bdelete " .. curr_buf)
+end
+
 function bufu.TrimStart(line)
 
     local space_num = 0
