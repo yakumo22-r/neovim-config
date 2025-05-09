@@ -64,6 +64,7 @@ vim.api.nvim_set_keymap("v", "<leader>)", bufu.SurroundSymbolsCMD('(',')',false)
 vim.api.nvim_set_keymap("v", "<leader>{", bufu.SurroundSymbolsCMD('{','}',true), opt)
 vim.api.nvim_set_keymap("v", "<leader>}", bufu.SurroundSymbolsCMD('{','}',false), opt)
 vim.api.nvim_set_keymap("v", "<leader>`", bufu.SurroundSymbolsCMD('`'), opt)
+vim.api.nvim_set_keymap("v", "<leader> ", bufu.SurroundSymbolsCMD(' '), opt)
 
 vim.api.nvim_create_user_command('OpenInSystem', function()
     local filepath = vim.api.nvim_buf_get_name(0)

@@ -1,4 +1,4 @@
-vim.cmd("command! -nargs=* InitFormatter lua InitFormatter(<f-args>)")
+vim.cmd("command! -nargs=* InitFormatter lua YKM22.InitFormatter(<f-args>)")
 
 local maps = {
     cpp = ".clang-format",
@@ -13,7 +13,7 @@ local function copy_files(name)
     os.execute('cp "' .. formatpath .. '" "' .. target .. '"')
 end
 
-function InitFormatter(...)
+function YKM22.InitFormatter(...)
     local args = { ... }
     if #args == 0 then
         for k, v in pairs(maps) do

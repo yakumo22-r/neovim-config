@@ -44,7 +44,7 @@ function bufu.SurroundSymbols(_beg,_end,add)
     local last_char = lines[len]:sub(end_col, end_col)
 
     if add == nil then
-        add = not (first_char == _beg and last_char == _end)
+        add = (first_char == _beg and last_char == _end) and 0 or 1
     elseif type(add) == "string" then
         add = tonumber(add)
     end
