@@ -8,9 +8,9 @@ function Custom.config()
     local tb = require("telescope.builtin")
 
     Custom.make_entry = require("telescope.make_entry")
-    Custom.utils = require "telescope.utils"
-    Custom.strings = require "plenary.strings"
-    Custom.entry_display = require "telescope.pickers.entry_display"
+    Custom.utils = require("telescope.utils")
+    Custom.strings = require("plenary.strings")
+    Custom.entry_display = require("telescope.pickers.entry_display")
 
     local lsp_opt = {
         entry_maker = Custom.make_entry_text,
@@ -80,9 +80,10 @@ function Custom.config()
                 previewer = false,
                 mappings = {
                     n = {
-                        ["d"] = actions.delete_buffer + actions.move_to_top,
+                        ["d"] = actions.delete_buffer,
                     },
                 },
+                entry_maker = Custom.make_entry_buffers,
             },
         },
     })
@@ -94,6 +95,7 @@ function Custom.config()
             fuzzy = false,
             use_regex = false,
             search = "",
+            entry_maker = Custom.make_entry_line_content,
         })
     end
 
@@ -121,6 +123,74 @@ function Custom.config()
     vim.keymap.set("n", "<leader>gs", tb.git_status, { desc = "show all lsp diagnotics" })
 end
 
+function Custom.make_entry_buffers(tbl)
+    local entry = tbl.info
+    -- entry = Custom.make_entry.gen_from_buffer({})(tbl)
+    -- print(vim.inspect(tbl))
+
+
+    local name = vim.fn.fnamemodify(entry.name, ":.")
+    local icon, hl_group = Custom.utils.get_devicons(entry.name)
+    local icon_width = Custom.strings.strdisplaywidth(icon)
+
+    return Custom.make_entry.set_default_entry_mt({
+        value = entry,
+        ordinal = entry.name,
+        bufnr = entry.bufnr,
+        filename = entry.name,
+        lnum = entry.lnum,
+        col = entry.col,
+        text = entry.text,
+        start = entry.start,
+        finish = entry.finish,
+        display = function()
+            return Custom.entry_display.create({
+                separator = " ",
+                items = {
+                    { width = 4 },
+                    { width = icon_width },
+                    { remaining = true },
+                },
+            })({
+                -- { string.format("[%d:%d]", entry.lnum, entry.col), "TelescopeResultsNumber" },
+                {tostring(entry.bufnr), "TelescopeResultsNumber"},
+                { icon, hl_group },
+                { string.format("%s:%d", name, entry.lnum) },
+            })
+        end,
+    }, entry)
+end
+
+function Custom.make_entry_line_content(entry)
+    entry = Custom.make_entry.gen_from_vimgrep({})(entry)
+    if not entry then
+        return nil
+    end
+    return Custom.make_entry.set_default_entry_mt({
+        value = entry,
+        ordinal = entry.filename .. " " .. entry.text,
+        bufnr = entry.bufnr,
+        filename = entry.filename,
+        lnum = entry.lnum,
+        col = entry.col,
+        text = entry.text,
+        start = entry.start,
+        finish = entry.finish,
+        display = function(_entry)
+            return Custom.entry_display.create({
+                separator = " ",
+                items = {
+                    { remaining = true },
+                    { remaining = true },
+                },
+            })({
+                { string.format("[%d:%d]", _entry.lnum, _entry.col), "TelescopeResultsNumber" },
+                { _entry.text },
+            })
+        end,
+    }, entry)
+end
+
 function Custom.make_entry_text(entry)
     entry = entry or {}
     local show_line = vim.F.if_nil(entry.show_line, true)
@@ -144,22 +214,17 @@ function Custom.make_entry_text(entry)
         items = {
             { width = icon_width },
             { remaining = true },
-            {width = 2},
+            { width = 2 },
             { remaining = true },
         },
     })
 
     local make_display = function(_entry)
         return displayer({
-            {icon,hl_group},
-            {string.format("%s:%d:%d", relpath,_entry.lnum,_entry.col)},
-            {"->", "TelescopeResultsNumber"},
-            {
-                vim.trim(_entry.text),
-                function ()
-                    return {}
-                end
-            }
+            { icon, hl_group },
+            { string.format("%s [%d:%d]", relpath, _entry.lnum, _entry.col) },
+            { "->", "TelescopeResultsNumber" },
+            { vim.trim(_entry.text) },
         })
     end
 

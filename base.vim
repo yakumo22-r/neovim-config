@@ -112,6 +112,8 @@ nnoremap <silent> c "_c
 vnoremap <silent> c "_c
 vnoremap <silent> p "_dp
 vnoremap <silent> P "_dP
+nnoremap <silent> <C-y> "+y
+vnoremap <silent> <C-y> "+y
 
 vnoremap <silent> q <Esc>
 
