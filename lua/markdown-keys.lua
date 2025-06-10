@@ -117,26 +117,38 @@ local function set(...)
     vim.api.nvim_buf_set_keymap(0, ...)
 end
 
+YKM22.CMD_Markdown = {
+    index = 0
+}
+
+local function cmd(f, v)
+    local m = YKM22.CMD_Markdown
+    m.index = m.index + 1
+    m[m.index] = f
+    return ":lua YKM22.CMD_Markdown["..m.index.."]("..v..")<CR>"
+end
+
 return function ()
-    set("n", "<leader>0", ":lua YKM.markdu.format_to(0)<CR>", opt)
-    set("v", "<leader>0", ":lua YKM.markdu.formats_to(0)<CR>", opt)
+    
+    set("n", "<leader>0", cmd(markdu.format_to, 0), opt)
+    set("v", "<leader>0", cmd(markdu.formats_to, 0), opt)
 
-    set("n", "<leader>1", ":lua YKM.markdu.format_to(1)<CR>", opt)
-    set("n", "<leader>2", ":lua YKM.markdu.format_to(2)<CR>", opt)
-    set("n", "<leader>3", ":lua YKM.markdu.format_to(3)<CR>", opt)
-    set("n", "<leader>4", ":lua YKM.markdu.format_to(4)<CR>", opt)
-    set("n", "<leader>5", ":lua YKM.markdu.format_to(5)<CR>", opt)
-    set("n", "<leader>6", ":lua YKM.markdu.format_to(6)<CR>", opt)
+    set("n", "<leader>1", cmd(markdu.format_to, 1), opt)
+    set("n", "<leader>2", cmd(markdu.format_to, 2), opt)
+    set("n", "<leader>3", cmd(markdu.format_to, 3), opt)
+    set("n", "<leader>4", cmd(markdu.format_to, 4), opt)
+    set("n", "<leader>5", cmd(markdu.format_to, 5), opt)
+    set("n", "<leader>6", cmd(markdu.format_to, 6), opt)
 
-    set("n", "<leader>]", ":lua YKM.markdu.header_level(1)<CR>", opt)
-    set("n", "<leader>[", ":lua YKM.markdu.header_level(-1)<CR>", opt)
+    set("n", "<leader>]", cmd(markdu.header_level, 1), opt)
+    set("n", "<leader>[", cmd(markdu.header_level, -1), opt)
 
-    set("n", "<leader>.", ":lua YKM.markdu.format_to(17)<CR>", opt)
-    set("v", "<leader>.", ":lua YKM.markdu.formats_to(17)<CR>", opt)
+    set("n", "<leader>.", cmd(markdu.format_to,17), opt)
+    set("v", "<leader>.", cmd(markdu.formats_to,17), opt)
 
-    set("v", "<leader>u", ":lua YKM.markdu.formats_to(18)<CR>", opt)
-    set("n", "<leader>u", ":lua YKM.markdu.format_to(18)<CR>", opt)
+    set("n", "<leader>.", cmd(markdu.format_to,18), opt)
+    set("v", "<leader>.", cmd(markdu.formats_to,18), opt)
 
-    set("v", "<leader>x", ":lua YKM.markdu.checkboxs_toggle()<CR>", opt)
-    set("n", "<leader>x", ":lua YKM.markdu.checkbox_toggle()<CR>", opt)
+    set("v", "<leader>x", cmd(markdu.checkboxs_toggle, 0), opt)
+    set("n", "<leader>x", cmd(markdu.checkbox_toggle, 0), opt)
 end
