@@ -102,10 +102,10 @@ function ins:newfile(node, args)
     -- maybe only create path 
     local path_len = #path
     local trim_end = 0
-    local last_char = path[path_len]
+    local last_char = path:sub(path_len)
     while last_char == '/' or last_char == '\\' do
         trim_end = trim_end + 1
-        last_char = path[path_len - trim_end]
+        last_char = path:sub(path_len - trim_end, 1)
     end
 
     local filename = nil
@@ -117,78 +117,33 @@ function ins:newfile(node, args)
     end
 
 
-    if not filename and path == node.path then
+    if not filename and path == node.dir.path then
         vim.notify("Nothing Create!!!", vim.log.levels.WARN)
         -- "no need to create"
         return
     end
 
-    if not node.is_dir then
-        ---@type FT_Node
-        node = node.parent
-    end
-
-    print("new file", oPath, filename, path, node.path)
-
     -- not under root
-    local root_path = self:root_path()
-    if path:sub(1,#root_path) ~= root_path then
-        vim.notify("create file/dir must under root!!!", vim.log.levels.ERROR)
+    local root_path = node.dir.path
+    local sub_char = path:sub(#root_path+1,1)
+    if path:sub(1,#root_path) ~= root_path and (sub_char == '/' or sub_char == '\\') then
+        vim.notify(string.format("create file/dir must under %d",node.dir.path), vim.log.levels.ERROR)
+        return
     end
 
-    local relPath = path:sub(#root_path+1)
-    relPath:find('/')
-
-    -- check need to create path 
-    local rnode = node
-    local baseParent = path
-    local dirname = vim.fn.fnamemodify(path, ":t")
-    local parent = baseParent
-    ---@type FT_Node[]
-    local dir_nodes = {}
-
-    while rnode and rnode.path ~= parent do
-        table.insert(dir_nodes, {
-            is_dir = true,
-            name = dirname,
-            path = parent,
-        })
-        rnode = rnode.parent or rnode
-        parent = vim.fn.fnamemodify(parent, ":h")
+    local need_mkdir = false
+    -- if true then return end
+    if not filename or vim.fn.fnamemodify(oPath, ":h") ~= root_path then
+        need_mkdir = true
     end
-
-    node = rnode
 
     -- create path
-    args.f = function ()
-        if dir_nodes[1] then
-            self:list_dir(rnode)
-            rnode.dir_open = true
-            vim.fn.mkdir(baseParent, "p")
-            local len = #dir_nodes
-            local last = dir_nodes[len]
-
-            table.insert(rnode.children, last)
-            table.sort(rnode.children, sort_nodes)
-            last.level = rnode.level + 1
-
-            for i=1,len do
-                local dirnode = dir_nodes[i]
-                dirnode.parent = dir_nodes[i+1] or rnode
-                dirnode.level = last.level + (len-i)
-                local child = dir_nodes[i-1]
-                dirnode.children = child and { child } or {}
-                dirnode.dir_open = true
-            end
-
-            node = dir_nodes[1]
+    local ok,err = pcall(function ()
+        if need_mkdir then
+            vim.fn.mkdir(path, "p")
         end
 
-        args.new_node = node
         -- create file
-        if not node.children then
-            self:list_dir(node)
-        end
         if filename then
             local file = io.open(oPath, "r")
             if not file then
@@ -196,29 +151,42 @@ function ins:newfile(node, args)
                 if file then
                     file:write("")
                     file:close()
-
-                    print("create file success", oPath)
-                    table.insert(node.children, {
-                        name = filename,
-                        is_dir = false,
-                        level = node.level+1,
-                        parent = node,
-                    })
-                    table.sort(node.children, sort_nodes)
                 else
-                    assert(false, "create file error: " .. oPath)
+                    vim.notify("Create file error -> " .. oPath, vim.log.levels.ERROR)
                 end
             else
                 file:close()
-                assert(false, "filename already exsist: " .. oPath)
+                vim.notify("Filename already exsist: " .. oPath, vim.log.levels.ERROR)
             end
         end
-    end
+    end)
 
-    return rnode
+    if not ok then
+        vim.notify("Create file/dir error: ".. err, vim.log.levels.ERROR)
+    end
 end
 
 -- TODO:
-function ins:remove(node) end
+---@param node FT_Node
+function ins:remove(node) 
+    local dir = node.parent.dir or {}
+    local absolute_path = vim.fs.joinpath(dir.path, node.name)
+    if vim.fn.filereadable(absolute_path) == 0 and vim.fn.isdirectory(absolute_path) == 0 then
+        vim.notify("Path does not exist: " .. absolute_path, vim.log.levels.ERROR)
+        return
+    end
 
+    local success
+    if vim.fn.isdirectory(absolute_path) == 1 then
+        success = vim.fn.delete(absolute_path, "rf") == 0 -- delete directory
+    else
+        success = vim.fn.delete(absolute_path) == 0 -- delete file
+    end
+
+    if success then
+        vim.notify("Deleted: " .. absolute_path, vim.log.levels.INFO)
+    else
+        vim.notify("Failed to delete: " .. absolute_path, vim.log.levels.ERROR)
+    end
+end
 return FH

@@ -7,11 +7,11 @@ use multiple windows to show file tree and operations window
 
 [ ]type text operation
     [x]rename
-    [ ]newfile
+    [x]newfile
 
 [ ]move
 [ ]copy
-[ ]delete
+[x]delete
 
 [ ]file groups
     [ ] auto groups by git
@@ -21,7 +21,7 @@ use multiple windows to show file tree and operations window
     [ ] move
 [ ] custom operation
 
-[ ] be a plugins
+[ ] be a plugin
 
 [ ] show as buffer
 
@@ -62,6 +62,9 @@ ins.lines = {}
 
 ---@type integer
 ins.currLine = -1
+
+---@type integer[]
+ins.lastPos = {-1,0}
 
 ---@type TextInput
 ins.textInput = nil
@@ -371,52 +374,56 @@ local function bind_keys(view)
 
             local args = {
                 name = text,
-
-                ---@type function
-                f = nil,
             }
 
-            ---@type any
-            local rnode = view.ft_handler:newfile(node, args)
-
-            -- refresh node display
-            if rnode then
-                if rnode.parent then
-                    print("currline:", line_id)
-                    line_id = find_node_line(view, line_id, rnode)
-                    print("findline:", line_id)
-                else
-                    line_id = 0
-                end
-
-                if rnode.dir_open then
-                    view:remove_nodes(line_id + 1, line_id + count_children_display(rnode.children))
-                end
-
-                local ok, err = pcall(args.f)
-
-                if not ok then
-                    vim.notify(err, vim.log.levels.ERROR)
-                end
-
-                rnode.dir_open = true
-
-                view:refresh_nodes({ rnode }, line_id, line_id)
-                view:insert_nodes(rnode.children, line_id + 1)
-            end
+            view.ft_handler:newfile(node, args)
         end
 
-        if node.is_dir then
-            view.textInput:init(" Create File ", callback, node.path .. "/")
-        else
-            view.textInput:init(" Create File ", callback, node.parent.path .. "/")
+        if not node.dir or not node.dir.open then
+            node = node.parent
         end
+
+        view.textInput:init(" Create File ", callback, node.dir.path .. "/")
     end)
 
     -- delete file/dir
+    WU.bind_key(buf, "d", function ()
+        local cursor = api.nvim_win_get_cursor(view.windows[WTree].wnd)
+        local line_id = cursor[1]
+        local node = view.lines[line_id].node
+
+        local callback = function (text)
+            view:switch_focus(WTree)
+            if text == "y" then
+                view.ft_handler:remove(node)
+            end
+        end
+
+        if node.dir then
+            view.textInput:init(" Delete Directory ? ", callback, "y")
+        else
+            view.textInput:init(" Delete File ? ", callback, "y")
+        end
+    end)
+
+    -- force delete
+    WU.bind_key(buf, "<C-D>", function ()
+        local cursor = api.nvim_win_get_cursor(view.windows[WTree].wnd)
+        local line_id = cursor[1]
+        local node = view.lines[line_id].node
+        view.ft_handler:remove(node)
+    end)
 end
 
 function ins:hide()
+
+    if self.curr_focus == WTree then
+        local cursor = api.nvim_win_get_cursor(self.windows[WTree].wnd)
+        self.lastPos = cursor
+    else
+        self.lastPos = {-1,0}
+    end
+
     self.super.hide(self)
     FE.change_dir_listen(self.ft_handler.root)
 end
@@ -427,9 +434,14 @@ function ins:show()
     -- self.windows[WTreePath]:show()
     self.windows[WTree]:show()
 
+    self.currLine = -1
     self:switch_focus(WTree)
     self:refresh_root()
     FE.open_dir(self.ft_handler.root, self)
+    self.currLine = self.lastPos[1]
+    if self.currLine > 0 then
+        api.nvim_win_set_cursor(self.windows[WTree].wnd, self.lastPos)
+    end
 end
 
 local function get_ft_wh(self, w, h)

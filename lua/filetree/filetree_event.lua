@@ -304,11 +304,12 @@ function M.fs_event_callback(node,view, es)
                             M.change_dir_listen(nNode, view)
                         end
                     end
+
+                    nNode.parent = node
                 else
                     nNode = {
                         name = e,
                         level = node.level + 1,
-                        is_dir = false,
                         parent = node,
                     }
                     -- TODO: rename opened buf

@@ -39,11 +39,9 @@ function FT.toggle()
     end
 
     if ft_view:is_show() then
-        print("hide")
         ft_view:hide()
         
     else
-        print("show")
         ft_view:show()
         -- local Window = require("window.window")
         -- local wu = require("window.window_util")
