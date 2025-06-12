@@ -12,19 +12,19 @@ vim.filetype.add({
 })
 
 -- surpport soft link
-vim.api.nvim_create_autocmd("VimEnter", {
-    callback = function()
-        local path = vim.fn.expand("%:p")
-        local stat = vim.loop.fs_stat(path)
+-- vim.api.nvim_create_autocmd("VimEnter", {
+--     callback = function()
+--         local path = vim.fn.expand("%:p")
+--         local stat = vim.loop.fs_stat(path)
 
-        if vim.loop.fs_stat(path) then
-            vim.api.nvim_buf_set_name(0, vim.loop.fs_realpath(path))
-            vim.api.nvim_command("edit")
-        end
+--         if vim.loop.fs_stat(path) then
+--             vim.api.nvim_buf_set_name(0, vim.loop.fs_realpath(path))
+--             vim.api.nvim_command("edit")
+--         end
 
-        vim.fn.chdir(vim.loop.fs_realpath(vim.fn.getcwd()))
-    end,
-})
+--         vim.fn.chdir(vim.loop.fs_realpath(vim.fn.getcwd()))
+--     end,
+-- })
 
 -- highlight after copy
 vim.api.nvim_create_autocmd({ "textyankpost" }, {

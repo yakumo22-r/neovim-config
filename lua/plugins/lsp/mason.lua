@@ -1,20 +1,16 @@
+local LspSetting = require("plugins.lsp.tools.lsp_setting")
 return {
     "williamboman/mason.nvim",
     event = { "VeryLazy" },
     dependencies = {
-        "williamboman/mason-lspconfig.nvim",
-        "WhoIsSethDaniel/mason-tool-installer.nvim",
+        -- "williamboman/mason-lspconfig.nvim",
+        -- "WhoIsSethDaniel/mason-tool-installer.nvim",
+        "hrsh7th/cmp-nvim-lsp",
     },
     config = function()
         -- import mason
         local mason = require("mason")
 
-        -- import mason-lspconfig
-        local mason_lspconfig = require("mason-lspconfig")
-
-        local mason_tool_installer = require("mason-tool-installer")
-
-        -- enable mason and configure icons
         mason.setup({
             ui = {
                 icons = {
@@ -23,26 +19,20 @@ return {
                     package_uninstalled = "✗",
                 },
             },
-        })
-
-        mason_lspconfig.setup({
-            -- list of servers for mason to install
             ensure_installed = {
+                -- lsp servers
                 "lua_ls",
                 "clangd",
                 "ts_ls",
-            },
-            -- auto-install configured servers (with lspconfig)
-            automatic_installation = true, -- not the same as ensure_installed
-        })
 
-        mason_tool_installer.setup({
-            ensure_installed = {
+                -- formatters
                 "stylua", -- lua formatter
                 "prettierd",
                 "clang-format",
                 "shfmt",
-            },
+            }
         })
+
+        LspSetting.Init()
     end,
 }
