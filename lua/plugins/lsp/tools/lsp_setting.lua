@@ -3,9 +3,6 @@ local lsp_base = require("plugins.lsp.tools.lsp_base")
 local LspSetting = {}
 
 local keybindings = require("plugins.lsp.tools.lsp-keybindings")
-local nohighlight = function(client, bufnr)
-    client.server_capabilities.semanticTokensProvider = nil
-end
 
 local signs = {
     Error = " ",
@@ -20,38 +17,8 @@ spec_lua_ls:init()
 local spec_ts_ls = require("plugins.lsp.specs.ts_ls")
 spec_ts_ls:init()
 
-local function lsp_clangd(capabilities)
-    vim.lsp.config.clangd = {
-        cmd = { "clangd" },
-        filetypes = { "c", "cpp", "objc", "objcpp" },
-        root_markers = { "compile_commands.json", ".git" },
-        on_attach = function(client, bufnr)
-            keybindings(client, bufnr)
-            nohighlight(client, bufnr)
-        end,
-        capabilities = capabilities,
-        single_file_support = true,
-    }
-end
-
--- local function lsp_ts_ls(capabilities)
---     vim.lsp.config.ts_ls = {
---         cmd = { "typescript-language-server", "--stdio" },
---         filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
---         root_markers = { "package.json", "tsconfig.json", ".git" },
---         on_attach = function(client, bufnr)
---             keybindings(client, bufnr)
---             nohighlight(client, bufnr)
---         end,
---         capabilities = capabilities,
---         single_file_support = true,
---         settings = {
---             diagnostics = {
---                 ignoredCodes = { 7043, 7044, 7045, 7046, 7047, 7048, 7049, 7050 },
---             },
---         },
---     }
--- end
+local spec_clangd = require("plugins.lsp.specs.clangd")
+spec_clangd:init()
 
 function LspSetting.Init()
     local cmp_nvim_lsp = require("cmp_nvim_lsp")
@@ -88,10 +55,9 @@ function LspSetting.Init()
         return original_open_floating_preview(contents, syntax, opts, ...)
     end
 
-    lsp_clangd(capabilities)
-
     spec_lua_ls:set_enable(capabilities, keybindings)
     spec_ts_ls:set_enable(capabilities,keybindings)
+    spec_clangd:set_enable(capabilities,keybindings)
 
     -- Custom :LspInfo command to display LSP client info
     vim.api.nvim_create_user_command("LspInfo", function()
