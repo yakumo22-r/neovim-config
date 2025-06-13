@@ -22,11 +22,5 @@ return {
                 },
             },
         })
-        vim.keymap.set(
-            "n",
-            "<A-h>",
-            ":TSHighlightCapturesUnderCursor<Enter>",
-            { silent = true, noremap = true }
-        )
     end,
 }

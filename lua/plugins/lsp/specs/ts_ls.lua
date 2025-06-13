@@ -23,8 +23,7 @@ function spec_ts_ls:attach_buf(bufnr)
             end,
             on_attach = function(client, bufnr2)
                 self.keybindings(client, bufnr2)
-                -- no highlight
-                client.server_capabilities.semanticTokensProvider = nil
+                -- client.server_capabilities.semanticTokensProvider = nil
             end,
             single_file_support = true,
             settings = {

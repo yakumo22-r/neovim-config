@@ -4,10 +4,10 @@ local stru = require('strutils')
 ---@class BUFU
 local bufu = {}
 
-function bufu.close_curr_buffer(buf)
+function bufu.close_curr_buffer()
     local curr_buf = vim.api.nvim_get_current_buf()
-    vim.cmd("BufferLineCyclePrev")
-    vim.cmd("bdelete " .. curr_buf)
+    vim.cmd("BufferLast")
+    vim.cmd("bdelete! " .. curr_buf)
 end
 
 function bufu.TrimStart(line)

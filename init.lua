@@ -16,12 +16,11 @@ require("base_func")
 require("tools")
 require("comment")
 require("formatcmd")
-require("compile_conf") -- in develop
-require("deploy_conf") -- in develop
-require("xmake_conf") -- in develop
-
-
-
+-- require("compile_conf") -- in develop
+-- require("deploy_conf") -- in develop
+-- require("xmake_conf") -- in develop
+require("ykm22.terminal") -- project management
+require("ykm22.terminal_view") -- project management
 
 -- custom theme
 _G.ykm22_cols = require("ykm22_colors")

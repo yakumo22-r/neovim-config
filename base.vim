@@ -73,10 +73,6 @@ noremap <expr> k v:count ? 'k' : 'gk'
 " Quick movement
 noremap <silent> <C-j> 6j
 noremap <silent> <C-k> 6k
-noremap <silent> <C-l> 6w
-noremap <silent> <C-h> 6b
-noremap <silent> <C-y> 6<c-y>
-noremap <silent> <C-e> 6<c-e>
 
 inoremap <C-h> <Left>
 inoremap <C-l> <Right>

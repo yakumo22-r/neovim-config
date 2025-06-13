@@ -216,19 +216,20 @@ local function get_groups()
             or { fg = colors.fg1, bg = colors.bg1 },
         NormalNC = config.dim_inactive and { fg = colors.fg0, bg = colors.bg1 }
             or { link = "Normal" },
-        CursorLine = { bg = colors.bg1 },
-        CursorColumn = { link = "CursorLine" },
-        TabLineFill = {
-            fg = colors.bg4,
-            bg = colors.bg1,
-            reverse = config.invert_tabline,
-        },
+        CursorLine = { bg = p.dark0 },
+        CursorColumn = { bg = colors.bg1 },
         TabLineSel = {
-            fg = colors.fg4,
-            bg = colors.bg2,
-            reverse = config.invert_tabline,
+            fg = p.light0,
+            bg = p.dark2,
         },
-        TabLine = { link = "TabLineFill" },
+        TabLine = {
+            fg = p.light4,
+            bg = p.dark0,
+        },
+        TabLineFill = {
+            fg = p.light4,
+            bg = p.dark0
+        },
         MatchParen = { bg = colors.bg3, bold = config.bold },
         ColorColumn = { bg = colors.bg1 },
         Conceal = { fg = colors.blue },

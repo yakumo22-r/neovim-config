@@ -121,3 +121,18 @@ vim.api.nvim_create_user_command('ClearCRLF', function ()
     end)
     vim.api.nvim_echo({{ 'Removed ^M from current buffer', 'None' }}, false, {})
 end, {desc = 'Clear \r\n'})
+
+-- Close syntax on big file
+vim.api.nvim_create_autocmd("BufEnter", {
+    callback = function()
+        local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(0))
+        if ok and stats then
+            if stats.size > 1024 * 1024 then
+                vim.treesitter.stop()
+            end
+            if stats.size > 2048 * 1024 then
+                vim.bo.syntax = "off" -- Optional: also disable legacy syntax
+            end
+        end
+    end,
+})
