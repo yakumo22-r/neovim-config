@@ -12,19 +12,19 @@ vim.filetype.add({
 })
 
 -- surpport soft link
-vim.api.nvim_create_autocmd("VimEnter", {
-    callback = function()
-        local path = vim.fn.expand("%:p")
-        local stat = vim.loop.fs_stat(path)
+-- vim.api.nvim_create_autocmd("VimEnter", {
+--     callback = function()
+--         local path = vim.fn.expand("%:p")
+--         local stat = vim.loop.fs_stat(path)
 
-        if vim.loop.fs_stat(path) then
-            vim.api.nvim_buf_set_name(0, vim.loop.fs_realpath(path))
-            vim.api.nvim_command("edit")
-        end
+--         if vim.loop.fs_stat(path) then
+--             vim.api.nvim_buf_set_name(0, vim.loop.fs_realpath(path))
+--             vim.api.nvim_command("edit")
+--         end
 
-        vim.fn.chdir(vim.loop.fs_realpath(vim.fn.getcwd()))
-    end,
-})
+--         vim.fn.chdir(vim.loop.fs_realpath(vim.fn.getcwd()))
+--     end,
+-- })
 
 -- highlight after copy
 vim.api.nvim_create_autocmd({ "textyankpost" }, {
@@ -121,11 +121,18 @@ vim.api.nvim_create_user_command('ClearCRLF', function ()
     end)
     vim.api.nvim_echo({{ 'Removed ^M from current buffer', 'None' }}, false, {})
 end, {desc = 'Clear \r\n'})
--- vim.api.nvim_set_keymap("n", "<leader>t", ":lua require('filetree.filetree').toggle()<CR>", { noremap = true, silent = true })
 
-vim.keymap.set("n", "<leader>t", function ()
-    -- require("msgwindow").Tip("test")
-    require('filetree.filetree').toggle()
-    
-end, {noremap = true, silent = true})
--- vim.api.nvim_set_keymap("n", "<leader>t", ":lua require('filetree.filetree').toggle()<CR>", { noremap = true, silent = true })
+-- Close syntax on big file
+vim.api.nvim_create_autocmd("BufEnter", {
+    callback = function()
+        local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(0))
+        if ok and stats then
+            if stats.size > 1024 * 1024 then
+                vim.treesitter.stop()
+            end
+            if stats.size > 2048 * 1024 then
+                vim.bo.syntax = "off" -- Optional: also disable legacy syntax
+            end
+        end
+    end,
+})
