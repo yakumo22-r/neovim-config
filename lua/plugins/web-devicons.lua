@@ -1,7 +1,7 @@
 return {
     "nvim-tree/nvim-web-devicons",
     config = function()
-        local colors = ykm22_cols
+        local colors = require("ykm22.theme")
         require("nvim-web-devicons").setup({
             override_by_extension = {
                 ["lua.txt"] = {

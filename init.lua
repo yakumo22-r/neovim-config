@@ -1,5 +1,6 @@
 YKM22 = {}
 
+
 --  readme.md
 
 -- vimrc ./base.vim
@@ -19,13 +20,9 @@ require("formatcmd")
 -- require("compile_conf") -- in develop
 -- require("deploy_conf") -- in develop
 -- require("xmake_conf") -- in develop
+require("ykm22.theme")
 require("ykm22.terminal") -- project management
 require("ykm22.terminal_view") -- project management
-
--- custom theme
-_G.ykm22_cols = require("ykm22_colors")
-require("ykm22_theme")
-
 
 -- plugins & settings
 require("user")
@@ -53,3 +50,19 @@ PF:check_use_undo_dir()
 local script_dir = vim.fn.expand("<sfile>:p:h")
 package.path = package.path .. ";" .. script_dir .. "/" .. "lib/?.lua"
 require("c_api")
+
+local sftp_pip = require("sftp_pip")
+
+sftp_pip.reg_host("xy.h5mj.test")
+sftp_pip.login("xy.h5mj.test")
+
+-- local process = require("process").new("./subtest")
+-- process:start()
+-- vim.api.nvim_create_user_command("SendTask", function(opts)
+--     local id = opts.fargs[1]
+--     process:send_raw(id)
+--     process:send_raw("\n")
+-- end, { nargs = 1 })
+
+
+

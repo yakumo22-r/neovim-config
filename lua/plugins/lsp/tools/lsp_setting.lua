@@ -46,7 +46,7 @@ function LspSetting.Init()
 
     local original_open_floating_preview = vim.lsp.util.open_floating_preview
     vim.lsp.util.open_floating_preview = function(contents, syntax, opts, ...)
-        local cols = ykm22_cols
+        local cols = require("ykm22.theme")
         opts = opts or {}
         opts.border = "rounded" -- 设置边框样式: 'single', 'double', 'rounded', 'solid', 'shadow'
         -- 自定义背景颜色

@@ -64,7 +64,7 @@ return {
             },
         })
 
-        local cols = ykm22_cols
+        local cols = require("ykm22.theme")
         vim.api.nvim_set_hl(0, "CmpNormal", { fg = cols.light1 })
         vim.api.nvim_set_hl(0, "CmpBorder", { fg = cols.flamingo })
         vim.api.nvim_set_hl(0, "CmpDocNormal", { fg = cols.light1 })
