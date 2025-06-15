@@ -53,7 +53,7 @@ local BufWidth = 26
 
 function M.RefreshTermManager()
     if ManagerHidden or ManagerWin < 0 then
-        vim.api.nvim_command("vsplit")
+        vim.api.nvim_command("rightbelow vsplit")
         ManagerWin = vim.api.nvim_get_current_win()
         vim.api.nvim_win_set_buf(ManagerWin, ManagerBuf)
         vim.api.nvim_win_set_width(ManagerWin, Width)
@@ -113,9 +113,9 @@ function M.RefreshTermManager()
 
     -- vim.api.nvim_buf_clear_namespace(ManagerBuf, -1, 0, -1)
 
-    V.set_hl(ManagerBuf, NsId, "TermManageTitle", {1,1})
-    V.set_hl(ManagerBuf, NsId, "TermManageShort", {2,1,BaseLineNum})
-    V.set_hl(ManagerBuf, NsId, "TermManageList", {BaseLineNum,1,line_num})
+    V.set_extmark(ManagerBuf, NsId, "TermManageTitle", {1,1})
+    V.set_extmark(ManagerBuf, NsId, "TermManageShort", {2,1,BaseLineNum})
+    V.set_extmark(ManagerBuf, NsId, "TermManageList", {BaseLineNum,1,line_num})
 
     vim.api.nvim_buf_set_extmark(ManagerBuf, NsId, 1, 0, {
         end_line = BaseLineNum,

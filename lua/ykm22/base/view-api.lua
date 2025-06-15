@@ -5,6 +5,8 @@ M.StyleNormal = "Normal"
 M.StyleError = "DiagnosticError"
 M.StyleWarn = "DiagnosticWarn"
 M.StyleInfo = "DiagnosticInfo"
+M.StyleOk = "DiagnosticOk"
+M.StyleHint = "DiagnosticHint"
 
 -- deprecated wrap
 M.add_highlight = vim.api.nvim_buf_add_highlight
@@ -17,10 +19,10 @@ M.add_highlight = vim.api.nvim_buf_add_highlight
 ---@param hl_group string
 ---@param range integer[] 1: start_line, 2: start_col, 3: end_line?, 4: end_col?
 --- @return integer # Id of the created/updated extmark
-function M.set_hl(buf,ns_id,hl_group,range)
+function M.set_extmark(buf,ns_id,hl_group,range)
     local start_line = range[1] - 1
     local start_col = range[2] - 1
-    local end_line = range[3]
+    local end_line = range[3] and range[3] - 1
     local end_col = range[4] or -1
 
     if not end_line then
@@ -39,14 +41,14 @@ function M.set_hl(buf,ns_id,hl_group,range)
     })
 end
 
----@class StyleCell
+---@class ykm22.nvim.StyleCell
 ---@field text? string
 ---@field style? string
 ---@field indent? integer char-width
 ---@field width? integer char-width
 ---@field byte_width? integer char-width
 
----@class BufStyle
+---@class ykm22.nvim.BufStyle
 ---@field style string
 ---@field _start integer
 ---@field _end integer
@@ -54,7 +56,7 @@ end
 ---@param text string
 ---@param indent? integer char-index
 ---@param style? string
----@return StyleCell
+---@return ykm22.nvim.StyleCell
 function M.style_cell(text, indent, style)
     return {
         text = text,
@@ -65,12 +67,12 @@ function M.style_cell(text, indent, style)
     }
 end
 
----@param cells StyleCell[]
----@return string line, BufStyle[] styles
+---@param cells ykm22.nvim.StyleCell[]
+---@return string line, ykm22.nvim.BufStyle[] styles
 function M.get_style_line(cells)
     local texts = {}
 
-    ---@type BufStyle[]
+    ---@type ykm22.nvim.BufStyle[]
     local styles = {}
 
     local ii = 1
@@ -89,18 +91,23 @@ function M.get_style_line(cells)
 end
 
 ---@param buf integer
+---@param ns_id integer
 ---@param line_id integer
----@param buf_styles BufStyle[]
-function M.set_styles(buf, line_id, buf_styles)
+---@param buf_styles ykm22.nvim.BufStyle[]
+function M.set_styles(buf,ns_id, line_id, buf_styles)
     for _,v in ipairs(buf_styles) do
-        M.add_highlight(buf,
-        -1, v.style or M.StyleNormal, line_id-1, v._start-1, v._end-1)
+        M.set_extmark(buf, ns_id, v.style or M.StyleNormal, {
+            line_id, v._start,
+            line_id, v._end,
+        })
+        -- M.add_highlight(buf,
+        -- -1, v.style or M.StyleNormal, line_id-1, v._start-1, v._end-1)
     end
 end
 
 ---@param text string
 ---@param width integer
----@param fill string
+---@param fill string?
 ---@return string ,integer height
 function M.center_text(text, width, fill)
     fill = fill or " "
@@ -112,6 +119,23 @@ function M.center_text(text, width, fill)
         return text, math.ceil(txt_w / width) - 1
     end
     return padding .. text .. padding, 0
+end
+
+---@param text string
+---@param width integer
+---@param fill string?
+---@return string ,integer height
+function M.right_text(text, width, fill)
+    fill = fill or " "
+    local fillLen = vim.fn.strdisplaywidth(fill) 
+    local txt_w = vim.fn.strdisplaywidth(text)
+    local padding = string.rep(fill, math.floor((width - txt_w) / fillLen))
+
+    if txt_w >= width then
+        return text, math.ceil(txt_w / width) - 1
+    end
+    return padding .. text, 0
+
 end
 
 ---@param text string

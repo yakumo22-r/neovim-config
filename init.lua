@@ -23,11 +23,23 @@ require("formatcmd")
 require("ykm22.theme")
 require("ykm22.terminal") -- project management
 require("ykm22.terminal_view") -- project management
+local ProjectFile = require("ykm22.base.project-file")
+
+ProjectFile.setup({
+    function(root)
+        vim.opt.undodir = root .. "/.undo/"
+    end,
+    function ()
+        
+    end
+
+})
 
 -- plugins & settings
 require("user")
 require("settings")
 require("lazy-setup")
+
 
 -- ensure env path
 local function ensure_env_path(path)

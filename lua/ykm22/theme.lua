@@ -154,7 +154,7 @@ local function get_groups()
         ykm22Bg2 = { fg = colors.bg2 },
         ykm22Bg3 = { fg = colors.bg3 },
         ykm22Bg4 = { fg = colors.bg4 },
-        ykm22Red = { fg = colors.red },
+        ykm22Red = { fg = colors.red, bg = nil },
         ykm22RedBold = { fg = colors.red, bold = config.bold },
         ykm22Green = { fg = colors.green },
         ykm22GreenBold = { fg = colors.green, bold = config.bold },
@@ -249,11 +249,11 @@ local function get_groups()
             bg = p.dark2,
         },
         TabLine = {
-            fg = p.light4,
+            fg = p.light2,
             bg = p.dark0,
         },
         TabLineFill = {
-            fg = p.light4,
+            fg = p.light2,
             bg = p.dark0
         },
         MatchParen = { bg = colors.bg3, bold = config.bold },
