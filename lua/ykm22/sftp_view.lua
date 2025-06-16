@@ -9,29 +9,10 @@ local M = {}
 
 ---@class ykm22.nvim.SftpViewConfig
 
-function M.upload_current() end
-
-function M.download_current() end
-
+-- TODO:
 ---@param files string[]
 function M.take_group_by_git(files) end
 
-function M.update_cfg() end
-
-function M.switch_node() end
-
-function M.init_cfg(target)
-    if not vim.fn.filereadable(target) then
-        local src_path = vim.fn.stdpath("config") .. "/lua/ykm22/sftp_conf.lua"
-        if vim.fn.has("win32") == 1 then
-            os.execute("copy " .. src_path .. " " .. target) -- Windows
-        else
-            os.execute("cp " .. src_path .. " " .. target) -- Unix-like
-        end
-    end
-
-    -- ]]
-end
 
 ---@return any
 local function NvimTreeApi()
@@ -102,7 +83,7 @@ end
 function Menu.switchConf()
     local currConf = Handle.get_curr_conf()
 
-    local cell = V.style_cell(string.format("Switch(%s)", currConf.name))
+    local cell = V.style_cell(string.format(" Switch(%s)", currConf.name))
     local cell2 = V.style_cell(V.right_text(" > ", floatMenu.Width - cell.width), 0, V.StyleOk)
     return {
         label = { cell, cell2 },
@@ -123,7 +104,26 @@ function Menu.testBtn()
     return {
         label = { cell, cell2 },
         action = function(v)
-            print(vim.inspect(get_relative_files_on_buf(v.lastBuf)))
+            return true
+        end,
+    }
+end
+
+function Menu.edit_config()
+    return {
+        label = " Edit Config",
+        action = function()
+            vim.schedule(Handle.cmd_edit_sftp_conf)
+            return true
+        end,
+    }
+end
+
+function Menu.reload_config()
+    return {
+        label = " Reload Config",
+        action = function()
+            Handle.cmd_init_sftp_conf()
             return true
         end,
     }
@@ -132,22 +132,23 @@ end
 function Menu.upload()
     return {
         label = { V.style_cell(" Upload ") },
-        action = function()
-            local files = get_relative_files_on_buf(vim.api.nvim_get_current_buf())
+        action = function(v)
+            local files = get_relative_files_on_buf(v.lastBuf)
             Handle.cmd_upload(nil, files)
             return true
         end,
     }
 end
 
+
 function Menu.upload_to()
     local cell = V.style_cell(" Upload to")
     local cell2 = V.style_cell(V.right_text(" > ", floatMenu.Width - cell.width), 0, V.StyleOk)
     return {
         label = { cell, cell2 },
-        action = function()
-            local files = get_relative_files_on_buf(vim.api.nvim_get_current_buf())
-            Menu.confSelects("Upload to", function(_, name)
+        action = function(v)
+            local files = get_relative_files_on_buf(v.lastBuf)
+            local lists = Menu.confSelects("Upload to", function(_, name)
                 if not name or name == "" then
                     return
                 end
@@ -158,7 +159,8 @@ function Menu.upload_to()
                 end
                 Handle.cmd_upload(conf, files)
             end)
-            return true
+            floatMenu:set_list(lists)
+            floatMenu:show()
         end,
     }
 end
@@ -167,8 +169,8 @@ end
 function Menu.sync() 
     return {
         label = { V.style_cell(" Sync ") },
-        action = function()
-            local files = get_relative_files_on_buf(vim.api.nvim_get_current_buf())
+        action = function(v)
+            local files = get_relative_files_on_buf(v.lastBuf)
             Handle.cmd_sync(nil, files)
             return true
         end,
@@ -180,9 +182,9 @@ function Menu.sync_from()
     local cell2 = V.style_cell(V.right_text(" > ", floatMenu.Width - cell.width), 0, V.StyleOk)
     return {
         label = { cell, cell2 },
-        action = function()
-            local files = get_relative_files_on_buf(vim.api.nvim_get_current_buf())
-            Menu.confSelects("Upload to", function(_, name)
+        action = function(v)
+            local files = get_relative_files_on_buf(v.lastBuf)
+            local lists = Menu.confSelects("Upload to", function(_, name)
                 if not name or name == "" then
                     return
                 end
@@ -193,7 +195,8 @@ function Menu.sync_from()
                 end
                 Handle.cmd_sync(conf, files)
             end)
-            return true
+            floatMenu:set_list(lists)
+            floatMenu:show()
         end,
     }
 end
@@ -245,8 +248,12 @@ function M.show_float_ops()
             end,
         })
     else
+        table.insert(menus, Menu.upload())
+        table.insert(menus, Menu.sync())
         table.insert(menus, Menu.switchConf())
-        table.insert(menus, Menu.testBtn())
+        table.insert(menus, Menu.upload_to())
+        table.insert(menus, Menu.sync_from())
+        table.insert(menus, Menu.reload_config())
     end
 
     floatMenu:set_list(menus)

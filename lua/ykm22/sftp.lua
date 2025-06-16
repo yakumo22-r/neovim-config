@@ -1,3 +1,13 @@
+--[[
+    SFTP Module for Neovim
+    This module provides functionality to manage SFTP connections, configurations, and file transfers.
+    It includes commands to initialize configurations, edit them, list available configurations,
+    switch between configurations, and perform file uploads and downloads.
+
+    TODO:
+    [ ] custom file groups
+    [ ] generate file groups by git
+--]]
 
 ---@class ykm22.nvim.Sftp
 local M = {}
@@ -14,6 +24,9 @@ local curr = nil
 ---@type string
 local _root = nil
 
+---@type string
+local confFile = nil
+
 local scriptPath = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":h")
 
 ---@type fun(file:string,_, _):string?,string
@@ -21,7 +34,9 @@ local _readCfg = nil
 
 ---@param content string?
 local function parseCfg(content)
-    content = content or _readCfg("sftp_conf.lua")
+    if not content then
+        content, confFile = _readCfg("sftp_conf.lua")
+    end
 
     if not content then
         -- vim.notify("Failed to read sftp_conf.lua. Please run :InitSftpConf", vim.log.levels.ERROR)
@@ -41,24 +56,17 @@ local function parseCfg(content)
     end
 end
 
-function M.get_confs()
-    return confs
-end
+-- stylua: ignore start
+function M.get_conf_file() return confFile end
+function M.get_confs() return confs end
+function M.get_curr_conf() return curr end
+function M.get_root() return _root end
+function M.get_conf_by_name(name) return name and confMaps[name] or nil end
+-- stylua: ignore end
 
-function M.get_curr_conf()
-    return curr
-end
-
-function M.get_root()
-    return _root
-end
-
-function M.get_conf_by_name(name)
-    return name and confMaps[name] or nil
-end
 
 -- TAG: Response
-local SFTP_PIP = require("lib.sftp_pip")
+local SFTP_PIP = require("ykm22.sftp_pip")
 local ClientReady = false
 local Starting = false
 ---@type fun()[]
@@ -100,7 +108,7 @@ local function on_response(id, status, msgs)
         for _, callback in ipairs(WaitReadyCmds) do
             callback()
         end
-        M.log(SFTP_PIP.RES_HELLO, "SFTP_PIP: Client is ready")
+        M.log(SFTP_PIP.RES_HELLO, "SFTP_PIP: Client is ready "..msgs[2])
         WaitReadyCmds = {}
         return
     end
@@ -111,11 +119,9 @@ local function on_response(id, status, msgs)
         return
     end
 
-    local info = msgs[2] or ""
-    for i=3,#msgs do
-        info = info .. "    \n" .. msgs[i]
+    for i=2,#msgs-1 do
+        M.log(status, msgs[i])
     end
-    M.log(status, info)
     local done = status < 1
     local err = status == 2 or status < 0
 
@@ -154,24 +160,31 @@ local SessionMap = {}
 function M.log(status, info, err)
     local tag = SFTP_PIP.CBTag[status] or "[UNKNOWN]"
     local time = os.date("%H:%M:%S")
+    local msg = string.format("%s %s %s", time, tag, info)
     vim.schedule(function()
-        if not err then
-            print(string.format("%s %s %s", time, tag, info))
-        else
-            vim.notify(string.format("%s %s %s", time, tag, info), vim.log.levels.ERROR)
+        print(msg)
+        M.logView:append(msg)
+        if not M.logView:is_show() then
+            M.logView:show()
         end
     end)
+    -- if not err then
+    --     print()
+    -- else
+    --     vim.notify(string.format("%s %s %s", time, tag, info), vim.log.levels.ERROR)
+    -- end
 end
 
 ---@param hosts ykm22.nvim.SftpHost[]
 function M.register_hosts(hosts)
     for _, host in ipairs(hosts) do
-        local s = SessionMap[host.domain]
-        s = s or {}
+        local s = SessionMap[host.domain] or {}
+        SessionMap[host.domain] = s
         s.user = host.username
         s.port = host.port
         s.password = host.password
         s.queue = {}
+        s.logging = false
     end
 end
 
@@ -184,12 +197,11 @@ function M.wait_login(hostname, cmd)
         return true
     end
 
-    if not info.logging then
-        table.insert(M.queue, cmd)
-        return true
-    elseif not info.sessionId then
-        M.login(hostname)
-        table.insert(M.queue, cmd)
+    if not info.sessionId then
+        table.insert(info.queue, cmd)
+        if not info.logging then
+            M.login(hostname)
+        end
         return true
     end
 end
@@ -208,7 +220,6 @@ function M.login(hostname)
         return
     end
 
-    info.sessionId = -1
     local reqId = SFTP_PIP.raw_send(CMD_NEW_SESSION, 0, {
         hostname,
         user,
@@ -222,6 +233,7 @@ function M.login(hostname)
             if not err and done then
                 info.sessionId = tonumber(msgs[2])
                 info.logging = false
+                -- print("login success: " .. hostname, #info.queue)
                 for _,cmd in ipairs(info.queue) do
                     cmd()
                 end
@@ -236,7 +248,6 @@ end
 ---@param remoteRoot string
 ---@param files string[]
 function M.upload_files(hostname, localRoot, remoteRoot, files)
-    local info = SessionMap[hostname]
 
     if M.wait_login(hostname, function()
         M.upload_files(hostname, localRoot, remoteRoot, files)
@@ -244,6 +255,7 @@ function M.upload_files(hostname, localRoot, remoteRoot, files)
         return
     end
 
+    local info = SessionMap[hostname]
     local reqId = SFTP_PIP.raw_send(CMD_UPLOADS, info.sessionId, {
         localRoot,
         remoteRoot,
@@ -285,11 +297,16 @@ end
 
 function M.cmd_init_sftp_conf()
     local content
-    content = _readCfg("sftp_conf.lua", nil, scriptPath .. "/conf_temp/sftp_conf.lua")
+    content,confFile = _readCfg("sftp_conf.lua", nil, scriptPath .. "/conf_temp/sftp_conf.lua")
     if not content then
         vim.notify("Failed to init sftp_conf", vim.log.levels.ERROR)
     end
     parseCfg(content)
+end
+
+function M.cmd_edit_sftp_conf()
+    if M.check_not_ready() then return end
+    vim.cmd("edit " .. confFile)
 end
 
 function M.cmd_list_conf()
@@ -340,16 +357,18 @@ function M.cmd_sync(conf,files)
 end
 
 ---@param readCfg fun(file:string,_, _):string?,string
----@param root string
-function M.setup(readCfg, root)
+function M.setup(readCfg)
     _readCfg = readCfg
-    parseCfg()
-
-    _root = vim.fn.fnamemodify(root,":h")
 
     M.view = require("ykm22.sftp_view")
     M.view.setup(M)
+end
 
+---@param root string
+function M.init(root)
+    M.logView = require("ykm22.base.float-log").new()
+    _root = root
+    parseCfg()
     SFTP_PIP.register_callbacks({
         on_response = on_response,
         on_process_exit = on_process_exit,
@@ -357,10 +376,11 @@ function M.setup(readCfg, root)
     })
 
     vim.api.nvim_create_user_command("SftpInitConf", M.cmd_init_sftp_conf, {})
+    vim.api.nvim_create_user_command("SftpEditConf", M.cmd_edit_sftp_conf, {})
     vim.api.nvim_create_user_command("SftpLs", M.cmd_list_conf, {})
     vim.api.nvim_create_user_command("SftpSwitch", M.cmd_switch_conf, {
         nargs = 1,
-        complete = function(_, line)
+        complete = function(_, _)
             return vim.tbl_keys(confMaps)
         end,
     })

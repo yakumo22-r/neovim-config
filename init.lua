@@ -17,20 +17,20 @@ require("base_func")
 require("tools")
 require("comment")
 require("formatcmd")
--- require("compile_conf") -- in develop
--- require("deploy_conf") -- in develop
--- require("xmake_conf") -- in develop
 require("ykm22.theme")
 require("ykm22.terminal") -- project management
 require("ykm22.terminal_view") -- project management
 local ProjectFile = require("ykm22.base.project-file")
+local Sftp = require("ykm22.sftp")
+
+Sftp.setup(ProjectFile.get_file)
 
 ProjectFile.setup({
     function(root)
         vim.opt.undodir = root .. "/.undo/"
     end,
-    function ()
-        
+    function (root)
+        Sftp.init(vim.fn.fnamemodify(root,":h"))
     end
 
 })
@@ -54,19 +54,15 @@ if vim.fn.has("macunix") == 1 then
     ensure_env_path("/opt/homebrew/bin")
 end
 
-local PF = require("project.project_file")
--- if dir .nvim under cwd exists, set undodir as .nvim/undo/. else do nothing
-PF:check_use_undo_dir()
-
 -- c-api lib
 local script_dir = vim.fn.expand("<sfile>:p:h")
 package.path = package.path .. ";" .. script_dir .. "/" .. "lib/?.lua"
 require("c_api")
 
-local sftp_pip = require("sftp_pip")
+-- local sftp_pip = require("sftp_pip")
 
-sftp_pip.reg_host("xy.h5mj.test")
-sftp_pip.login("xy.h5mj.test")
+-- sftp_pip.reg_host("xy.h5mj.test")
+-- sftp_pip.login("xy.h5mj.test")
 
 -- local process = require("process").new("./subtest")
 -- process:start()
