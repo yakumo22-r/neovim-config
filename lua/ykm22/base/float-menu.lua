@@ -36,9 +36,6 @@ local Class = {}
 function Class.new()
     ---@class ykm22.nvim.FloatMenu
     local ins = L.clone(M)
-    for k, v in pairs(M) do
-        ins[k] = v
-    end
     return ins
 end
 
@@ -157,6 +154,7 @@ function M:show()
         }
 
         self.Win = vim.api.nvim_open_win(self.Buf, true, opts)
+        vim.api.nvim_set_option_value("winfixbuf", true, { win = self.Win })
     end
 
     ---@type string[]
