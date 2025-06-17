@@ -20,9 +20,11 @@ require("formatcmd")
 require("ykm22.theme")
 require("ykm22.terminal") -- project management
 require("ykm22.terminal_view") -- project management
+local GitChangeView = require("ykm22.git-changes-view")
 local ProjectFile = require("ykm22.base.project-file")
 local Sftp = require("ykm22.sftp")
 
+GitChangeView.setup(ProjectFile.get_file)
 Sftp.setup(ProjectFile.get_file)
 
 ProjectFile.setup({
@@ -30,7 +32,9 @@ ProjectFile.setup({
         vim.opt.undodir = root .. "/.undo/"
     end,
     function (root)
-        Sftp.init(vim.fn.fnamemodify(root,":h"))
+        root = vim.fn.fnamemodify(root,":h")
+        Sftp.init(root)
+        GitChangeView.init(root)
     end
 
 })
@@ -39,7 +43,6 @@ ProjectFile.setup({
 require("user")
 require("settings")
 require("lazy-setup")
-
 
 -- ensure env path
 local function ensure_env_path(path)

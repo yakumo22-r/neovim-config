@@ -20,10 +20,8 @@ local confs = nil
 local confMaps = {}
 ---@type ykm22.nvim.SftpConf
 local curr = nil
-
 ---@type string
 local _root = nil
-
 ---@type string
 local confFile = nil
 
@@ -179,6 +177,14 @@ end
 function M.register_hosts(hosts)
     for _, host in ipairs(hosts) do
         local s = SessionMap[host.domain] or {}
+        if s.sessionId and (
+            s.user ~= host.username or
+            s.port ~= host.port or
+            s.password ~= host.password
+        ) then
+            M.close_session(s.sessionId)
+            s.sessionId = nil
+        end
         SessionMap[host.domain] = s
         s.user = host.username
         s.port = host.port
@@ -223,8 +229,8 @@ function M.login(hostname)
     local reqId = SFTP_PIP.raw_send(CMD_NEW_SESSION, 0, {
         hostname,
         user,
+        password,
         tostring(port),
-        password or "#",
     })
 
     Callbacks[reqId] = {
@@ -241,6 +247,11 @@ function M.login(hostname)
             end
         end,
     }
+end
+
+function M.close_session(sessionId)
+    local reqId = SFTP_PIP.raw_send(CMD_CLOSE_SESSION, sessionId, {})
+    Callbacks[reqId] = { cmd = CMD_CLOSE_SESSION }
 end
 
 ---@param hostname string
@@ -366,7 +377,7 @@ end
 
 ---@param root string
 function M.init(root)
-    M.logView = require("ykm22.base.float-log").new()
+    M.logView = require("ykm22.base.buf-log").new()
     _root = root
     parseCfg()
     SFTP_PIP.register_callbacks({

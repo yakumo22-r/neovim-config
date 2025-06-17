@@ -25,7 +25,7 @@ local config_dir = vim.fn.stdpath("config")
 local sftp_pip_path
 if vim.fn.has("win32") == 1 then
     sftp_pip_path = config_dir .. "/lib/win32/sftp_pip.exe"
-    print(sftp_pip_path)
+    sftp_pip_path = "./sftp_pip.exe"
 end
 
 ---@param callback fun()

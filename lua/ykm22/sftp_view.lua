@@ -1,11 +1,15 @@
 local V = require("ykm22.base.view-api")
 local floatMenu = require("ykm22.base.float-menu").new()
+floatMenu.Width = 30
+floatMenu.BufWidth = 30
 
 ---@type ykm22.nvim.Sftp
 local Handle = nil
 
 ---@class ykm22.nvim.SftpView
 local M = {}
+
+if not ykm22 then ykm22 = {} end
 
 ---@class ykm22.nvim.SftpViewConfig
 
@@ -57,6 +61,11 @@ local function get_relative_files_on_buf(buf)
             local node = api.tree.get_node_under_cursor()
             isdir = node.type == "directory"
             path = node.absolute_path
+        elseif ykm22.GitChangeView and ykm22.GitChangeView.get_buf() == buf then
+            local file = ykm22.GitChangeView.get_cursor_abs_path()
+            if file then
+                return { vim.fs.relpath(Handle.get_root(), file) }
+            end
         end
     end
 
@@ -120,13 +129,54 @@ function Menu.edit_config()
 end
 
 function Menu.reload_config()
+    ---@type ykm22.nvim.FloatMenuELement
     return {
-        label = " Reload Config",
+        label = {V.style_cell(" Reload Config"), V.style_cell(" (r)", 0, V.StyleHint)},
         action = function()
             Handle.cmd_init_sftp_conf()
             return true
         end,
+        key = "r",
     }
+end
+
+function Menu.git_changes_upload()
+    return {
+
+    label = { V.style_cell(" Changes Upload ") },
+    action = function(v)
+        local files = ykm22.GitChangeView.get_change_files()
+        Handle.cmd_upload(nil, files)
+        return true
+    end,
+}
+end
+
+
+function Menu.git_changes_upload_to()
+    local cell = V.style_cell(" Changes Upload to")
+    local cell2 = V.style_cell(V.right_text(" > ", floatMenu.Width - cell.width), 0, V.StyleOk)
+    return {
+        label = { cell, cell2 },
+        action = function(v)
+            
+            local files = ykm22.GitChangeView.get_change_files()
+            local lists = Menu.confSelects("Changes Upload to", function(_, name)
+                if not name or name == "" then
+                    return
+                end
+                local conf = Handle.get_conf_by_name(name)
+                if not conf then
+                    vim.notify("No such configuration: " .. name, vim.log.levels.ERROR)
+                    return
+                end
+                Handle.cmd_upload(conf, files)
+            end)
+            floatMenu:set_list(lists)
+            floatMenu:show()
+        end,
+    }
+
 end
 
 function Menu.upload()
@@ -248,11 +298,26 @@ function M.show_float_ops()
             end,
         })
     else
-        table.insert(menus, Menu.upload())
-        table.insert(menus, Menu.sync())
+
+        local isGrp = false
+        if ykm22.GitChangeView and vim.api.nvim_get_current_buf() == ykm22.GitChangeView.get_buf() then
+            table.insert(menus, Menu.git_changes_upload())
+            table.insert(menus, Menu.git_changes_upload_to())
+            if not ykm22.GitChangeView.get_cursor_abs_path() then
+                isGrp = true
+                if #ykm22.GitChangeView.get_change_files() == 0 then
+                    return
+                end
+            end
+        end
+
+        if not isGrp then
+            table.insert(menus, Menu.upload())
+            table.insert(menus, Menu.sync())
+            table.insert(menus, Menu.upload_to())
+            table.insert(menus, Menu.sync_from())
+        end
         table.insert(menus, Menu.switchConf())
-        table.insert(menus, Menu.upload_to())
-        table.insert(menus, Menu.sync_from())
         table.insert(menus, Menu.reload_config())
     end
 
