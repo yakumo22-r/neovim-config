@@ -1,3 +1,4 @@
+require("ykm22.base.global")
 local V = require("ykm22.base.view-api")
 local B = require("ykm22.base.buf-api")
 local CmdPip = require("ykm22.base.cmd-pip")
@@ -5,9 +6,6 @@ local NvimTreeWrap = require("ykm22.base.nvim-tree-wrap")
 
 ---@class ykm22.nvim.GitChangeView
 local M = {}
-if not ykm22 then
-    ykm22 = {}
-end
 ykm22.GitChangeView = M
 
 local NsId = vim.api.nvim_create_namespace("ykm22.GitChanges")
@@ -63,7 +61,7 @@ function M.refresh_git_changes()
         Lines = lines
         Files = files
         IsRefreshing = false
-        print("Git changes:", vim.inspect(files))
+        -- print("Git changes:", vim.inspect(files))
         M.RefreshView()
     end, _root)
 end
@@ -81,7 +79,7 @@ end
 
 local Line2Buf = {}
 
-local function OpenWindow()
+function M.OpenWindow()
     vim.api.nvim_command("botright vsplit")
     Win = vim.api.nvim_get_current_win()
     vim.api.nvim_win_set_buf(Win, Buf)
@@ -93,7 +91,7 @@ end
 
 function M.RefreshView()
     if Hidden or Win == -1 then
-        OpenWindow()
+        M.OpenWindow()
     end
 
     local lines = {}
@@ -179,14 +177,22 @@ local function Enter()
         end
         local num = #file_wins
 
-        if num == 0 then
-            vim.api.nvim_win_close(Win, false)
-            NvimTreeWrap.edit(path)
-            OpenWindow()
-        else
-            NvimTreeWrap.edit(path)
-        end
+        NvimTreeWrap.edit(path)
     end
+end
+
+function M.RefreshLayout()
+    if Win==-1 or not vim.api.nvim_win_is_valid(Win) then
+        return
+    end
+    -- vim.schedule(function ()
+        local current_win = vim.api.nvim_get_current_win()
+        vim.api.nvim_set_current_win(Win)
+        vim.api.nvim_command('wincmd L')
+        -- vim.api.nvim_win_set_config(Win, { relative = "", col = vim.o.columns - Width })
+        vim.api.nvim_win_set_width(Win, Width)
+        vim.api.nvim_set_current_win(current_win)
+    -- end)
 end
 
 function M.OpenView()
@@ -200,9 +206,14 @@ function M.OpenView()
     vim.api.nvim_set_hl(NsId, StyleLoading, { fg = "#ef90e2" })
     vim.api.nvim_set_hl(NsId, StyleLine, { fg = "#f5c0b2" })
 
-    B.autocmd(Buf, "WinClosed", function(ev)
-        Hidden = true
-        Win = -1
+    B.autocmd(Buf, {"WinClosed", "WinNew"}, function(ev)
+        if ev.event == "WinNew" then
+            print("WinNew")
+            M.RefreshLayout()
+        else
+            Hidden = true
+            Win = -1
+        end
     end)
 
     StaticView()
@@ -217,6 +228,7 @@ function M.OpenView()
                 Hidden = true
                 Buf = -1
             end
+            Win = -1
         end,
     })
 
@@ -251,6 +263,7 @@ end
 function M.setup(readCfg)
     _readCfg = readCfg
     vim.api.nvim_create_user_command("GitChangeView", M.ToggleView, {})
+    vim.keymap.set("n", "<C-g>", M.ToggleView, B.opts)
 end
 
 function M.init(root)

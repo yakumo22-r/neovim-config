@@ -32,7 +32,13 @@ function M:show()
         B.set_modifiable(self.Buf, true)
         B.set_lines(self.Buf, 1, -1, self.Lines)
         B.set_modifiable(self.Buf, false)
+
+        B.autocmd(self.Buf,{ "BufHidden", "BufDelete" }, function ()
+            self.Win = nil
+            
+        end)
     end
+
 
     vim.api.nvim_command("belowright vsplit")
     self.Win = vim.api.nvim_get_current_win()
@@ -58,6 +64,10 @@ function M:append(msgs)
         B.set_modifiable(self.Buf, true)
         B.set_lines(self.Buf, lineNum, -1, lines)
         B.set_modifiable(self.Buf, false)
+    end
+
+    if self.Win then
+        vim.api.nvim_win_set_cursor(self.Win, { lineNum + #lines - 1, 0 })
     end
 end
 

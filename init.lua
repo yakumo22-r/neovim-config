@@ -34,10 +34,11 @@ ProjectFile.setup({
     function (root)
         root = vim.fn.fnamemodify(root,":h")
         Sftp.init(root)
-        GitChangeView.init(root)
     end
 
 })
+GitChangeView.init(vim.fn.fnamemodify(ProjectFile.get_root(),":h"))
+
 
 -- plugins & settings
 require("user")

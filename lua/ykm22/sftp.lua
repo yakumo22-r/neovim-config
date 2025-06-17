@@ -3,11 +3,8 @@
     This module provides functionality to manage SFTP connections, configurations, and file transfers.
     It includes commands to initialize configurations, edit them, list available configurations,
     switch between configurations, and perform file uploads and downloads.
-
-    TODO:
-    [ ] custom file groups
-    [ ] generate file groups by git
 --]]
+require("ykm22.base.global")
 
 ---@class ykm22.nvim.Sftp
 local M = {}
@@ -132,17 +129,6 @@ local function on_response(id, status, msgs)
     end
 end
 
----@param msg string
-local function on_process_exit(msg)
-    Callbacks = {}
-    SessionMap = {}
-    ClientReady = false
-    Starting = false
-    M.log(SFTP_PIP.RES_NVIM, msg)
-end
-
-
-
 -- TAG: Request
 ---@class ykm22.nvim.SftpSession
 ---@field sessionId? integer
@@ -155,12 +141,26 @@ end
 ---@type table<string,ykm22.nvim.SftpSession>
 local SessionMap = {}
 
+---@param msg string
+local function on_process_exit(msg)
+    Callbacks = {}
+    -- SessionMap = {}
+    ClientReady = false
+    Starting = false
+    for _, v in pairs(SessionMap) do
+        v.queue = {}
+        v.sessionId = nil
+    end
+    M.log(SFTP_PIP.RES_NVIM, msg)
+end
+
+
 function M.log(status, info, err)
     local tag = SFTP_PIP.CBTag[status] or "[UNKNOWN]"
     local time = os.date("%H:%M:%S")
     local msg = string.format("%s %s %s", time, tag, info)
     vim.schedule(function()
-        print(msg)
+        -- print(msg)
         M.logView:append(msg)
         if not M.logView:is_show() then
             M.logView:show()
@@ -250,7 +250,7 @@ function M.login(hostname)
 end
 
 function M.close_session(sessionId)
-    local reqId = SFTP_PIP.raw_send(CMD_CLOSE_SESSION, sessionId, {})
+    local reqId = SFTP_PIP.raw_send(CMD_CLOSE_SESSION, sessionId, {"1"})
     Callbacks[reqId] = { cmd = CMD_CLOSE_SESSION }
 end
 

@@ -1,8 +1,11 @@
+require("ykm22.base.global")
 local T = require("ykm22.terminal")
 local V = require("ykm22.base.view-api")
 local B = require("ykm22.base.buf-api")
 ---@class ykm22.TerminalView
 local M = {}
+
+ykm22.TerminalManagerView = M
 
 local Buf = -1
 local Win = -1

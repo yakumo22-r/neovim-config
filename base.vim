@@ -123,6 +123,9 @@ au BufRead,BufNewFile .zshrc					set filetype=sh
 
 highlight Visual ctermfg=NONE ctermbg=darkgray
 
+" Other
+nnoremap <silent> <Leader>g <C-g>
+
 
 if has('win32')
     set clipboard=unnamedplus

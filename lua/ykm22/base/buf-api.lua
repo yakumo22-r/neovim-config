@@ -2,6 +2,7 @@
 local M = {}
 
 local opts = { noremap = true, silent = true }
+M.opts = opts
 
 ---@param buf integer
 ---@param key string
