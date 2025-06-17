@@ -2,22 +2,24 @@ local V = require("ykm22.base.view-api")
 local B = require("ykm22.base.buf-api")
 local L = require("ykm22.base.lua-util")
 
-local NsId = vim.api.nvim_create_namespace("ykm22.nvim.FloatLog")
+-- TODO: 
+-- Highlight [ ]
+
+local NsId = vim.api.nvim_create_namespace("ykm22.ns.BufLog")
 
 
 ---@class ykm22.nvim.BufLog
 local M = {
-    Buf = -1,
     NsId = NsId,
     Lines = {},
 }
 
 function M:is_show()
-    return vim.fn.bufwinnr(self.Buf) ~= -1
+    return self.Buf and self.Win
 end
 
 function M:show()
-    if self.Buf < 0 then
+    if not self.Buf then
         self.Buf = vim.api.nvim_create_buf(false, true)
         B.set_buf_nofile(self.Buf)
         B.block_fast_keys(self.Buf)
@@ -33,9 +35,12 @@ function M:show()
         B.set_lines(self.Buf, 1, -1, self.Lines)
         B.set_modifiable(self.Buf, false)
 
-        B.autocmd(self.Buf,{ "BufHidden", "BufDelete" }, function ()
+        B.autocmds(self.Buf,{ "BufHidden", "BufDelete" }, function (ev)
             self.Win = nil
-            
+            if ev == "BufDelete" then
+                vim.api.nvim_clear_autocmds({ buffer = self.Buf })
+                self.Buf = nil
+            end
         end)
     end
 
@@ -50,6 +55,12 @@ function M:show()
 
 end
 
+function M:hide()
+    if self.Win then
+        vim.api.nvim_win_close(self.Win, false)
+    end
+end
+
 function M:append(msgs)
     if #self.Lines > 400 then
         self:clear(100)
@@ -61,7 +72,7 @@ function M:append(msgs)
     for _,line in ipairs(lines) do
         table.insert(self.Lines, line)
     end
-    if self.Buf >= 0 then
+    if self.Buf then
         B.set_modifiable(self.Buf, true)
         B.set_lines(self.Buf, lineNum, -1, lines)
         B.set_modifiable(self.Buf, false)
@@ -73,7 +84,7 @@ function M:append(msgs)
 end
 
 function M:clear(lastNum)
-    if self.Buf >= 0 then
+    if self.Buf then
         B.set_modifiable(self.Buf, true)
         B.set_lines(self.Buf, 1, lastNum, {})
         B.set_modifiable(self.Buf, false)

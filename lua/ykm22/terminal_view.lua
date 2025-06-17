@@ -7,8 +7,10 @@ local M = {}
 
 ykm22.TerminalManagerView = M
 
-local Buf = -1
-local Win = -1
+---@type any
+local Buf = nil
+---@type any
+local Win = nil
 local Line2Buf = {}
 local Hidden = true
 local StaticLineNum = 0
@@ -26,7 +28,7 @@ local Width = 30
 local BufWidth = 26
 
 function M.RefreshTermManager()
-    if Hidden or Win < 0 then
+    if not Win then
         vim.api.nvim_command("botright vsplit")
         Win = vim.api.nvim_get_current_win()
         vim.api.nvim_win_set_buf(Win, Buf)
@@ -142,10 +144,11 @@ function M.OpenTermManager()
         buffer = Buf, -- 0 means current buffer, or specify buffer number
         callback = function(ev)
             if ev.event == "BufHidden" then
+                Win = nil
                 Hidden = true
             elseif ev.event == "BufDelete" then
                 Hidden = true
-                Buf = -1
+                Buf = nil
             end
         end,
     })
@@ -187,7 +190,7 @@ function M.OpenTermManager()
 end
 
 function M.ToggleTermManager()
-    if Buf == -1 then
+    if not Buf then
         M.OpenTermManager()
     else
         if not Hidden then

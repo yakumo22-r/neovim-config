@@ -1,3 +1,5 @@
+local B = require("ykm22.base.buf-api")
+
 ---@class ykm22.Terminal
 local M = {}
 
@@ -51,10 +53,21 @@ vim.api.nvim_create_autocmd("TermOpen", {
             end
         end
         local opts = { buffer = bufnr, noremap = true, silent = true }
-        vim.keymap.set("t", "<esc>", [[<C-\><C-n>]], opts)
-        vim.keymap.set("t", "<C-w>", [[<C-\><C-n><C-w>]], opts)
+        vim.keymap.set("n", "<C-t>", function ()
+            vim.cmd('bprevious')
+        end, opts)
+        vim.schedule(function ()
+            vim.cmd("startinsert")
+        end)
     end, -- Call the function
     group = vim.api.nvim_create_augroup("TerminalKeymaps", { clear = true }), -- Autocommand group to avoid duplicates
+})
+
+vim.api.nvim_create_autocmd("BufEnter", {
+    pattern = "term://*",
+    callback = function()
+        vim.cmd("startinsert")
+    end,
 })
 
 vim.api.nvim_create_autocmd("BufDelete", {
@@ -145,7 +158,14 @@ vim.api.nvim_create_user_command("Term", function()
     vim.notify("No terminal avaliable", vim.log.levels.ERROR)
 end, {})
 
+local index = 0
 local function ToggleTerm()
+    index = index + 1
+    if vim.bo.buftype == "terminal" then
+        return
+    else
+        print(index, "ToggleTerm: Not a terminal buffer")
+    end
     if defaultTerm == -1 then
         vim.cmd("terminal")
         return
@@ -154,6 +174,11 @@ local function ToggleTerm()
     end
 end
 
-vim.keymap.set("n", "<C-t>", ToggleTerm, { noremap = true, silent = true })
+vim.keymap.set("n", "<C-t>", ToggleTerm, B.opts)
+vim.keymap.set("t", "<esc>", [[<C-\><C-n>]], B.opts)
+vim.keymap.set("t", "<C-w>", [[<C-\><C-n><C-w>]], B.opts)
+vim.keymap.set("t", "<C-t>", function ()
+    vim.cmd('bprevious')
+end, B.opts)
 
 return M

@@ -22,10 +22,17 @@ return {
         map("n", "<A-l>", "<Cmd>BufferMoveNext<CR>", opts)
 
         bufu = require("bufutils")
-        vim.keymap.set("n", "<bs>c", bufu.close_curr_buffer, opts)
+        vim.keymap.set("n", "<bs>c", function()
+            local curr_buf = vim.api.nvim_get_current_buf()
+            local fname = vim.api.nvim_buf_get_name(curr_buf)
+            if fname ~= "" and vim.fn.filereadable(fname) == 1 then
+                vim.cmd("BufferLast")
+                vim.cmd("bdelete! " .. curr_buf)
+            end
+        end, opts)
         map("n", "<bs>o", "<Cmd>BufferCloseAllButCurrent<CR>", opts)
 
-        map('n', '<leader>bg',   '<Cmd>BufferPick<CR>', opts)
-        map('n', '<leader>bd', '<Cmd>BufferPickDelete<CR>', opts)
+        map("n", "<leader>bg", "<Cmd>BufferPick<CR>", opts)
+        map("n", "<leader>bd", "<Cmd>BufferPickDelete<CR>", opts)
     end,
 }

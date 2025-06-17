@@ -31,6 +31,11 @@ function M.set_buf_nofile(buf)
 end
 
 ---@param buf integer
+function M.set_buf_disable_listed(buf)
+    vim.api.nvim_set_option_value("buflisted", false, { buf = buf })
+end
+
+---@param buf integer
 ---@param index integer
 ---@param line string
 function M.set_line(buf, index, line)
@@ -83,8 +88,10 @@ M.FK = {
 ---@param buf integer?
 ---@param event string|string[]
 ---@param callback fun(ev: vim.api.keyset.create_autocmd.callback_args)
-function M.autocmd(buf,event, callback)
+---@param augroup integer?
+function M.autocmds(buf,event, callback, augroup)
     vim.api.nvim_create_autocmd(event, {
+        group = augroup,
         buffer = buf,
         callback = callback,
     })

@@ -206,7 +206,7 @@ function M.OpenView()
     vim.api.nvim_set_hl(NsId, StyleLoading, { fg = "#ef90e2" })
     vim.api.nvim_set_hl(NsId, StyleLine, { fg = "#f5c0b2" })
 
-    B.autocmd(Buf, {"WinClosed", "WinNew"}, function(ev)
+    B.autocmds(Buf, {"WinClosed", "WinNew"}, function(ev)
         if ev.event == "WinNew" then
             print("WinNew")
             M.RefreshLayout()
