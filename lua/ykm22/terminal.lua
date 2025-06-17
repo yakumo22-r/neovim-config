@@ -6,6 +6,8 @@ M.termAlaias = {}
 M.termNames = {}
 M.termCount = 0
 
+defaultTerm = -1
+
 function M.set_term_alias(bufnr, alias)
     if M.termNames[alias] and M.termNames[alias] ~= bufnr then
         vim.notify("Alias '" .. alias .. "' is already in use by another terminal.", vim.log.levels.ERROR)
@@ -36,6 +38,9 @@ vim.api.nvim_create_autocmd("TermOpen", {
     pattern = "term://*", -- Match terminal buffers
     callback = function()
         local bufnr = vim.api.nvim_get_current_buf()
+        if defaultTerm == -1 then
+            defaultTerm = bufnr
+        end
         if not M.termAlaias[bufnr] then
             if M.next_term_alias then
                 M.set_term_alias(bufnr, M.next_term_alias)
@@ -58,6 +63,9 @@ vim.api.nvim_create_autocmd("BufDelete", {
         local bufnr = vim.api.nvim_get_current_buf()
         if vim.api.nvim_buf_is_valid(bufnr) then
             return
+        end
+        if bufnr == M.defaultTerm then
+            M.defaultTerm = -1
         end
         local name = M.termAlaias[bufnr]
         if name then
@@ -136,5 +144,16 @@ vim.api.nvim_create_user_command("Term", function()
     end
     vim.notify("No terminal avaliable", vim.log.levels.ERROR)
 end, {})
+
+local function ToggleTerm()
+    if defaultTerm == -1 then
+        vim.cmd("terminal")
+        return
+    else
+        vim.api.nvim_win_set_buf(0, defaultTerm)
+    end
+end
+
+vim.keymap.set("n", "<C-t>", ToggleTerm, { noremap = true, silent = true })
 
 return M
