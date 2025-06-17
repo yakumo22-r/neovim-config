@@ -1,3 +1,5 @@
+local wrap = require "ykm22.base.nvim-tree-wrap"
+
 local function on_attach(bufnr)
     local api = require("nvim-tree.api")
 
@@ -74,6 +76,7 @@ return {
             respect_buf_cwd = true,
         })
 
+        wrap.on_nvim_tree_loaded()
         vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>")
     end,
 }

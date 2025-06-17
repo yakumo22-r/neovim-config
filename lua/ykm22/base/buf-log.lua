@@ -5,7 +5,7 @@ local L = require("ykm22.base.lua-util")
 local NsId = vim.api.nvim_create_namespace("ykm22.nvim.FloatLog")
 
 
----@class ykm22.nvim.FloatLog
+---@class ykm22.nvim.BufLog
 local M = {
     Buf = -1,
     NsId = NsId,
@@ -36,6 +36,8 @@ function M:show()
 
     vim.api.nvim_command("belowright vsplit")
     self.Win = vim.api.nvim_get_current_win()
+
+    vim.api.nvim_win_set_width(self.Win, math.floor(vim.o.columns*0.3))
     vim.api.nvim_win_set_buf(self.Win, self.Buf)
     vim.api.nvim_win_set_hl_ns(self.Win, self.NsId)
 

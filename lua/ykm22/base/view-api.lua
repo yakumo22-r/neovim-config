@@ -29,7 +29,6 @@ function M.set_extmark(buf,ns_id,hl_group,range)
         end_line = start_line + 1
         end_col = 0
     elseif end_col < 0 then
-        end_line = end_line - 1
         end_col = 0
     end
 

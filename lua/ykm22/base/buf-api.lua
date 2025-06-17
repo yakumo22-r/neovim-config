@@ -3,15 +3,6 @@ local M = {}
 
 local opts = { noremap = true, silent = true }
 
-local edit_keys = { "i", "I", "a", "A", "o", "O", "c", "C", "d", "D", "p", "P", "u", "U", "r", "R", "x", "X", "s", "S" }
----@param buf integer
-function M.block_edit_keys(buf)
-    for _, k in ipairs(edit_keys) do
-        vim.api.nvim_buf_set_keymap(buf, "v", k, "<Nop>", opts)
-        vim.api.nvim_buf_set_keymap(buf, "n", k, "<Nop>", opts)
-    end
-end
-
 ---@param buf integer
 ---@param key string
 ---@param f string|function
@@ -68,23 +59,34 @@ function M.set_buf_auto_close(buf)
 end
 
 function M.block_fast_keys(buf, key, f, mode)
-    for _, k in ipairs(M.FK) do
+    for k, v in pairs(M.FK) do
         vim.api.nvim_buf_set_keymap(buf, "n", k, "<Nop>", opts)
     end
 end
 
+
 -- stylua: ignore start
+M.MK = {
+    w = "w", W = "W", e = "e", E = "E",
+    b = "b", B = "B", v = "v", V = "V",
+    l = "l", h = "h"
+}
 M.FK = {
-    w = "w", W = "W", x = "x", X = "X",
-    e = "e", E = "E", c = "c", C = "C",
-    r = "r", R = "R", v = "v", V = "V",
-    t = "t", T = "T", l = "l", L = "L",
-    a = "a", A = "A", p = "p", P = "P",
-    s = "s", S = "S", b = "b", B = "B",
-    d = "d", D = "D", n = "n", N = "N",
-    f = "f", F = "F", m = "m", M = "M",
-    z = "z", Z = "Z", i = "i", I = "I",
+    x = "x", X = "X", c = "c", C = "C", r = "r", R = "R", t = "t", T = "T",
+    a = "a", A = "A", p = "p", P = "P", s = "s", S = "S", b = "b", B = "B",
+    d = "d", D = "D", n = "n", N = "N", f = "f", F = "F", m = "m", M = "M",
+    z = "z", Z = "Z", i = "i", I = "I", u = "u", U = "U", o = "o", O = "O",
 }
 -- stylua: ignore end
+
+---@param buf integer?
+---@param event string|string[]
+---@param callback fun(ev: vim.api.keyset.create_autocmd.callback_args)
+function M.autocmd(buf,event, callback)
+    vim.api.nvim_create_autocmd(event, {
+        buffer = buf,
+        callback = callback,
+    })
+end
 
 return M
