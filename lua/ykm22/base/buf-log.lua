@@ -40,10 +40,11 @@ function M:show()
     end
 
 
-    vim.api.nvim_command("belowright vsplit")
+    vim.api.nvim_command("botright split")
     self.Win = vim.api.nvim_get_current_win()
 
-    vim.api.nvim_win_set_width(self.Win, math.floor(vim.o.columns*0.3))
+    vim.api.nvim_win_set_height(self.Win, math.floor(vim.o.lines*0.4))
+    -- vim.api.nvim_win_set_width(self.Win, math.floor(vim.o.columns*0.3))
     vim.api.nvim_win_set_buf(self.Win, self.Buf)
     vim.api.nvim_win_set_hl_ns(self.Win, self.NsId)
 

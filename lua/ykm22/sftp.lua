@@ -103,7 +103,13 @@ local function on_response(id, status, msgs)
         for _, callback in ipairs(WaitReadyCmds) do
             callback()
         end
-        M.log(SFTP_PIP.RES_HELLO, "SFTP_PIP: Client is ready "..msgs[2])
+        if #msgs > 2 then
+            for i=3,#msgs do
+                M.log(SFTP_PIP.RES_HELLO, "Debug => ".. msgs[i])
+            end
+        else
+            M.log(SFTP_PIP.RES_HELLO, "SFTP_PIP: Client is ready ".. (msgs[2] or "debug"))
+        end
         WaitReadyCmds = {}
         return
     end
@@ -114,7 +120,7 @@ local function on_response(id, status, msgs)
         return
     end
 
-    for i=2,#msgs-1 do
+    for i=2,#msgs do
         M.log(status, msgs[i])
     end
     local done = status < 1

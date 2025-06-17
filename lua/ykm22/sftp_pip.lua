@@ -1,3 +1,4 @@
+local Plat = require("ykm22.base.plat")
 ---@type any
 local uv = vim.uv
 
@@ -21,20 +22,13 @@ function M.register_callbacks(_cb)
     cb = _cb
 end
 
-local config_dir = vim.fn.stdpath("config")
-local sftp_pip_path
-if vim.fn.has("win32") == 1 then
-    sftp_pip_path = config_dir .. "/lib/win32/sftp_pip.exe"
-    -- sftp_pip_path = "./sftp_pip.exe"
-end
-
 ---@param callback fun()
 function M.start(callback)
     M.stdout = uv.new_pipe(false)
     M.stderr = uv.new_pipe(false)
     M.stdin = uv.new_pipe(false)
 
-    M.handle = uv.spawn(sftp_pip_path, {
+    M.handle = uv.spawn(Plat.get_local_exec("sftp_pip"), {
         stdio = { M.stdin, M.stdout, M.stderr },
     }, function(code, signal)
         M.stop()
@@ -58,8 +52,10 @@ function M.start(callback)
                 -- cb.sftp_log(M.RES_NVIM, "SFTP_PIP Subprocess output: " .. data)
                 local lines = vim.split(data, "\n", { trimempty = false })
                 for _, line in ipairs(lines) do
-                    -- vim.notify(" SFTP_PIP Response: '" .. line .. "'\n")
                     if line == "" then
+                        -- vim.schedule(function ()
+                        --     vim.notify(" SFTP_PIP Response: '" .. line .. "'\n")
+                        -- end)
                         if M.cache[1] then
                             M.decode_res(M.cache)
                         end
