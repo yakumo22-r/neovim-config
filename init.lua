@@ -62,18 +62,4 @@ local script_dir = vim.fn.expand("<sfile>:p:h")
 package.path = package.path .. ";" .. script_dir .. "/" .. "lib/?.lua"
 require("c_api")
 
--- local sftp_pip = require("sftp_pip")
-
--- sftp_pip.reg_host("xy.h5mj.test")
--- sftp_pip.login("xy.h5mj.test")
-
--- local process = require("process").new("./subtest")
--- process:start()
--- vim.api.nvim_create_user_command("SendTask", function(opts)
---     local id = opts.fargs[1]
---     process:send_raw(id)
---     process:send_raw("\n")
--- end, { nargs = 1 })
-
-
 
