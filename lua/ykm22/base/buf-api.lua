@@ -97,4 +97,9 @@ function M.autocmds(buf,event, callback, augroup)
     })
 end
 
+---@param buf integer
+function M.clear_buf_autocmds(buf)
+    vim.api.nvim_clear_autocmds({ buffer = buf })
+end
+
 return M

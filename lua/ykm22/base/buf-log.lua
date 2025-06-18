@@ -24,6 +24,7 @@ function M:show()
         B.set_buf_nofile(self.Buf)
         B.block_fast_keys(self.Buf)
 
+
         B.bind_key(self.Buf, "<Esc>", function()
             vim.api.nvim_win_close(self.Win, true)
         end)
@@ -35,10 +36,17 @@ function M:show()
         B.set_lines(self.Buf, 1, -1, self.Lines)
         B.set_modifiable(self.Buf, false)
 
+        B.autocmds(self.Buf, {"WinClosed", "WinNew"}, function(ev)
+            if ev.event == "WinNew" then
+            else
+                self.Win = nil
+            end
+        end)
+
         B.autocmds(self.Buf,{ "BufHidden", "BufDelete" }, function (ev)
             self.Win = nil
             if ev == "BufDelete" then
-                vim.api.nvim_clear_autocmds({ buffer = self.Buf })
+                B.clear_buf_autocmds(self.Buf)
                 self.Buf = nil
             end
         end)
@@ -52,7 +60,7 @@ function M:show()
     -- vim.api.nvim_win_set_width(self.Win, math.floor(vim.o.columns*0.3))
     vim.api.nvim_win_set_buf(self.Win, self.Buf)
     vim.api.nvim_win_set_hl_ns(self.Win, self.NsId)
-
+    vim.api.nvim_set_option_value("winfixbuf", true, { win = self.Win })
 end
 
 function M:hide()

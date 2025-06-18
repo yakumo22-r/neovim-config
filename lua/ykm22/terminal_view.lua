@@ -33,7 +33,7 @@ function M.RefreshTermManager()
         Win = vim.api.nvim_get_current_win()
         vim.api.nvim_win_set_buf(Win, Buf)
         vim.api.nvim_win_set_width(Win, Width)
-        -- vim.api.nvim_set_option_value("winfixwidth", true, { win = Win })
+        vim.api.nvim_set_option_value("winfixbuf", true, { win = Win })
         vim.api.nvim_win_set_hl_ns(Win, NsId)
         vim.api.nvim_create_autocmd("WinClosed", {
             buffer = Buf,

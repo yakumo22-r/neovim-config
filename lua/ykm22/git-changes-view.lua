@@ -18,9 +18,10 @@ local StaticLineNum = 0
 ---@type string[]
 local Lines = {}
 local Files = {}
-local Buf = -1
-local Win = -1
-local Hidden = true
+---@type any
+local Buf = nil
+---@type any
+local Win = nil
 local IsRefreshing = false
 
 local Width = 30
@@ -84,13 +85,12 @@ function M.OpenWindow()
     Win = vim.api.nvim_get_current_win()
     vim.api.nvim_win_set_buf(Win, Buf)
     vim.api.nvim_win_set_width(Win, Width)
-    -- vim.api.nvim_set_option_value("winfixwidth", true, { win = ManagerWin })
+    vim.api.nvim_set_option_value("winfixbuf", true, { win = Win })
     vim.api.nvim_win_set_hl_ns(Win, NsId)
-    Hidden = false
 end
 
 function M.RefreshView()
-    if Hidden or Win == -1 then
+    if not Win then
         M.OpenWindow()
     end
 
@@ -182,7 +182,7 @@ local function Enter()
 end
 
 function M.RefreshLayout()
-    if Win==-1 or not vim.api.nvim_win_is_valid(Win) then
+    if not Win or not vim.api.nvim_win_is_valid(Win) then
         return
     end
     -- vim.schedule(function ()
@@ -208,29 +208,21 @@ function M.OpenView()
 
     B.autocmds(Buf, {"WinClosed", "WinNew"}, function(ev)
         if ev.event == "WinNew" then
-            print("WinNew")
             M.RefreshLayout()
         else
-            Hidden = true
-            Win = -1
+            Win = nil
         end
     end)
 
     StaticView()
 
-    -- Listen for specific buffer events
-    vim.api.nvim_create_autocmd({ "BufHidden", "BufDelete" }, {
-        buffer = Buf, -- 0 means current buffer, or specify buffer number
-        callback = function(ev)
-            if ev.event == "BufHidden" then
-                Hidden = true
-            elseif ev.event == "BufDelete" then
-                Hidden = true
-                Buf = -1
-            end
-            Win = -1
-        end,
-    })
+    B.autocmds(Buf, { "BufHidden", "BufDelete" }, function (ev)
+        if ev.event == "BufDelete" then
+            B.clear_buf_autocmds(Buf)
+            Buf = nil
+        end
+        Win = nil
+    end)
 
     B.block_fast_keys(Buf)
 
@@ -247,11 +239,11 @@ function M.OpenView()
 end
 
 function M.ToggleView()
-    if Buf == -1 then
+    if not Buf then
         M.OpenView()
         M.refresh_git_changes()
     else
-        if not Hidden then
+        if Win then
             vim.api.nvim_win_close(Win, false)
         else
             M.RefreshView()
