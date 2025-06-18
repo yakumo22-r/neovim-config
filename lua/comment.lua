@@ -2,6 +2,12 @@ local cms = require("comment.pub_comment")
 cms.cover(require("comment.xml_comment"))
 cms.cover(require("comment.vue_comment"))
 
+local CM = 1
+local CMBF = 2
+local CMBE = 3
+local CMF1 = 4
+local CMF2 = 5
+
 local function new_LOP(l1, l2)
     local LOP = {
         l1 = l1,
@@ -169,4 +175,16 @@ vim.keymap.set("n", "<leader>-", RmCommentNormal, opt)
 vim.keymap.set("v", "=", cmd(AddCommentVisual), opt)
 vim.keymap.set("v", "-", cmd(RmCommentVisual), opt)
 
-return M
+local function FastComment()
+end
+
+vim.keymap.set("i", "<C-=>",function ()
+    local front = cms.get_cmstr(CMF1) or cms.get_cmstr(CM)
+    local tail = cms.get_cmstr(CMF2) or ""
+    r = " "
+    if tail ~= "" then
+        r = string.rep("<Left>", #tail) .. r
+    end
+    return front .. tail .. r
+    
+end,{noremap=true, silent = true, expr = true})

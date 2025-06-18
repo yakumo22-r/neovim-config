@@ -1,20 +1,26 @@
 local CM = 1
 local CMBF = 2
 local CMBE = 3
+local CMF1 = 4
+local CMF2 = 5
 local cmstrs = {
     default = {
         [CM] = "//",
         [CMBF] = "/*",
         [CMBE] = "*/",
+        [CMF1] = "/**",
+        [CMF2] = " */",
     },
     lua = {
         [CM] = "--",
         [CMBF] = [[--[[]],
-        [CMBE] = "--]]",
+        [CMBE] = " --]]",
     },
     html = {
         [CMBF] = "<!--",
         [CMBE] = "-->",
+        [CMF1] = "<!--",
+        [CMF2] = " -->",
     },
     vim = { '"' },
     sh = { "#" },
