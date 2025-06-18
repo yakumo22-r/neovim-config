@@ -52,9 +52,10 @@ function M.start(callback)
                 -- cb.sftp_log(M.RES_NVIM, "SFTP_PIP Subprocess output: " .. data)
                 local lines = vim.split(data, "\n", { trimempty = false })
                 for _, line in ipairs(lines) do
-                    if line == "" then
+                    if vim.trim(line) == "" then
                         -- vim.schedule(function ()
-                        --     vim.notify(" SFTP_PIP Response: '" .. line .. "'\n")
+                        --     local l = line
+                        --     vim.notify(" SFTP_PIP Response: '" .. l .. "'\n")
                         -- end)
                         if M.cache[1] then
                             M.decode_res(M.cache)
@@ -101,6 +102,9 @@ function M.decode_res(msgs)
     local _, b, c = msgs[1]:match("(%d+)%s+(%d+)%s+(%d+)")
     local _id = tonumber(b) or -1
     local status = tonumber(c) or 1
+    -- vim.schedule(function ()
+    --     print("SFTP_PIP Response: " .. table.concat(msgs, "\n"))
+    -- end)
     cb.on_response(_id, status, msgs)
 end
 

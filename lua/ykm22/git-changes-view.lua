@@ -15,22 +15,24 @@ local Line2Index = {}
 local _readCfg = nil
 
 local StaticLineNum = 0
----@type string[]
-local Lines = {}
-local Files = {}
 ---@type any
 local Buf = nil
 ---@type any
 local Win = nil
 local IsRefreshing = false
 
-local Width = 30
-local BufWidth = 26
+---@type string[]
+local NeedUploadFiles = {}
+
+local Width = 50
+local BufWidth = 46
 
 local StyleTitle = "StyleTitle"
 local StyleCmd = "StyleCmd"
 local StyleInfo = "StyleInfo"
 local StyleLine = "StyleLine"
+local StylePath = "StylePath"
+local StyleDir = "StyleDir"
 local StyleLoading = "StyleLoading"
 
 function M.get_buf()
@@ -40,42 +42,129 @@ end
 ---@type string
 local _root = nil
 
+---@class ykm22.nvim.GitChangeNode
+---@field path string
+---@field mode string
+---@field isdir boolean?
+---@field moveSrc string?
+
+---@type ykm22.nvim.GitChangeNode[]
+local GitNodes = {}
+
+---@param line string
+local function parse_git_changes(line)
+    local mode = line:sub(1,2)
+
+    ---@type string
+    local path
+
+    line = line:sub(4)
+    local index
+    if line:sub(1,1) == '"' then
+        index = line:find('"', 2)
+    else
+        index = line:find(' ', 2)
+    end
+    path = line:sub(1, index)
+    local moveSrc
+    if mode:sub(1,1) == "R" then
+        line = line:sub(index + 5)
+        moveSrc = path
+        if line:sub(1,1) == '"' then
+            index = line:find('"', 2)
+        else
+            index = line:find(' ', 2)
+        end
+        moveSrc = path
+        path = line:sub(1, index)
+    end
+
+    ---@type ykm22.nvim.GitChangeNode
+    local v = {
+        name = vim.fn.fnamemodify(path, ':t'),
+        path = path,
+        mode = mode,
+        isdir = path:sub(#path) == "/",
+        moveSrc = moveSrc,
+    }
+
+    -- print(">>>>>>>>>>>",line)
+    -- for k,vv in pairs(v) do
+    --     print(k, vv)
+    -- end
+    -- print("<<<<<<<<<<<")
+
+    return v
+end
+
 function M.refresh_git_changes()
     IsRefreshing = true
     M.RefreshView()
     CmdPip.run("git", { "status", "--porcelain" }, function(m)
         if not m then
             IsRefreshing = false
-            Lines = {}
-            Files = {}
+            GitNodes = {}
+            NeedUploadFiles = {}
             M.RefreshView()
             return
         end
         local files = {}
         local lines = vim.split(m, "\n", { trimempty = true })
+        GitNodes = {}
+        NeedUploadFiles = {}
         for _, line in ipairs(lines) do
-            if line:match("^[AM?]") ~= "" then
-                table.insert(files, line:sub(4))
-            end
+            local node = parse_git_changes(line)
+            table.insert(GitNodes, node)
         end
-        -- TODO: parse directory
-        Lines = lines
-        Files = files
+
         IsRefreshing = false
         -- print("Git changes:", vim.inspect(files))
         M.RefreshView()
     end, _root)
 end
-local sep = package.config:sub(1, 1)
-function M.get_cursor_abs_path()
-    local lnum = vim.api.nvim_win_get_cursor(Win)[1]
-    if Line2Index[lnum] then
-        return _root .. sep .. Files[Line2Index[lnum]]
+
+---@parma node ykm22.nvim.GitChangeNode
+---@param paths string[]
+---@param root? string
+local function get_git_node_path(node, paths, root)
+    if not node.mode:match("^[MAR? ][MA? ]") then
+        return
+    end
+    if node.isdir then
+        local files = ykm22.get_all_subfiles(_root .. "/" .. node.path, root)
+        for _,f in ipairs(files) do
+            table.insert(paths, f)
+        end
+    else
+        if root then
+            table.insert(paths, vim.fs.relpath(root, _root .. "/" .. node.path))
+        else
+            table.insert(paths, _root .. "/" .. node.path)
+        end
     end
 end
 
-function M.get_change_files()
-    return Files
+---@return string[]
+---@param root? string
+function M.get_cursor_abs_paths(root)
+    local lnum = vim.api.nvim_win_get_cursor(Win)[1]
+    local index = Line2Index[lnum]
+    local r = {}
+    if index and GitNodes[index] then
+        get_git_node_path(GitNodes[index], r, root)
+    end
+    return r
+end
+
+---@return string[]
+---@param root string
+function M.get_need_upload_files(root)
+    if not NeedUploadFiles[1] then
+        for _, node in ipairs(GitNodes) do
+            get_git_node_path(node, NeedUploadFiles, root)
+        end
+    end
+    return NeedUploadFiles
 end
 
 local Line2Buf = {}
@@ -87,6 +176,29 @@ function M.OpenWindow()
     vim.api.nvim_win_set_width(Win, Width)
     vim.api.nvim_set_option_value("winfixbuf", true, { win = Win })
     vim.api.nvim_win_set_hl_ns(Win, NsId)
+end
+
+---@param gitNode ykm22.nvim.GitChangeNode
+local function gitnode_to_line(gitNode)
+    ---@type ykm22.nvim.StyleCell[]
+    local cells = {}
+    table.insert(cells, V.style_cell(gitNode.mode, 0, StyleCmd))
+
+    if gitNode.isdir then
+        table.insert(cells, V.style_cell("  ", 0, StyleDir))
+        table.insert(cells, V.style_cell(gitNode.path, 0, StyleDir))
+    else
+        local filename = vim.fn.fnamemodify(gitNode.path, ':t')
+        local icon,style = V.get_icon_style(filename)
+        table.insert(cells, V.style_cell(string.format(" %s ", icon), 0, style))
+        table.insert(cells, V.style_cell(filename.." "))
+        if gitNode.moveSrc then
+            table.insert(cells, V.style_cell(gitNode.moveSrc .. " ", 0, StylePath))
+            table.insert(cells, V.style_cell("-> ", 0, StyleCmd))
+        end
+        table.insert(cells, V.style_cell(gitNode.path, 0, StylePath))
+    end
+    return V.get_style_line(cells)
 end
 
 function M.RefreshView()
@@ -108,8 +220,15 @@ function M.RefreshView()
 
     local line_num = StaticLineNum + 1
     Line2Index = {}
-    for i, line in ipairs(Lines) do
+    local lineStyles = {}
+    for i=1,line_num do
+        table.insert(lineStyles, false)
+    end
+
+    for i, node in ipairs(GitNodes) do
+        local line, styles = gitnode_to_line(node)
         table.insert(lines, line)
+        table.insert(lineStyles, styles)
         line_num = line_num + 1
         Line2Index[line_num] = i
     end
@@ -118,6 +237,11 @@ function M.RefreshView()
     B.set_lines(Buf, StaticLineNum + 1, -1, lines)
     V.set_extmark(Buf, NsId, styleR, { StaticLineNum + 1, 1 })
     V.set_extmark(Buf, NsId, StyleLine, { StaticLineNum + 2, 1, line_num + 1, 1 })
+    for i, styles in ipairs(lineStyles) do
+        if styles then
+            V.set_styles(Buf, NsId, i, styles)
+        end
+    end
     B.set_modifiable(Buf, false)
 
     if line_num == StaticLineNum then
@@ -166,7 +290,7 @@ local function Enter()
         vim.notify("nvim-tree is not available. Please install it.", vim.log.levels.ERROR)
         return
     end
-    local path = M.get_cursor_abs_path()
+    local path = M.get_cursor_abs_paths()[1]
     if path then
         local file_wins = {}
         for _, win in ipairs(vim.api.nvim_list_wins()) do
@@ -200,11 +324,13 @@ function M.OpenView()
     B.set_buf_nofile(Buf)
     vim.api.nvim_buf_set_name(Buf, "Git Changes")
 
-    vim.api.nvim_set_hl(NsId, StyleTitle, { fg = "#45a8a8" })
+    vim.api.nvim_set_hl(NsId, StyleTitle, { fg = "#45b8c8" })
     vim.api.nvim_set_hl(NsId, StyleCmd, { fg = "#fe6644" })
     vim.api.nvim_set_hl(NsId, StyleInfo, { fg = "#e5de42" })
     vim.api.nvim_set_hl(NsId, StyleLoading, { fg = "#ef90e2" })
-    vim.api.nvim_set_hl(NsId, StyleLine, { fg = "#f5c0b2" })
+    vim.api.nvim_set_hl(NsId, StyleLine, { fg = "#e6d2bc" })
+    vim.api.nvim_set_hl(NsId, StylePath, { fg = "#aa9999" })
+    vim.api.nvim_set_hl(NsId, StyleDir, { fg = "#facd1f" })
 
     B.autocmds(Buf, {"WinClosed", "WinNew"}, function(ev)
         if ev.event == "WinNew" then

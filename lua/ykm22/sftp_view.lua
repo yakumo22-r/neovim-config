@@ -1,4 +1,5 @@
 local V = require("ykm22.base.view-api")
+require("ykm22.base.global")
 local floatMenu = require("ykm22.base.float-menu").new()
 floatMenu.Width = 30
 floatMenu.BufWidth = 30
@@ -27,25 +28,6 @@ local function NvimTreeApi()
     end
 end
 
----@return string[]
-local function get_all_subfiles(dir)
-    local files = vim.fn.readdir(dir)
-    local rfiles = {}
-    for _, file in ipairs(files) do
-        local full_path = dir .. "/" .. file
-        if vim.fn.isdirectory(full_path) == 1 then
-            local subfiles = get_all_subfiles(full_path)
-            for _, subfile in ipairs(subfiles) do
-                table.insert(rfiles, subfile)
-            end
-        else
-            table.insert(rfiles, vim.fs.relpath(Handle.get_root(), full_path))
-        end
-    end
-
-    return rfiles
-end
-
 ---@return string[]|nil
 local function get_relative_files_on_buf(buf)
     local bufname = vim.api.nvim_buf_get_name(buf)
@@ -62,15 +44,15 @@ local function get_relative_files_on_buf(buf)
             isdir = node.type == "directory"
             path = node.absolute_path
         elseif ykm22.GitChangeView and ykm22.GitChangeView.get_buf() == buf then
-            local file = ykm22.GitChangeView.get_cursor_abs_path()
-            if file then
-                return { vim.fs.relpath(Handle.get_root(), file) }
+            local files = ykm22.GitChangeView.get_cursor_abs_paths(Handle.get_root())
+            if files[1] then
+                return files
             end
         end
     end
 
     if isdir then
-        local files = get_all_subfiles(path)
+        local files = ykm22.get_all_subfiles(path)
         if #files > 0 then
             return files
         end
@@ -145,7 +127,8 @@ function Menu.git_changes_upload()
 
     label = { V.style_cell(" Changes Upload ") },
     action = function(v)
-        local files = ykm22.GitChangeView.get_change_files()
+        local files = ykm22.GitChangeView.get_need_upload_files(Handle.get_root())
+        -- print(vim.inspect(files))
         Handle.cmd_upload(nil, files)
         return true
     end,
@@ -160,7 +143,7 @@ function Menu.git_changes_upload_to()
         label = { cell, cell2 },
         action = function(v)
             
-            local files = ykm22.GitChangeView.get_change_files()
+            local files = ykm22.GitChangeView.get_need_upload_files(Handle.get_root())
             local lists = Menu.confSelects("Changes Upload to", function(_, name)
                 if not name or name == "" then
                     return
@@ -303,9 +286,9 @@ function M.show_float_ops()
         if ykm22.GitChangeView and vim.api.nvim_get_current_buf() == ykm22.GitChangeView.get_buf() then
             table.insert(menus, Menu.git_changes_upload())
             table.insert(menus, Menu.git_changes_upload_to())
-            if not ykm22.GitChangeView.get_cursor_abs_path() then
+            if not ykm22.GitChangeView.get_cursor_abs_paths()[1] then
                 isGrp = true
-                if #ykm22.GitChangeView.get_change_files() == 0 then
+                if not ykm22.GitChangeView.get_need_upload_files(Handle.get_root())[1] then
                     return
                 end
             end

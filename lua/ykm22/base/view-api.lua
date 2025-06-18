@@ -156,4 +156,14 @@ function M.short_text(text, width, style)
     }
 end
 
+---@param filename string
+---@return string icon,string hl_group
+function M.get_icon_style(filename)
+    local filetype = vim.filetype.match({ filename = filename }) or "txt"
+    -- if not file_icons[filetype] then
+    local web_devicons = require("nvim-web-devicons")
+    local icon, color = web_devicons.get_icon_by_filetype(filetype)
+    return icon, color
+end
+
 return M
