@@ -5,6 +5,7 @@
     switch between configurations, and perform file uploads and downloads.
 --]]
 require("ykm22.base.global")
+local BufLog = require("ykm22.base.buf-log")
 
 ---@class ykm22.nvim.Sftp
 local M = {}
@@ -160,6 +161,14 @@ local function on_process_exit(msg)
     M.log(SFTP_PIP.RES_NVIM, msg)
 end
 
+local LOGStyle = {
+    [SFTP_PIP.RES_HELLO] = BufLog.StyleYellow,
+    [SFTP_PIP.RES_NVIM] = BufLog.StyleBlue,
+    [SFTP_PIP.RES_INTERNAL_ERR] = BufLog.StyleRed,
+    [SFTP_PIP.RES_ERROR] = BufLog.StyleRed,
+    [SFTP_PIP.RES_ERROR_DONE] = BufLog.StyleRed,
+    [SFTP_PIP.RES_DONE] = BufLog.StyleGreen,
+}
 
 function M.log(status, info, err)
     local tag = SFTP_PIP.CBTag[status] or "[UNKNOWN]"
@@ -167,7 +176,7 @@ function M.log(status, info, err)
     local msg = string.format("%s %s %s", time, tag, info)
     vim.schedule(function()
         -- print(msg)
-        M.logView:append(msg)
+        M.logView:append(msg, LOGStyle[status])
         if not M.logView:is_show() then
             M.logView:show()
         end
@@ -383,7 +392,7 @@ end
 
 ---@param root string
 function M.init(root)
-    M.logView = require("ykm22.base.buf-log").new()
+    M.logView = BufLog.new()
     _root = root
     parseCfg()
     SFTP_PIP.register_callbacks({

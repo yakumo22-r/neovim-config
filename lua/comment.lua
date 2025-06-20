@@ -175,10 +175,8 @@ vim.keymap.set("n", "<leader>-", RmCommentNormal, opt)
 vim.keymap.set("v", "=", cmd(AddCommentVisual), opt)
 vim.keymap.set("v", "-", cmd(RmCommentVisual), opt)
 
-local function FastComment()
-end
-
-vim.keymap.set("i", "<C-=>",function ()
+vim.keymap.set("i", "<C-w>",function ()
+    print("C-=")
     local front = cms.get_cmstr(CMF1) or cms.get_cmstr(CM)
     local tail = cms.get_cmstr(CMF2) or ""
     r = " "

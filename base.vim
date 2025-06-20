@@ -78,10 +78,7 @@ inoremap <C-h> <Left>
 inoremap <C-l> <Right>
 inoremap <C-j> <Down>
 inoremap <C-k> <Up>
-inoremap <C-d> <Del>
-inoremap <C-b> <BS>
-inoremap <C-e> <Esc>ea
-inoremap <C-w> <Esc>wa
+
 
 " Move text
 nnoremap <silent> < <<
