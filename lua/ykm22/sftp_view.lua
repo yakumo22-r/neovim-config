@@ -70,19 +70,25 @@ function Menu.title(text)
     }
 end
 
+local function style_key(k)
+    return V.style_cell(" "..k, 0, V.StyleHint)
+end
+
 ---@return ykm22.nvim.FloatMenuELement
 function Menu.switchConf()
     local currConf = Handle.get_curr_conf()
 
-    local cell = V.style_cell(string.format(" Switch(%s)", currConf.name))
-    local cell2 = V.style_cell(V.right_text(" > ", floatMenu.Width - cell.width), 0, V.StyleOk)
+    local cell = style_key("m")
+    local cell2 = V.style_cell(string.format(" Switch(%s)", currConf.name))
+    local cell3 = V.style_cell(V.right_text(" > ", floatMenu.Width - cell.width - cell2.width), 0, V.StyleOk)
     return {
-        label = { cell, cell2 },
+        label = { cell, cell2, cell3 },
         action = function()
             floatMenu:set_list(Menu.confSelects("Switch Config", Handle.cmd_switch_conf))
             floatMenu:show()
             return false
         end,
+        key = "m",
     }
 end
 
@@ -113,7 +119,7 @@ end
 function Menu.reload_config()
     ---@type ykm22.nvim.FloatMenuELement
     return {
-        label = {V.style_cell(" Reload Config"), V.style_cell(" (r)", 0, V.StyleHint)},
+        label = { style_key("r"), V.style_cell(" Reload Config") },
         action = function()
             Handle.cmd_init_sftp_conf()
             return true
@@ -122,25 +128,52 @@ function Menu.reload_config()
     }
 end
 
-function Menu.git_changes_upload()
+function Menu.open_log()
+    ---@type ykm22.nvim.FloatMenuELement
     return {
+        label = { style_key("L"), V.style_cell(" Open Log") },
+        action = function()
+            Handle.open_log()
+            return true
+        end,
+        key = "L",
+    }
+end
 
-    label = { V.style_cell(" Changes Upload ") },
+function Menu.exit_proc()
+    ---@type ykm22.nvim.FloatMenuELement
+    return {
+        label = { style_key("R"), V.style_cell(" Quit SFTP_PIP") },
+        action = function()
+            Handle.exit_proc()
+            return true
+        end,
+        key = "R",
+    }
+end
+
+function Menu.git_changes_upload()
+    ---@type ykm22.nvim.FloatMenuELement
+    return {
+    label = { style_key("c"), V.style_cell(" Changes Upload ") },
     action = function(v)
         local files = ykm22.GitChangeView.get_need_upload_files(Handle.get_root())
         -- print(vim.inspect(files))
         Handle.cmd_upload(nil, files)
         return true
     end,
+    key = "c"
 }
 end
 
 
 function Menu.git_changes_upload_to()
-    local cell = V.style_cell(" Changes Upload to")
-    local cell2 = V.style_cell(V.right_text(" > ", floatMenu.Width - cell.width), 0, V.StyleOk)
+    local cell = style_key("C")
+    local cell2 = V.style_cell(" Changes Upload to")
+    local cell3 = V.style_cell(V.right_text(" > ", floatMenu.Width - cell.width - cell2.width), 0, V.StyleOk)
+    ---@type ykm22.nvim.FloatMenuELement
     return {
-        label = { cell, cell2 },
+        label = { cell, cell2 , cell3 },
         action = function(v)
             
             local files = ykm22.GitChangeView.get_need_upload_files(Handle.get_root())
@@ -158,27 +191,32 @@ function Menu.git_changes_upload_to()
             floatMenu:set_list(lists)
             floatMenu:show()
         end,
+        key = "C",
     }
 
 end
 
 function Menu.upload()
+    ---@type ykm22.nvim.FloatMenuELement
     return {
-        label = { V.style_cell(" Upload ") },
+        label = { style_key("u"), V.style_cell(" Upload ")  },
         action = function(v)
             local files = get_relative_files_on_buf(v.lastBuf)
             Handle.cmd_upload(nil, files)
             return true
         end,
+        key = "u",
     }
 end
 
 
 function Menu.upload_to()
-    local cell = V.style_cell(" Upload to")
-    local cell2 = V.style_cell(V.right_text(" > ", floatMenu.Width - cell.width), 0, V.StyleOk)
+    local cell = style_key("U")
+    local cell2 = V.style_cell(" Upload to")
+    local cell3 = V.style_cell(V.right_text(" > ", floatMenu.Width - cell.width - cell2.width), 0, V.StyleOk)
+    ---@type ykm22.nvim.FloatMenuELement
     return {
-        label = { cell, cell2 },
+        label = { cell, cell2 , cell3 },
         action = function(v)
             local files = get_relative_files_on_buf(v.lastBuf)
             local lists = Menu.confSelects("Upload to", function(_, name)
@@ -195,26 +233,29 @@ function Menu.upload_to()
             floatMenu:set_list(lists)
             floatMenu:show()
         end,
+        key = "U",
     }
 end
 
-
-function Menu.sync() 
+function Menu.sync()
+    ---@type ykm22.nvim.FloatMenuELement
     return {
-        label = { V.style_cell(" Sync ") },
+        label = { style_key("s"), V.style_cell(" Sync ") },
         action = function(v)
             local files = get_relative_files_on_buf(v.lastBuf)
             Handle.cmd_sync(nil, files)
             return true
         end,
+        key = "s",
     }
 end
 
 function Menu.sync_from() 
-    local cell = V.style_cell(" Sync from")
-    local cell2 = V.style_cell(V.right_text(" > ", floatMenu.Width - cell.width), 0, V.StyleOk)
+    local cell = style_key("S")
+    local cell2 = V.style_cell(" Sync from")
+    local cell3 = V.style_cell(V.right_text(" > ", floatMenu.Width - cell.width - cell2.width), 0, V.StyleOk)
     return {
-        label = { cell, cell2 },
+        label = { cell, cell2, cell3 },
         action = function(v)
             local files = get_relative_files_on_buf(v.lastBuf)
             local lists = Menu.confSelects("Upload to", function(_, name)
@@ -231,6 +272,7 @@ function Menu.sync_from()
             floatMenu:set_list(lists)
             floatMenu:show()
         end,
+        key = "S",
     }
 end
 
@@ -302,6 +344,8 @@ function M.show_float_ops()
         end
         table.insert(menus, Menu.switchConf())
         table.insert(menus, Menu.reload_config())
+        table.insert(menus, Menu.open_log())
+        table.insert(menus, Menu.exit_proc())
     end
 
     floatMenu:set_list(menus)

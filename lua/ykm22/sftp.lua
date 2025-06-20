@@ -93,6 +93,7 @@ local CMD_UPLOADS = 1
 local CMD_DOWNLOADS = 2
 local CMD_CLOSE_SESSION = 3
 local CMD_STATUS_SESSION = 4
+local CMD_EXIT = 100
 
 ---@param id integer
 ---@param status integer
@@ -169,6 +170,32 @@ local LOGStyle = {
     [SFTP_PIP.RES_ERROR_DONE] = BufLog.StyleRed,
     [SFTP_PIP.RES_DONE] = BufLog.StyleGreen,
 }
+
+function M.open_log()
+    if not M.logView:is_show() then
+        M.logView:show()
+    end
+end
+
+function M.exit_proc()
+    M.log(SFTP_PIP.RES_NVIM, "SFTP_PIP: Exiting process")
+    if ClientReady then
+        local reqId = SFTP_PIP.raw_send(CMD_EXIT, 0, {"1"})
+        Callbacks[reqId] = {
+            cmd = CMD_EXIT,
+            callback = function (done, err, msgs)
+                ClientReady = false
+                Starting = false
+                -- reset
+                for _,v in pairs(SessionMap) do
+                    v.queue = {}
+                    v.sessionId = nil
+                end
+                Callbacks = {}
+            end
+        }
+    end
+end
 
 function M.log(status, info, err)
     local tag = SFTP_PIP.CBTag[status] or "[UNKNOWN]"
