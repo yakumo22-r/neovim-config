@@ -24,6 +24,7 @@ return {
                 "lua_ls",
                 "clangd",
                 "ts_ls",
+                "gopls",
 
                 -- formatters
                 "stylua", -- lua formatter

@@ -20,6 +20,9 @@ spec_ts_ls:init()
 local spec_clangd = require("plugins.lsp.specs.clangd")
 spec_clangd:init()
 
+local spec_gopls = require("plugins.lsp.specs.gopls")
+spec_gopls:init()
+
 function LspSetting.Init()
     local cmp_nvim_lsp = require("cmp_nvim_lsp")
     -- Enable autocompletion capabilities
@@ -58,6 +61,7 @@ function LspSetting.Init()
     spec_lua_ls:set_enable(capabilities, keybindings)
     spec_ts_ls:set_enable(capabilities,keybindings)
     spec_clangd:set_enable(capabilities,keybindings)
+    spec_gopls:set_enable(capabilities,keybindings)
 
     -- Custom :LspInfo command to display LSP client info
     vim.api.nvim_create_user_command("LspInfo", function()
