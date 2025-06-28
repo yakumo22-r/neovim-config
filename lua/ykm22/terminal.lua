@@ -72,18 +72,18 @@ vim.api.nvim_create_autocmd("BufEnter", {
 
 vim.api.nvim_create_autocmd("BufDelete", {
     pattern = "term://*",
-    callback = function()
-        local bufnr = vim.api.nvim_get_current_buf()
-        if vim.api.nvim_buf_is_valid(bufnr) then
+    callback = function(ev)
+        -- local bufnr = vim.api.nvim_get_current_buf()
+        if vim.api.nvim_buf_is_valid(ev.buf) then
             return
         end
-        if bufnr == M.defaultTerm then
+        if ev.buf == M.defaultTerm then
             M.defaultTerm = -1
         end
-        local name = M.termAlaias[bufnr]
+        local name = M.termAlaias[ev.buf]
         if name then
             M.termNames[name] = nil
-            M.termAlaias[bufnr] = nil
+            M.termAlaias[ev.buf] = nil
         end
     end,
 })
@@ -160,12 +160,12 @@ end, {})
 
 local index = 0
 local function ToggleTerm()
-    index = index + 1
+    -- index = index + 1
     if vim.bo.buftype == "terminal" then
         return
-    else
-        print(index, "ToggleTerm: Not a terminal buffer")
     end
+    --     print(index, "ToggleTerm: Not a terminal buffer")
+    -- end
     if defaultTerm == -1 then
         vim.cmd("terminal")
         return
@@ -174,11 +174,9 @@ local function ToggleTerm()
     end
 end
 
-vim.keymap.set("n", "<C-t>", ToggleTerm, B.opts)
+vim.keymap.set("n", "<C-p>", ToggleTerm, B.opts)
 vim.keymap.set("t", "<esc>", [[<C-\><C-n>]], B.opts)
-vim.keymap.set("t", "<C-w>", [[<C-\><C-n><C-w>]], B.opts)
-vim.keymap.set("t", "<C-t>", function ()
-    vim.cmd('bprevious')
-end, B.opts)
+vim.keymap.set("t", "<C-n>", [[<C-\><C-n>]], B.opts)
+vim.keymap.set("t", "<C-j>", [[<C-\><C-n><C-o>]], B.opts)
 
 return M

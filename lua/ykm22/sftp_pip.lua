@@ -86,6 +86,7 @@ M.RES_INFO = 1
 M.RES_ERROR = 2
 M.RES_HELLO = 99
 M.RES_NVIM = 100
+M.RES_NVIM_DONE = 101
 
 M.CBTag = {
     [M.RES_INTERNAL_ERR] = "[INTERNAL_ERR]",
@@ -95,6 +96,7 @@ M.CBTag = {
     [M.RES_ERROR] = "[ERROR]",
     [M.RES_HELLO] = "[HELLO WORLD]",
     [M.RES_NVIM] = "[NVIM]",
+    [M.RES_NVIM_DONE] = "[NVIM_DONE]",
 }
 
 ---@param msgs string[]

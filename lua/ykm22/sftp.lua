@@ -169,6 +169,7 @@ local LOGStyle = {
     [SFTP_PIP.RES_ERROR] = BufLog.StyleRed,
     [SFTP_PIP.RES_ERROR_DONE] = BufLog.StyleRed,
     [SFTP_PIP.RES_DONE] = BufLog.StyleGreen,
+    [SFTP_PIP.RES_NVIM_DONE] = BufLog.StyleGreen,
 }
 
 function M.open_log()
@@ -300,10 +301,10 @@ end
 ---@param localRoot string
 ---@param remoteRoot string
 ---@param files string[]
-function M.upload_files(hostname, localRoot, remoteRoot, files)
+function M.upload_files(hostname, localRoot, remoteRoot, files, cfg_name)
 
     if M.wait_login(hostname, function()
-        M.upload_files(hostname, localRoot, remoteRoot, files)
+        M.upload_files(hostname, localRoot, remoteRoot, files, cfg_name)
     end) then
         return
     end
@@ -315,7 +316,13 @@ function M.upload_files(hostname, localRoot, remoteRoot, files)
         table.concat(files, "\n"),
     })
 
-    Callbacks[reqId] = { cmd = CMD_UPLOADS }
+    Callbacks[reqId] = { cmd = CMD_UPLOADS,
+        callback = cfg_name and function (done, err, msgs)
+            if not err and done then
+                M.log(SFTP_PIP.RES_NVIM_DONE, string.format("<<<<<<<< %s upload done", cfg_name))
+            end
+        end
+    }
 end
 
 ---@param hostname string
@@ -381,6 +388,7 @@ function M.cmd_switch_conf(opts, name)
     end
 end
 
+---@param conf ykm22.nvim.SftpConf
 function M.cmd_upload(conf,files)
     conf = conf or curr
     if files then
@@ -388,7 +396,8 @@ function M.cmd_upload(conf,files)
             conf.host.domain,
             M.get_root(),
             conf.remoteRoot,
-            files
+            files,
+            conf.name
         )
     else
         vim.notify("No valid file to upload", vim.log.levels.ERROR)

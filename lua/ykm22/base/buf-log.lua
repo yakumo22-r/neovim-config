@@ -86,9 +86,11 @@ function M:show()
 
 
         B.bind_key(self.Buf, "<Esc>", function()
+            vim.cmd("wincmd p")
             vim.api.nvim_win_close(self.Win, true)
         end)
         B.bind_key(self.Buf, "q", function()
+            vim.cmd("wincmd p")
             vim.api.nvim_win_close(self.Win, true)
         end)
 
@@ -166,10 +168,10 @@ end
 function Class.new()
     if not M.NsId then
         M.NsId = vim.api.nvim_create_namespace("ykm22.ns.BufLog")
-        vim.api.nvim_set_hl(M.NsId, Class.StyleRed, { fg = "#fe6644" })
+        vim.api.nvim_set_hl(M.NsId, Class.StyleRed, { fg = "#f85a50" })
         vim.api.nvim_set_hl(M.NsId, Class.StyleGreen, { fg = "#99ffaa" })
         vim.api.nvim_set_hl(M.NsId, Class.StyleBlue, { fg = "#45b8c8" })
-        vim.api.nvim_set_hl(M.NsId, Class.StyleYellow, { fg = "#facd1f" })
+        vim.api.nvim_set_hl(M.NsId, Class.StyleYellow, { fg = "#fabd2f" })
     end
     local ins = L.clone(M)
 
