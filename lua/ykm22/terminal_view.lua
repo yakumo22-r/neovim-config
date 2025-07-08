@@ -33,7 +33,7 @@ function M.RefreshTermManager()
         Win = vim.api.nvim_get_current_win()
         vim.api.nvim_win_set_buf(Win, Buf)
         vim.api.nvim_win_set_width(Win, Width)
-        vim.api.nvim_set_option_value("winfixbuf", true, { win = Win })
+        -- vim.api.nvim_set_option_value("winfixbuf", true, { win = Win })
         vim.api.nvim_win_set_hl_ns(Win, NsId)
         vim.api.nvim_create_autocmd("WinClosed", {
             buffer = Buf,
@@ -68,13 +68,12 @@ function M.RefreshTermManager()
         Line2Buf[line_num] = entry.bufnr
     end
 
-    if line_num > StaticLineNum then
-        -- Set buffer content
-        B.set_modifiable(Buf, true)
-        B.set_lines(Buf, StaticLineNum + 1, -1, lines)
-        B.set_modifiable(Buf, false)
-        V.set_extmark(Buf, NsId, StyleInfo, { StaticLineNum + 1, 1, line_num+1, 1 })
-    end
+
+    -- Set buffer content
+    B.set_modifiable(Buf, true)
+    B.set_lines(Buf, StaticLineNum + 1, -1, lines)
+    B.set_modifiable(Buf, false)
+    V.set_extmark(Buf, NsId, StyleInfo, { StaticLineNum + 1, 1, line_num+1, 1 })
 
     if line_num == StaticLineNum then
         vim.api.nvim_win_set_cursor(Win, { StaticLineNum - 1, 0 })
@@ -177,7 +176,7 @@ function M.OpenTermManager()
         if Line2Buf[lnum] then
             local alias = T.termAlaias[Line2Buf[lnum]]
             T.TermDelete(alias)
-            M.RefreshTermManager()
+            vim.schedule(M.RefreshTermManager)
         end
     end)
 

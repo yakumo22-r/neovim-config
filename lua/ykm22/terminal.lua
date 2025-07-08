@@ -8,7 +8,7 @@ M.termAlaias = {}
 M.termNames = {}
 M.termCount = 0
 
-defaultTerm = -1
+M.defaultTerm = -1
 
 function M.set_term_alias(bufnr, alias)
     if M.termNames[alias] and M.termNames[alias] ~= bufnr then
@@ -38,10 +38,10 @@ end
 -- Create autocommand for TermOpen
 vim.api.nvim_create_autocmd("TermOpen", {
     pattern = "term://*", -- Match terminal buffers
-    callback = function()
+    callback = function(ev)
         local bufnr = vim.api.nvim_get_current_buf()
-        if defaultTerm == -1 then
-            defaultTerm = bufnr
+        if M.defaultTerm == -1 then
+            M.defaultTerm = bufnr
         end
         if not M.termAlaias[bufnr] then
             if M.next_term_alias then
@@ -70,13 +70,8 @@ vim.api.nvim_create_autocmd("BufEnter", {
     end,
 })
 
-vim.api.nvim_create_autocmd("BufDelete", {
-    pattern = "term://*",
-    callback = function(ev)
-        -- local bufnr = vim.api.nvim_get_current_buf()
-        if vim.api.nvim_buf_is_valid(ev.buf) then
-            return
-        end
+vim.api.nvim_create_autocmd("TermClose", {
+    callback = function (ev)
         if ev.buf == M.defaultTerm then
             M.defaultTerm = -1
         end
@@ -85,7 +80,7 @@ vim.api.nvim_create_autocmd("BufDelete", {
             M.termNames[name] = nil
             M.termAlaias[ev.buf] = nil
         end
-    end,
+    end
 })
 
 function M.TermLs(notip)
@@ -166,11 +161,11 @@ local function ToggleTerm()
     end
     --     print(index, "ToggleTerm: Not a terminal buffer")
     -- end
-    if defaultTerm == -1 then
+    if M.defaultTerm == -1 then
         vim.cmd("terminal")
         return
     else
-        vim.api.nvim_win_set_buf(0, defaultTerm)
+        vim.api.nvim_win_set_buf(0, M.defaultTerm)
     end
 end
 
