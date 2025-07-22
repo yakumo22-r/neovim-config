@@ -40,7 +40,7 @@ return {
             vim.g.copilot_enabled = not vim.g.copilot_enabled
             if vim.g.copilot_enabled then
                 print("Copilot ON")
-                copilot_event()
+                -- copilot_event()
             else
                 print("Copilot OFF")
             end
