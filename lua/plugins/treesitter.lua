@@ -1,8 +1,9 @@
 return {
-    "nvim-treesitter/nvim-treesitter",
-    branch = "main",
+    "yakumo22-r/nvim-treesitter",
+    branch = "master",
     build = ":TSUpdate",
     config = function()
+        vim.filetype.add({ extension = { sproto = "sproto", }, })
         require("nvim-treesitter.configs").setup({
             -- A list of parser names, or "all" (the five listed parsers should always be installed)
             ensure_installed = { "c", "lua", "vim", "vimdoc","typescript", "javascript" },
