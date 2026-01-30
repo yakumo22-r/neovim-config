@@ -41,7 +41,9 @@ function defu.check_cm_line(lines)
             c1 = c1+1
             c = line:sub(c1,c1)
         end
-        mc1 = math.min(c1,mc1)
+        if not line:match("^%s*$") then
+            mc1 = math.min(c1,mc1)
+        end
 
         cmlines[i] = {c1=c1}
         if c ~= "" then

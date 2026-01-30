@@ -15,7 +15,7 @@ vim.opt.clipboard = ""
 -- tool
 require("base_func")
 require("tools")
-require("comment")
+require("comment.comment")
 require("formatcmd")
 require("ykm22.theme")
 require("ykm22.terminal") -- project management

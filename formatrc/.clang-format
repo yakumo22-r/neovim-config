@@ -37,6 +37,7 @@ ColumnLimit:     160
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 DerivePointerAlignment: false
 ExperimentalAutoDetectBinPacking: false
+IndentExternBlock: NoIndent
 IndentCaseLabels: false
 IndentWidth:     4
 KeepEmptyLinesAtTheStartOfBlocks: true
