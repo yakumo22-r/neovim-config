@@ -23,6 +23,7 @@ settings.default = {
     diagnostics = {
         disable = { "lowercase-global", "trailing-space", "empty-block" },
     },
+    extentions = {".lua"}
 }
 
 settings.nvim = vim.tbl_deep_extend("keep", settings.default, {
@@ -86,6 +87,7 @@ function spec_lua_ls:attach_buf(bufnr)
         t = "nvim"
     end
 
+
     if not lua_clients[t] then
         lua_clients[t] = vim.lsp.start({
             name = "lua_ls_" .. t,
@@ -94,7 +96,7 @@ function spec_lua_ls:attach_buf(bufnr)
             --     return vim.fn.getcwd()
             -- end,
             filetype = { "lua" },
-            root_dir = vim.fs.root(0, root_files),
+            root_dir = vim.fs.root(0, root_files) or vim.fn.getcwd(),
             -- root_markers = {".git"},
             capabilities = vim.tbl_deep_extend("keep", self.capabilities, {
                 workspace = {
@@ -110,6 +112,11 @@ function spec_lua_ls:attach_buf(bufnr)
             single_file_support = true,
             settings = {
                 Lua = settings[t],
+                files = {
+                    associations = {
+                        ["*.lua.txt"] = "lua",
+                    },
+                }
             },
         })
     else
