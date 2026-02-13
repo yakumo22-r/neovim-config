@@ -18,6 +18,7 @@ local path = {
 settings.default = {
     runtime = {
         version = "Lua 5.4",
+        pathStrict = false,
         path = path,
     },
     diagnostics = {
@@ -75,7 +76,7 @@ local function check_in_lua_config(filename)
     return subname == config_dir
 end
 
-local spec_lua_ls = lsp_base.new_entity({"lua"})
+local spec_lua_ls = lsp_base.new_entity({"lua", "lua.txt"})
 
 ---@param bufnr integer
 function spec_lua_ls:attach_buf(bufnr)

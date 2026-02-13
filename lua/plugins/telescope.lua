@@ -88,7 +88,7 @@ function Custom.config()
         },
     })
 
-    local grep_this_buffer = function()
+    local grep_this_buffer = function(default_text)
         tb.live_grep({
             search_dirs = { vim.fn.expand("%:p") },
             -- word_march = "-w",
@@ -96,6 +96,7 @@ function Custom.config()
             use_regex = false,
             search = "",
             entry_maker = Custom.make_entry_line_content,
+            default_text = default_text,
         })
     end
 
@@ -121,13 +122,78 @@ function Custom.config()
     vim.keymap.set("n", "<leader>gc", tb.git_bcommits, { desc = "show all lsp diagnotics" })
     vim.keymap.set("n", "<leader>gC", tb.git_commits, { desc = "show all lsp diagnotics" })
     vim.keymap.set("n", "<leader>gs", tb.git_status, { desc = "show all lsp diagnotics" })
+
+    local function goto_file(name)
+        local filename = vim.fn.expand("%:t")
+        local full_ext = filename:match("^[^.]+%.(.+)$") or ""
+        local findMap = {
+            "." .. full_ext,
+            "",
+        }
+        local results = {}
+
+        for i, ex in ipairs(findMap) do
+            results = vim.fn.globpath(vim.fn.getcwd(), "**/" .. name .. ex, false, true)
+            if #results > 0 then
+                break
+            end
+        end
+
+        if #results == 1 then
+            vim.cmd("edit " .. vim.fn.fnameescape(results[1]))
+            return
+        end
+
+        tb.find_files({
+            default_text = name,
+        })
+    end
+
+    vim.keymap.set("n", "<leader>gf", function()
+        local cword = vim.fn.expand("<cfile>")
+        if vim.fn.has("win32") == 1 then
+            cword = cword:gsub("/", "\\")
+        end
+        goto_file(cword)
+    end)
+
+    vim.keymap.set("n", "<leader>gw", function()
+        local cword = vim.fn.expand("<cword>")
+        goto_file(cword)
+    end)
+
+    vim.keymap.set("n", "<leader>w", function()
+        local cword = vim.fn.expand("<cword>")
+        tb.live_grep({
+            default_text = cword,
+        })
+    end)
+
+    vim.keymap.set("n", "f", function()
+        local cword = vim.fn.expand("<cword>")
+        grep_this_buffer(cword)
+    end)
+
+    vim.keymap.set("v", "<leader>w", function()
+        vim.cmd('normal! "vy')
+        local text = vim.fn.getreg("v"):gsub("\n$", "")
+        tb.live_grep({
+            default_text = text,
+        })
+    end)
+
+    vim.keymap.set("v", "f", function()
+        vim.cmd('normal! "vy')
+        local text = vim.fn.getreg("v"):gsub("\n$", "")
+        grep_this_buffer(text)
+    end)
+
 end
 
 function Custom.make_entry_buffers(tbl)
     local entry = tbl.info
     -- entry = Custom.make_entry.gen_from_buffer({})(tbl)
     -- print(vim.inspect(tbl))
-
 
     local name = vim.fn.fnamemodify(entry.name, ":.")
     local icon, hl_group = Custom.utils.get_devicons(entry.name)
@@ -153,7 +219,7 @@ function Custom.make_entry_buffers(tbl)
                 },
             })({
                 -- { string.format("[%d:%d]", entry.lnum, entry.col), "TelescopeResultsNumber" },
-                {tostring(entry.bufnr), "TelescopeResultsNumber"},
+                { tostring(entry.bufnr), "TelescopeResultsNumber" },
                 { icon, hl_group },
                 { string.format("%s:%d", name, entry.lnum) },
             })
@@ -264,6 +330,11 @@ return {
         { "<leader>gc" },
         { "<leader>gC" },
         { "<leader>gs" },
+        { "v" },
+        { "f" },
+        { "<leader>w" },
+        { "<leader>gf" },
+        { "<leader>gw" },
         { "<leader>/" },
         { "<leader>_" },
     },
