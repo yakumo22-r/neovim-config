@@ -163,6 +163,9 @@ function M.get_icon_style(filename)
     -- if not file_icons[filetype] then
     local web_devicons = require("nvim-web-devicons")
     local icon, color = web_devicons.get_icon_by_filetype(filetype)
+    if not icon then
+        icon,color = web_devicons.get_icon_by_filetype("txt")
+    end
     return icon, color
 end
 

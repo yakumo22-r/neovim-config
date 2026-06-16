@@ -149,4 +149,3 @@ else
 
     autocmd TextYankPost * call s:OSC52()
 endif
-

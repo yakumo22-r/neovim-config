@@ -169,11 +169,6 @@ function Custom.config()
         })
     end)
 
-    vim.keymap.set("n", "f", function()
-        local cword = vim.fn.expand("<cword>")
-        grep_this_buffer(cword)
-    end)
-
     vim.keymap.set("v", "<leader>w", function()
         vim.cmd('normal! "vy')
         local text = vim.fn.getreg("v"):gsub("\n$", "")

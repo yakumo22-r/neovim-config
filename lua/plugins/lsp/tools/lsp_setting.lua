@@ -59,29 +59,34 @@ function LspSetting.Init()
     end
 
     spec_lua_ls:set_enable(capabilities, keybindings)
-    spec_ts_ls:set_enable(capabilities,keybindings)
-    spec_clangd:set_enable(capabilities,keybindings)
-    spec_gopls:set_enable(capabilities,keybindings)
+    spec_ts_ls:set_enable(capabilities, keybindings)
+    spec_clangd:set_enable(capabilities, keybindings)
+    spec_gopls:set_enable(capabilities, keybindings)
 
     -- Custom :LspInfo command to display LSP client info
     vim.api.nvim_create_user_command("LspInfo", function()
-      local bufnr = vim.api.nvim_get_current_buf()
-      local clients = vim.lsp.get_clients({ bufnr = bufnr })
-      if #clients == 0 then
-        vim.notify("No LSP clients attached to this buffer", vim.log.levels.INFO)
-        return
-      end
+        local bufnr = vim.api.nvim_get_current_buf()
+        local clients = vim.lsp.get_clients({ bufnr = bufnr })
+        if #clients == 0 then
+            vim.notify("No LSP clients attached to this buffer", vim.log.levels.INFO)
+            return
+        end
 
-      local info = {}
-      for _, client in ipairs(clients) do
-        table.insert(info, string.format("LSP Client: %s (ID: %d)", client.name, client.id))
-        table.insert(info, string.format("  Root Dir: %s", client.config.root_dir or "N/A"))
-        table.insert(info, string.format("  Status: %s", client.is_stopped() and "Stopped" or "Running"))
-        -- table.insert(info, string.format("  Capabilities: %s", vim.inspect(client.server_capabilities, { depth = 1 })))
-        table.insert(info, "")
-      end
-      vim.notify(table.concat(info, "\n"), vim.log.levels.INFO)
+        local info = {}
+        for _, client in ipairs(clients) do
+            table.insert(info, string.format("LSP Client: %s (ID: %d)", client.name, client.id))
+            table.insert(info, string.format("  Root Dir: %s", client.config.root_dir or "N/A"))
+            table.insert(info, string.format("  Status: %s", client.is_stopped() and "Stopped" or "Running"))
+            -- table.insert(info, string.format("  Capabilities: %s", vim.inspect(client.server_capabilities, { depth = 1 })))
+            table.insert(info, "")
+        end
+        vim.notify(table.concat(info, "\n"), vim.log.levels.INFO)
     end, { desc = "Display LSP client info for current buffer" })
+
+    vim.lsp.util.stylize_markdown = function(bufnr, contents, opts)
+        -- 啥都不干，直接返回原内容
+        return contents
+    end
 end
 
 return LspSetting

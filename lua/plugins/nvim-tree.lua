@@ -51,6 +51,9 @@ return {
         vim.g.loaded_netrwPlugin = 1
 
         nvimtree.setup({
+            filters= {
+                custom = {"^\\.git", "*.meta"}
+            },
             renderer = {
                 icons = {
                     glyphs = {
