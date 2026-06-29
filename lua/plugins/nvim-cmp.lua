@@ -8,7 +8,6 @@ return {
         "saadparwaiz1/cmp_luasnip", -- for autocompletion
         "rafamadriz/friendly-snippets", -- useful snippets
         "onsails/lspkind.nvim", -- vs-code like pictograms
-        "milanglacier/minuet-ai.nvim", -- AI completion source
     },
     config = function()
         local cmp = require("cmp")
@@ -42,14 +41,10 @@ return {
             -- sources for autocompletion
             sources = cmp.config.sources({
                 { name = "nvim_lsp" },
-                { name = "minuet" }, -- AI completion
                 { name = "luasnip" }, -- snippets
                 { name = "buffer" }, -- text within current buffer
                 { name = "path" }, -- file system paths
             }),
-            performance = {
-                fetching_timeout = 2000,
-            },
             -- configure lspkind for vs-code like pictograms in completion menu
             formatting = {
                 format = lspkind.cmp_format({
