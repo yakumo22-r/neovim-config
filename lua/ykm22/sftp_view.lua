@@ -52,7 +52,7 @@ local function get_relative_files_on_buf(buf)
     end
 
     if isdir then
-        local files = ykm22.get_all_subfiles(path)
+        local files = ykm22.get_all_subfiles(path, Handle.get_root())
         if #files > 0 then
             return files
         end

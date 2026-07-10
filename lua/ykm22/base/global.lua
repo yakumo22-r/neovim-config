@@ -11,7 +11,7 @@ function ykm22.get_all_subfiles(dir,root)
     for _, file in ipairs(files) do
         local full_path = dir .. "/" .. file
         if vim.fn.isdirectory(full_path) == 1 then
-            local subfiles = ykm22.get_all_subfiles(full_path)
+            local subfiles = ykm22.get_all_subfiles(full_path, root)
             for _, subfile in ipairs(subfiles) do
                 table.insert(rfiles, subfile)
             end
