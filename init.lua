@@ -30,9 +30,17 @@ require("lazy-setup")
 local GitChangeView = require("nvim_ykm22_ui.git")
 local Sftp = require("nvim_ykm22_sftp")
 
-GitChangeView.setup({ read_file = ProjectFile.get_file })
+GitChangeView.setup({
+    read_file = ProjectFile.get_file,
+    keymaps = {
+        git_changes = "<C-g>",
+    },
+})
 Sftp.setup({
     read_file = ProjectFile.get_file,
+    keymaps = {
+        sftp_menu = "<leader>u",
+    },
     git = {
         enabled = true,
     },
