@@ -10,20 +10,20 @@ local function copilot_event()
     if not EVENT then
         EVENT = true
         -- set fileformat to unix
-        if vim.fn.has("win32") == 1 then
-            if is_dos_text_file_buf() then
-                vim.bo.fileformat = "unix"
-            end
+        -- if vim.fn.has("win32") == 1 then
+        --     if is_dos_text_file_buf() then
+        --         vim.bo.fileformat = "unix"
+        --     end
 
-            vim.api.nvim_create_autocmd({"FileType"}, {
-                pattern = "*",
-                callback = function(args)
-                    if is_dos_text_file_buf() then
-                        vim.bo.fileformat = "unix"
-                    end
-                end,
-            })
-        end
+        --     vim.api.nvim_create_autocmd({"FileType"}, {
+        --         pattern = "*",
+        --         callback = function(args)
+        --             if is_dos_text_file_buf() then
+        --                 vim.bo.fileformat = "unix"
+        --             end
+        --         end,
+        --     })
+        -- end
     end
 end
 

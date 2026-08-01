@@ -136,3 +136,19 @@ vim.api.nvim_create_autocmd("BufEnter", {
         end
     end,
 })
+
+-- vim.opt.fileformats = { "unix", "dos" }
+vim.opt.list = true
+vim.opt.listchars = {
+  eol = "⏎",
+  trail = "•",
+  tab = " •"
+}
+vim.opt.conceallevel = 2
+vim.opt.concealcursor = "nvic"
+vim.api.nvim_create_autocmd({"BufWinEnter", "BufRead"}, {
+  pattern = "*",
+  callback = function()
+    vim.fn.matchadd("Conceal", [[\r]], 10, -1, {conceal = " "})
+  end,
+})
