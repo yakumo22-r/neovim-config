@@ -3,6 +3,7 @@ syntax on
 filetype plugin indent on
 set number
 set relativenumber
+set clipboard=unnamed
 set cursorline
 
 set hlsearch
@@ -18,24 +19,19 @@ set backspace=indent,eol,start
 set smartindent
 set nolist
 
-" " blink cursor
-" set guicursor=n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50
-"   \,a:blinkwait100-blinkoff400-blinkon250-Cursor/lCursor
-"   \
-
 set fileencodings=utf-8
 set encoding=utf-8
 
 set scrolloff=2
 set iskeyword+=-
 set undofile
+set undodir=~/.vim/undo
 
 " Set leader key to space
 let mapleader = " "
 
-nnoremap <silent> <A-b> ge
-nnoremap <silent> <C-b> ge
-nnoremap <silent> <C-B> gE
+" Shield keys
+nnoremap <silent> z <Nop>
 " nnoremap <silent> q <Nop>
 
 " Window navigation
@@ -73,12 +69,19 @@ noremap <expr> k v:count ? 'k' : 'gk'
 " Quick movement
 noremap <silent> <C-j> 6j
 noremap <silent> <C-k> 6k
+noremap <silent> <C-l> 6w
+noremap <silent> <C-h> 6b
+noremap <silent> <C-y> 6<c-y>
+noremap <silent> <C-e> 6<c-e>
 
 inoremap <C-h> <Left>
 inoremap <C-l> <Right>
 inoremap <C-j> <Down>
 inoremap <C-k> <Up>
-
+inoremap <C-d> <Del>
+inoremap <C-b> <BS>
+inoremap <C-e> <Esc>ea
+inoremap <C-w> <Esc>wa
 
 " Move text
 nnoremap <silent> < <<
@@ -91,11 +94,6 @@ nnoremap <silent> <A-k> :m .-2<CR>==
 vnoremap <silent> <A-j> :m '>+1<CR>gv=gv
 vnoremap <silent> <A-k> :m '<-2<CR>gv=gv
 
-nnoremap <silent> <C-n> :m .+1<CR>==
-nnoremap <silent> <C-m> :m .-2<CR>==
-vnoremap <silent> <C-n> :m '>+1<CR>gv=gv
-vnoremap <silent> <C-m> :m '<-2<CR>gv=gv
-
 " Copy
 nnoremap <silent> d "_d
 vnoremap <silent> d "_d
@@ -105,9 +103,27 @@ nnoremap <silent> c "_c
 vnoremap <silent> c "_c
 vnoremap <silent> p "_dp
 vnoremap <silent> P "_dP
-nnoremap <silent> y "+y
-vnoremap <silent> y "+y
+" ({["'
+inoremap <silent> {{ {{}}<Esc>hi
+inoremap <silent> {} {}<Esc>i
+inoremap <silent> [] []<Esc>i
+inoremap <silent> <> <><Esc>i
+inoremap <silent> () ()<Esc>i
+inoremap <silent> "" ""<Esc>i
+inoremap <silent> '' ''<Esc>i
+inoremap <silent> {<CR> {<CR>}<Esc>O
+inoremap <silent> <<CR> <<CR>><Esc>O
+inoremap <silent> [<CR> [<CR>]<Esc>O
+inoremap <silent> (<CR> (<CR>)<Esc>O
+inoremap <silent> {; {<CR>};<Esc>O
+inoremap <silent> [; [<CR>];<Esc>O
+inoremap <silent> <; <<CR>>;<Esc>O
+inoremap <silent> (; (<CR>);<Esc>O
 
+nnoremap <silent> qqwrv :qa<CR>
+nnoremap <silent> <Leader>qqq :qa<CR>
+nnoremap <silent> <Leader>www :wqa<CR>
+nnoremap <silent> <Leader>eee :qa!<CR>
 
 vnoremap <silent> q <Esc>
 
@@ -120,32 +136,68 @@ au BufRead,BufNewFile .zshrc					set filetype=sh
 
 highlight Visual ctermfg=NONE ctermbg=darkgray
 
-" Other
-nnoremap <silent> <Leader>g <C-g>
-
-
-if has('win32')
-    set clipboard=unnamedplus
-else
-    function! s:raw_echo(str)
-        if has('win32') && has('nvim')
-            call chansend(v:stderr, a:str)
+function! Terminal_MetaMode(mode)
+    set ttimeout
+    if $TMUX != ''
+        set ttimeoutlen=30
+    elseif &ttimeoutlen > 80 || &ttimeoutlen <= 0
+        set ttimeoutlen=80
+    endif
+    if has('nvim') || has('gui_running')
+        return
+    endif
+    function! s:metacode(mode, key)
+        if a:mode == 0
+            exec "set <M-".a:key.">=\e".a:key
         else
-            if filewritable('/dev/fd/2')
-                call writefile([a:str], '/dev/fd/2', 'b')
-            else
-                exec("silent! !echo " . shellescape(a:str))
-                redraw!
-            endif
+            exec "set <M-".a:key.">=\e]{0}".a:key."~"
         endif
-    endfunction
+    endfunc
+    for i in range(10)
+        call s:metacode(a:mode, nr2char(char2nr('0') + i))
+    endfor
+    for i in range(26)
+        call s:metacode(a:mode, nr2char(char2nr('a') + i))
+        call s:metacode(a:mode, nr2char(char2nr('A') + i))
+    endfor
+    if a:mode != 0
+        for c in [',', '.', '/', ';', '[', ']', '{', '}']
+            call s:metacode(a:mode, c)
+        endfor
+        for c in ['?', ':', '-', '_']
+            call s:metacode(a:mode, c)
+        endfor
+    else
+        for c in [',', '.', '/', ';', '{', '}']
+            call s:metacode(a:mode, c)
+        endfor
+        for c in ['?', ':', '-', '_']
+            call s:metacode(a:mode, c)
+        endfor
+    endif
+endfunc
 
-    function! s:OSC52()
-        let c = join(v:event.regcontents,"\n")
-        let c64 = system("base64", c)
-        let s = "\e]52;c;" . trim(c64) . "\x07"
-        call s:raw_echo(s)
-    endfunction
+function! s:raw_echo(str)
+  if has('win32') && has('nvim')
+    call chansend(v:stderr, a:str)
+  else
+    if filewritable('/dev/fd/2')
+      call writefile([a:str], '/dev/fd/2', 'b')
+    else
+      exec("silent! !echo " . shellescape(a:str))
+      redraw!
+    endif
+  endif
+endfunction
 
-    autocmd TextYankPost * call s:OSC52()
-endif
+function! s:OSC52()
+  let c = join(v:event.regcontents,"\n")
+  let c64 = system("base64", c)
+  let s = "\e]52;c;" . trim(c64) . "\x07"
+  call s:raw_echo(s)
+endfunction
+
+autocmd TextYankPost * call s:OSC52()
+
+
+call Terminal_MetaMode(0)
